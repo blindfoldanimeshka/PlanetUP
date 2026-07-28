@@ -95,7 +95,13 @@ export function GallerySection({ cms }: { cms: CmsData }) {
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-cosmic-accent-2 border-t-transparent" />
+            </div>
+          }
+        >
           <Lightbox
             open={lightboxIndex !== null}
             close={handleClose}

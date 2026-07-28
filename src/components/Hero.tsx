@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { motion, useScroll, useTransform, type MotionValue, type TargetAndTransition, type Transition, type Variants } from 'framer-motion'
 import { mockCms } from '@/data/mock'
 
@@ -16,7 +16,7 @@ function Starfield() {
   const midParallax = useTransform(scrollY, [0, 600], [0, -40])
   const nearParallax = useTransform(scrollY, [0, 600], [0, -80])
 
-  const layers = useMemo(() => {
+  const [layers] = useState(() => {
     const makeStars = (count: number, sizeRange: [number, number], opacityRange: [number, number]) =>
       Array.from({ length: count }, (_, i) => ({
         id: `star-${sizeRange[0]}-${i}`,
@@ -33,7 +33,7 @@ function Starfield() {
       mid: makeStars(50, [2, 3], [0.4, 0.7]),
       near: makeStars(20, [3, 4], [0.6, 1]),
     }
-  }, [])
+  })
 
   const renderLayer = (stars: typeof layers.far, yValue: MotionValue<number>) =>
     stars.map((star) => (

@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
+import { escapeHtml } from '../src/lib/escapeHtml.js'
 
 const schema = z.object({
   name: z.string().min(1, 'Имя обязательно'),
@@ -19,7 +20,24 @@ const schema = z.object({
   honeypot: z.string().optional(),
 })
 
+/* ------------------------------------------------------------------ */
+/*  Rate limiting — in-memory Map (resets on cold start).             */
+/*  TODO: Replace with Vercel KV / Upstash Redis for production.      */
+/* ------------------------------------------------------------------ */
 const rateLimitMap = new Map<string, number>()
+const RATE_LIMIT_WINDOW = 60000 // 1 minute
+const CLEANUP_INTERVAL = 300000 // 5 minutes
+
+function cleanupOldEntries() {
+  const now = Date.now()
+  for (const [ip, last] of rateLimitMap.entries()) {
+    if (now - last > RATE_LIMIT_WINDOW) {
+      rateLimitMap.delete(ip)
+    }
+  }
+}
+
+setInterval(cleanupOldEntries, CLEANUP_INTERVAL)
 
 export default async function handler(
   req: VercelRequest,
@@ -29,18 +47,18 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown'
-  const ipStr = Array.isArray(ip) ? ip[0] : ip
+  const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown'
+  const ipStr = Array.isArray(rawIp) ? rawIp[0].trim() : rawIp.trim()
 
-  // Honeypot check
+  // Honeypot check — return 200 OK to avoid revealing detection
   if (req.body.honeypot) {
-    return res.status(400).json({ error: 'Spam detected' })
+    return res.status(200).json({ success: true })
   }
 
   // Rate limit: max 1 per minute per IP
   const now = Date.now()
   const last = rateLimitMap.get(ipStr)
-  if (last && now - last < 60000) {
+  if (last && now - last < RATE_LIMIT_WINDOW) {
     return res.status(429).json({
       error: 'Слишком много заявок. Подождите минуту.',
     })
@@ -50,13 +68,20 @@ export default async function handler(
   // Validate body
   const parseResult = schema.safeParse(req.body)
   if (!parseResult.success) {
+    const isDev = process.env.NODE_ENV === 'development'
     return res.status(400).json({
       error: 'Некорректные данные',
-      details: parseResult.error.flatten(),
+      ...(isDev && { details: parseResult.error.flatten() }),
     })
   }
 
   const data = parseResult.data
+
+  // Escape user data for HTML output
+  const safeName = escapeHtml(data.name)
+  const safePhone = escapeHtml(data.phone)
+  const safeDirection = escapeHtml(data.direction || 'Не указано')
+  const safeTime = escapeHtml(data.preferredTime)
 
   // Telegram notification
   const botToken = process.env.TELEGRAM_BOT_TOKEN
@@ -65,10 +90,10 @@ export default async function handler(
     const text = [
       '<b>Новая заявка на пробное занятие</b>',
       '',
-      `<b>Имя:</b> ${data.name}`,
-      `<b>Телефон:</b> ${data.phone}`,
-      `<b>Направление:</b> ${data.direction || 'Не указано'}`,
-      `<b>Время:</b> ${data.preferredTime}`,
+      `<b>Имя:</b> ${safeName}`,
+      `<b>Телефон:</b> ${safePhone}`,
+      `<b>Направление:</b> ${safeDirection}`,
+      `<b>Время:</b> ${safeTime}`,
     ].join('\n')
 
     try {
@@ -82,7 +107,7 @@ export default async function handler(
         }),
       })
     } catch (err) {
-      console.error('Telegram send failed:', err)
+      console.error('Telegram send failed:', err instanceof Error ? err.message : err)
     }
   }
 
@@ -103,15 +128,15 @@ export default async function handler(
           subject: 'Новая заявка на пробное занятие — Планета UP',
           html: [
             '<h2>Новая заявка</h2>',
-            `<p><b>Имя:</b> ${data.name}</p>`,
-            `<p><b>Телефон:</b> ${data.phone}</p>`,
-            `<p><b>Направление:</b> ${data.direction || 'Не указано'}</p>`,
-            `<p><b>Время:</b> ${data.preferredTime}</p>`,
+            `<p><b>Имя:</b> ${safeName}</p>`,
+            `<p><b>Телефон:</b> ${safePhone}</p>`,
+            `<p><b>Направление:</b> ${safeDirection}</p>`,
+            `<p><b>Время:</b> ${safeTime}</p>`,
           ].join(''),
         }),
       })
     } catch (err) {
-      console.error('Resend email failed:', err)
+      console.error('Resend email failed:', err instanceof Error ? err.message : err)
     }
   }
 

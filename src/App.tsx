@@ -5,6 +5,7 @@ import { getCmsData } from '@/api/cms'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import {
   AdultsSection,
   KidsSection,
@@ -17,7 +18,7 @@ import {
   ContactsSection,
 } from '@/sections'
 
-function Placeholder({ cms }: { cms: CmsData | null }) {
+function MainSections({ cms }: { cms: CmsData | null }) {
   if (!cms) return null
   return (
     <>
@@ -38,7 +39,13 @@ export default function App() {
   const [cms, setCms] = useState<CmsData | null>(null)
 
   useEffect(() => {
-    getCmsData().then(setCms)
+    let mounted = true
+    getCmsData().then((data) => {
+      if (mounted) setCms(data)
+    })
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const seo = cms?.settings.seo
@@ -64,8 +71,10 @@ export default function App() {
       </a>
       <Header />
       <main id="main-content">
-        <Hero />
-        <Placeholder cms={cms} />
+        <ErrorBoundary>
+          <Hero />
+          <MainSections cms={cms} />
+        </ErrorBoundary>
       </main>
       {cms && <Footer settings={cms.settings} />}
     </>

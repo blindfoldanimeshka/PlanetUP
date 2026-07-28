@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import type { CmsData, Subscription } from '@/types/cms'
+import { scrollToHero } from '@/lib/scroll'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -23,7 +24,7 @@ function SubscriptionCard({ subscription, index }: { subscription: Subscription;
           variant="primary"
           size="md"
           className="mt-2 self-start"
-          onClick={() => document.querySelector('#hero')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={scrollToHero}
         >
           Записаться
         </Button>

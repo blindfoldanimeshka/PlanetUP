@@ -23,6 +23,9 @@
     "yet-another-react-lightbox": "^3.32.1",
     "zod": "^4.4.3"
   },
+  "overrides": {
+    "undici": "^6.28.0"
+  },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
