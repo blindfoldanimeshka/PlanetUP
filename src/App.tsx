@@ -6,8 +6,6 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { ScrollProgressBar } from '@/components/scrollytelling/ScrollProgressBar'
-import { SmoothScrollProvider } from '@/components/scrollytelling/SmoothScrollProvider'
 import {
   AdultsSection,
   KidsSection,
@@ -53,7 +51,7 @@ export default function App() {
   const seo = cms?.settings.seo
 
   return (
-    <SmoothScrollProvider>
+    <>
       <Helmet>
         <title>{seo?.title ?? 'Планета UP — студия акробатики'}</title>
         <meta
@@ -65,10 +63,9 @@ export default function App() {
         />
         <link rel="canonical" href="https://planeta-up.ru/" />
       </Helmet>
-      <ScrollProgressBar />
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-black"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-min-text focus:text-min-surface focus:px-4 focus:py-2"
       >
         Перейти к содержимому
       </a>
@@ -80,6 +77,6 @@ export default function App() {
         </ErrorBoundary>
       </main>
       {cms && <Footer settings={cms.settings} />}
-    </SmoothScrollProvider>
+    </>
   )
 }

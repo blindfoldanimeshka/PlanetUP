@@ -18,16 +18,15 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
 
   return (
     <Tabs.Root defaultValue="Пн" className="mt-10">
-      <Tabs.List className="flex gap-1 overflow-x-auto pb-2 scrollbar-thin">
+      <Tabs.List className="flex gap-1 overflow-x-auto pb-2">
         {DAYS.map((day) => (
           <Tabs.Trigger
             key={day}
             value={day}
-            className="rounded-md px-4 py-2 text-sm font-medium transition-colors
-              data-[state=active]:bg-cosmic-accent data-[state=active]:text-white
-              text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2
-              focus-visible:ring-cosmic-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cosmic-bg
-              whitespace-nowrap"
+            className="rounded-sm px-4 py-2 text-sm font-medium transition-colors
+              data-[state=active]:bg-min-accent data-[state=active]:text-white
+              text-min-muted hover:text-min-text focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-min-accent whitespace-nowrap"
           >
             {day}
           </Tabs.Trigger>
@@ -40,23 +39,23 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
           <Tabs.Content
             key={day}
             value={day}
-            className="mt-4 rounded-lg border border-cosmic-accent/20 bg-cosmic-bg-deep/60 p-4
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cosmic-accent"
+            className="mt-4 rounded-sm border border-min-border bg-min-surface p-4
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
           >
             {items.length === 0 ? (
-              <p className="text-sm text-white/50">Нет занятий в этот день</p>
+              <p className="text-sm text-min-muted">Нет занятий в этот день</p>
             ) : (
               <ul className="flex flex-col gap-3">
                 {items.map((item, i) => (
                   <li
                     key={`${item.groupName}-${i}`}
-                    className="flex items-center justify-between rounded-md bg-white/5 px-4 py-3"
+                    className="flex items-center justify-between rounded-sm bg-min-bg px-4 py-3"
                   >
                     <div>
-                      <span className="text-sm font-semibold text-white">{item.time}</span>
-                      <span className="ml-3 text-xs text-white/60">{item.note}</span>
+                      <span className="text-sm font-semibold text-min-text">{item.time}</span>
+                      <span className="ml-3 text-xs text-min-muted">{item.note}</span>
                     </div>
-                    <span className="text-xs text-cosmic-accent-2">{item.groupName}</span>
+                    <span className="text-xs text-min-accent">{item.groupName}</span>
                   </li>
                 ))}
               </ul>

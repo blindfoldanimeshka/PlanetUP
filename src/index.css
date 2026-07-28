@@ -1,49 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;700;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* Cosmic palette */
-  --color-cosmic-bg: #0b1026;
-  --color-cosmic-bg-deep: #16123a;
-  --color-cosmic-accent: #7c3aed;
-  --color-cosmic-accent-2: #a855f7;
-  --color-cosmic-glow: rgba(124, 58, 237, 0.45);
-  --color-cosmic-star: rgba(255, 255, 255, 0.8);
+  /* Minimal monochrome palette */
+  --color-min-bg: #fafafa;
+  --color-min-surface: #ffffff;
+  --color-min-text: #111111;
+  --color-min-muted: #666666;
+  --color-min-accent: #FF6B35;
+  --color-min-border: #e5e5e5;
 
-  /* Light palette */
-  --color-light-bg: #f8fafc;
-  --color-light-surface: #ffffff;
-  --color-light-text: #1e293b;
-  --color-light-muted: #64748b;
-  --color-light-border: #e2e8f0;
+  /* Semantic */
+  --color-min-error: #dc2626;
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
 
-  /* Border radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 0 32px rgba(124, 58, 237, 0.35);
-  --shadow-glow-lg: 0 0 48px rgba(124, 58, 237, 0.5);
+  /* Border radius - sharp minimal */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
 }
 
 :root {
-  --cosmic-bg: #0b1026;
-  --cosmic-bg-2: #16123a;
-  --cosmic-accent: #7c3aed;
-  --cosmic-accent-2: #a855f7;
-  --cosmic-glow: rgba(124, 58, 237, 0.45);
-  --light-bg: #f8fafc;
-  --light-surface: #ffffff;
-  --light-text: #1e293b;
-  --light-muted: #64748b;
-  --light-border: #e2e8f0;
+  --min-bg: #fafafa;
+  --min-surface: #ffffff;
+  --min-text: #111111;
+  --min-muted: #666666;
+  --min-accent: #FF6B35;
+  --min-border: #e5e5e5;
+  --min-error: #dc2626;
 }
 
 html {
@@ -53,11 +40,11 @@ html {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: var(--light-text);
-  background: var(--light-bg);
+  color: var(--min-text);
+  background: var(--min-bg);
 }
 
 * {
@@ -70,23 +57,11 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cosmic-accent);
+  outline: 2px solid var(--min-accent);
   outline-offset: 2px;
 }
 
-/* Pinned section layout */
-.pinned-section-track {
-  position: relative;
-}
-
-.pinned-section-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Reduced motion overrides */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -33,7 +33,7 @@ function LazyYandexMap() {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-xl">
+    <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-sm">
       {loaded ? (
         <iframe
           src="https://yandex.ru/map-widget/v1/?ll=37.6173%2C55.7558&z=15&l=map"
@@ -43,7 +43,7 @@ function LazyYandexMap() {
           allowFullScreen
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-light-surface text-light-muted">
+        <div className="flex h-full w-full items-center justify-center bg-min-surface text-min-muted">
           <p className="text-sm">Загрузка карты…</p>
         </div>
       )}
@@ -61,14 +61,14 @@ export function ContactsSection({ cms }: { cms: CmsData }) {
   const { settings } = cms
 
   return (
-    <Section id="contacts" variant="light">
+    <Section id="contacts">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-light-text md:text-4xl">
+        <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
           Контакты
         </h2>
 
@@ -76,13 +76,13 @@ export function ContactsSection({ cms }: { cms: CmsData }) {
           {/* Info */}
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-light-text">Как нас найти</h3>
-              <address className="not-italic text-sm leading-relaxed text-light-muted">
+              <h3 className="text-lg font-semibold text-min-text">Как нас найти</h3>
+              <address className="not-italic text-sm leading-relaxed text-min-muted">
                 <p className="font-medium">{settings.address}</p>
                 <p className="mt-2">
                   <a
                     href={`tel:${settings.phone.replace(/\D/g, '')}`}
-                    className="text-cosmic-accent transition-colors hover:text-cosmic-accent-2"
+                    className="text-min-accent transition-colors hover:text-min-text"
                   >
                     {settings.phone}
                   </a>
@@ -90,7 +90,7 @@ export function ContactsSection({ cms }: { cms: CmsData }) {
                 <p>
                   <a
                     href={`mailto:${settings.email}`}
-                    className="text-cosmic-accent transition-colors hover:text-cosmic-accent-2"
+                    className="text-min-accent transition-colors hover:text-min-text"
                   >
                     {settings.email}
                   </a>
@@ -105,10 +105,10 @@ export function ContactsSection({ cms }: { cms: CmsData }) {
                     href={url}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md border border-light-border px-3 py-1.5 text-sm
-                      font-medium text-light-muted transition-colors
-                      hover:border-cosmic-accent hover:text-cosmic-accent
-                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cosmic-accent"
+                    className="rounded-sm border border-min-border px-3 py-1.5 text-sm
+                      font-medium text-min-muted transition-colors
+                      hover:border-min-accent hover:text-min-accent
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
                   >
                     {SOCIAL_LABELS[key] || key}
                   </a>

@@ -11,8 +11,8 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
@@ -25,8 +25,8 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
         />
         <div className="flex flex-1 flex-col gap-3 p-5">
           <div>
-            <h3 className="text-lg font-semibold text-light-text">{post.title}</h3>
-            <time className="text-xs text-light-muted" dateTime={post.date}>
+            <h3 className="text-lg font-semibold text-min-text">{post.title}</h3>
+            <time className="text-xs text-min-muted" dateTime={post.date}>
               {new Date(post.date).toLocaleDateString('ru-RU', {
                 day: 'numeric',
                 month: 'long',
@@ -34,7 +34,7 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
               })}
             </time>
           </div>
-          <p className="text-sm leading-relaxed text-light-muted">{post.text}</p>
+          <p className="text-sm leading-relaxed text-min-muted">{post.text}</p>
 
           {/* Expandable album */}
           {hasAlbum && (
@@ -55,7 +55,7 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
                       key={i}
                       src={url}
                       alt={`Фото из альбома «${post.title}»`}
-                      className="h-20 w-20 flex-shrink-0 rounded-md object-cover"
+                      className="h-20 w-20 flex-shrink-0 rounded-sm object-cover"
                       loading="lazy"
                     />
                   ))}
@@ -71,8 +71,8 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
 
 export function LifeSection({ cms }: { cms: CmsData }) {
   return (
-    <Section id="life" variant="light">
-      <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-light-text md:text-4xl">
+    <Section id="life">
+      <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
         Жизнь коллектива
       </h2>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -10,15 +10,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', className, children, ...props }, ref) => {
     const base =
-      'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-250 ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cosmic-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97]'
+      'inline-flex items-center justify-center font-semibold transition-all duration-200 ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variants = {
       primary:
-        'bg-cosmic-accent text-white shadow-md shadow-cosmic-accent/30 hover:bg-cosmic-accent-2 hover:shadow-lg hover:shadow-cosmic-accent-2/40 hover:-translate-y-0.5',
+        'bg-min-accent text-white border-2 border-min-accent hover:bg-transparent hover:text-min-accent',
       secondary:
-        'border-2 border-cosmic-accent text-cosmic-accent bg-transparent hover:bg-cosmic-accent hover:text-white hover:-translate-y-0.5',
+        'border-2 border-min-text text-min-text bg-transparent hover:bg-min-text hover:text-min-surface',
       ghost:
-        'text-cosmic-accent hover:bg-cosmic-accent/10 hover:text-cosmic-accent-2',
+        'text-min-muted hover:text-min-accent',
     }
 
     const sizes = {

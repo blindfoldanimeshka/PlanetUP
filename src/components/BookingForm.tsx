@@ -15,6 +15,9 @@ function formatPhone(digits: string): string {
   return result
 }
 
+const inputBase =
+  'w-full border border-min-border bg-min-surface px-4 py-3 text-min-text placeholder-min-muted transition-colors focus:border-min-accent focus:outline-none focus:ring-1 focus:ring-min-accent'
+
 export function BookingForm({ interest }: { interest?: string }) {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -61,9 +64,9 @@ export function BookingForm({ interest }: { interest?: string }) {
 
   if (success) {
     return (
-      <div className="rounded-lg border border-cosmic-accent/30 bg-cosmic-bg-deep/60 p-6 text-center">
-        <p className="text-lg font-semibold text-white">Заявка отправлена!</p>
-        <p className="mt-2 text-sm text-white/70">
+      <div className="border border-min-border bg-min-surface p-6 text-center">
+        <p className="text-lg font-semibold text-min-text">Заявка отправлена!</p>
+        <p className="mt-2 text-sm text-min-muted">
           Мы свяжемся с вами в ближайшее время.
         </p>
       </div>
@@ -76,7 +79,7 @@ export function BookingForm({ interest }: { interest?: string }) {
       className="grid gap-3 sm:grid-cols-2"
       aria-label="Форма записи на пробное занятие"
     >
-      {/* Honeypot — invisible to humans */}
+      {/* Honeypot */}
       <input
         {...register('honeypot')}
         tabIndex={-1}
@@ -94,14 +97,14 @@ export function BookingForm({ interest }: { interest?: string }) {
           type="text"
           placeholder="Ваше имя"
           className={cn(
-            'w-full rounded-lg border bg-white/10 px-4 py-3 text-white placeholder-white/50 backdrop-blur-sm transition-colors focus:border-cosmic-accent-2 focus:outline-none focus:ring-2 focus:ring-cosmic-accent/40',
-            errors.name ? 'border-red-400' : 'border-white/20'
+            inputBase,
+            errors.name ? 'border-min-error' : 'border-min-border'
           )}
           autoComplete="name"
           {...register('name')}
         />
         {errors.name && (
-          <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>
+          <p className="mt-1 text-xs text-min-error">{errors.name.message}</p>
         )}
       </div>
 
@@ -119,8 +122,8 @@ export function BookingForm({ interest }: { interest?: string }) {
               placeholder="+7 (___) ___-__-__"
               inputMode="numeric"
               className={cn(
-                'w-full rounded-lg border bg-white/10 px-4 py-3 text-white placeholder-white/50 backdrop-blur-sm transition-colors focus:border-cosmic-accent-2 focus:outline-none focus:ring-2 focus:ring-cosmic-accent/40',
-                errors.phone ? 'border-red-400' : 'border-white/20'
+                inputBase,
+                errors.phone ? 'border-min-error' : 'border-min-border'
               )}
               autoComplete="tel"
               value={formatPhone(field.value || '')}
@@ -132,7 +135,7 @@ export function BookingForm({ interest }: { interest?: string }) {
           )}
         />
         {errors.phone && (
-          <p className="mt-1 text-xs text-red-400">{errors.phone.message}</p>
+          <p className="mt-1 text-xs text-min-error">{errors.phone.message}</p>
         )}
       </div>
 
@@ -143,18 +146,18 @@ export function BookingForm({ interest }: { interest?: string }) {
         <select
           id="booking-direction"
           {...register('direction')}
-          className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white backdrop-blur-sm"
+          className={inputBase}
         >
-          <option value="" className="bg-cosmic-bg text-light-text">
+          <option value="" className="bg-min-surface text-min-text">
             Направление
           </option>
-          <option value="adults" className="bg-cosmic-bg text-light-text">
+          <option value="adults" className="bg-min-surface text-min-text">
             Взрослым
           </option>
-          <option value="kids" className="bg-cosmic-bg text-light-text">
+          <option value="kids" className="bg-min-surface text-min-text">
             Детям
           </option>
-          <option value="general" className="bg-cosmic-bg text-light-text">
+          <option value="general" className="bg-min-surface text-min-text">
             Общая заявка
           </option>
         </select>
@@ -169,13 +172,13 @@ export function BookingForm({ interest }: { interest?: string }) {
           type="text"
           placeholder="Удобное время/день"
           className={cn(
-            'w-full rounded-lg border bg-white/10 px-4 py-3 text-white placeholder-white/50 backdrop-blur-sm transition-colors focus:border-cosmic-accent-2 focus:outline-none focus:ring-2 focus:ring-cosmic-accent/40',
-            errors.preferredTime ? 'border-red-400' : 'border-white/20'
+            inputBase,
+            errors.preferredTime ? 'border-min-error' : 'border-min-border'
           )}
           {...register('preferredTime')}
         />
         {errors.preferredTime && (
-          <p className="mt-1 text-xs text-red-400">
+          <p className="mt-1 text-xs text-min-error">
             {errors.preferredTime.message}
           </p>
         )}
@@ -186,21 +189,21 @@ export function BookingForm({ interest }: { interest?: string }) {
           id="booking-consent"
           type="checkbox"
           {...register('consent')}
-          className="mt-1 h-4 w-4 accent-cosmic-accent"
+          className="mt-1 h-4 w-4 accent-min-accent"
         />
-        <label htmlFor="booking-consent" className="text-xs text-white/70">
+        <label htmlFor="booking-consent" className="text-xs text-min-muted">
           Согласен на обработку{' '}
           <a
             href="/privacy"
             target="_blank"
-            className="underline hover:text-cosmic-accent-2"
+            className="underline hover:text-min-accent"
           >
             персональных данных
           </a>
         </label>
       </div>
       {errors.consent && (
-        <p className="text-xs text-red-400 sm:col-span-2">
+        <p className="text-xs text-min-error sm:col-span-2">
           {errors.consent.message}
         </p>
       )}
@@ -210,7 +213,7 @@ export function BookingForm({ interest }: { interest?: string }) {
           type="submit"
           variant="primary"
           size="lg"
-          className="w-full shadow-glow sm:w-auto"
+          className="w-full sm:w-auto"
           disabled={loading}
         >
           {loading ? 'Отправка...' : 'Записаться'}
@@ -218,7 +221,7 @@ export function BookingForm({ interest }: { interest?: string }) {
       </div>
 
       {submitError && (
-        <p className="text-sm text-red-400 sm:col-span-2">{submitError}</p>
+        <p className="text-sm text-min-error sm:col-span-2">{submitError}</p>
       )}
     </form>
   )

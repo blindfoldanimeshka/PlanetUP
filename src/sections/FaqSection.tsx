@@ -8,14 +8,14 @@ export function FaqSection({ cms }: { cms: CmsData }) {
   const sorted = [...cms.faq].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
-    <Section id="faq" variant="light">
+    <Section id="faq">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-light-text md:text-4xl">
+        <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
           Часто задаваемые вопросы
         </h2>
 
@@ -27,15 +27,15 @@ export function FaqSection({ cms }: { cms: CmsData }) {
                   <Accordion.Header>
                     <Accordion.Trigger
                       className="group flex w-full items-center justify-between gap-4 px-5 py-4
-                        text-left text-sm font-semibold text-light-text transition-colors
-                        hover:text-cosmic-accent focus-visible:outline-none focus-visible:ring-2
-                        focus-visible:ring-cosmic-accent focus-visible:ring-inset"
+                        text-left text-sm font-semibold text-min-text transition-colors
+                        hover:text-min-accent focus-visible:outline-none focus-visible:ring-2
+                        focus-visible:ring-min-accent focus-visible:ring-inset"
                     >
                       <span>{item.question}</span>
                       <span
-                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full
-                          border border-light-border text-xs text-light-muted transition-transform
-                          duration-200 group-data-[state=open]:rotate-45 group-data-[state=open]:border-cosmic-accent"
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm
+                          border border-min-border text-xs text-min-muted transition-transform
+                          duration-200 group-data-[state=open]:rotate-45 group-data-[state=open]:border-min-accent"
                         aria-hidden="true"
                       >
                         +
@@ -45,7 +45,7 @@ export function FaqSection({ cms }: { cms: CmsData }) {
                   <Accordion.Content
                     className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
                   >
-                    <div className="px-5 pb-4 text-sm leading-relaxed text-light-muted">
+                    <div className="px-5 pb-4 text-sm leading-relaxed text-min-muted">
                       {item.answer}
                     </div>
                   </Accordion.Content>

@@ -8,14 +8,14 @@ export function KidsSection({ cms }: { cms: CmsData }) {
   const kidsGroups = cms.groups.filter((g) => g.category === 'kids')
 
   return (
-    <Section id="kids" variant="cosmic">
+    <Section id="kids">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-white md:text-4xl">
+        <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
           Детям
         </h2>
 

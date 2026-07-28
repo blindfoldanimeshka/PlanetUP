@@ -5,7 +5,7 @@ import type { Group } from '@/types/cms'
 
 export function GroupCard({ group }: { group: Group }) {
   return (
-    <Card variant="cosmic" className="flex flex-col overflow-hidden p-0">
+    <Card className="flex flex-col overflow-hidden p-0">
       <img
         src={group.photoUrl}
         alt={group.name}
@@ -14,12 +14,12 @@ export function GroupCard({ group }: { group: Group }) {
       />
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div>
-          <h3 className="text-lg font-semibold text-white">{group.name}</h3>
-          <span className="inline-block mt-1 text-xs font-medium uppercase tracking-wide text-cosmic-accent-2/80">
+          <h3 className="text-lg font-semibold text-min-text">{group.name}</h3>
+          <span className="mt-1 inline-block text-xs font-medium uppercase tracking-wide text-min-accent">
             {group.level}
           </span>
         </div>
-        <p className="text-sm leading-relaxed text-white/70">{group.description}</p>
+        <p className="text-sm leading-relaxed text-min-muted">{group.description}</p>
         <Button
           variant="primary"
           size="sm"

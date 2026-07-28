@@ -38,19 +38,19 @@ export function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 bg-cosmic-bg text-white shadow-lg shadow-black/20">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <a href="#hero" className="text-lg font-bold tracking-wide">
-          Планета <span className="text-cosmic-accent-2">UP</span>
+    <header className="sticky top-0 z-50 bg-min-bg/95 backdrop-blur-sm border-b border-min-border">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href="#hero" className="text-lg font-bold tracking-wide text-min-text">
+          Планета UP
         </a>
-        <nav className="hidden gap-4 text-sm md:flex">
+        <nav className="hidden gap-6 text-sm md:flex">
           {NAV.map((item) => (
             <a
               key={item.href}
               href={item.href}
               className={cn(
-                'transition-colors hover:text-cosmic-accent-2',
-                active === item.href.replace('#', '') && 'text-cosmic-accent-2 font-medium'
+                'transition-colors hover:text-min-accent text-min-muted',
+                active === item.href.replace('#', '') && 'text-min-text font-medium'
               )}
             >
               {item.label}

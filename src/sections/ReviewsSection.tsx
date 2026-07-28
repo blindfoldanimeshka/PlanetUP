@@ -5,16 +5,16 @@ import { Card } from '@/components/ui/Card'
 
 export function ReviewsSection({ cms }: { cms: CmsData }) {
   return (
-    <Section id="reviews" variant="light">
-      <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-light-text md:text-4xl">
+    <Section id="reviews">
+      <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
         Отзывы
       </h2>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cms.testimonials.map((t, i) => (
           <motion.div
             key={t.id}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
           >
@@ -27,10 +27,10 @@ export function ReviewsSection({ cms }: { cms: CmsData }) {
                   loading="lazy"
                 />
               )}
-              <blockquote className="text-sm leading-relaxed text-light-muted italic">
+              <blockquote className="text-sm leading-relaxed text-min-muted italic">
                 &ldquo;{t.text}&rdquo;
               </blockquote>
-              <p className="text-sm font-semibold text-light-text">— {t.name}</p>
+              <p className="text-sm font-semibold text-min-text">— {t.name}</p>
             </Card>
           </motion.div>
         ))}

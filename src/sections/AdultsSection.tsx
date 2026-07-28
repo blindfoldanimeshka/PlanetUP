@@ -8,14 +8,14 @@ export function AdultsSection({ cms }: { cms: CmsData }) {
   const adultsGroups = cms.groups.filter((g) => g.category === 'adults')
 
   return (
-    <Section id="adults" variant="cosmic">
+    <Section id="adults">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-white md:text-4xl">
+        <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
           Взрослым
         </h2>
 
