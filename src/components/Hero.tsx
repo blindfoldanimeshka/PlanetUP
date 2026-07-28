@@ -1,20 +1,26 @@
 import { lazy, Suspense, useState } from 'react'
 import { motion, useScroll, useTransform, type MotionValue, type TargetAndTransition, type Transition, type Variants } from 'framer-motion'
 import { mockCms } from '@/data/mock'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 const BookingForm = lazy(() =>
   import('@/components/BookingForm').then((m) => ({ default: m.BookingForm }))
 )
 
 /* ------------------------------------------------------------------ */
-/*  Starfield — pure CSS particles, animated via Framer Motion         */
+/*  Starfield — 5-layer CSS particles with parallax                    */
 /* ------------------------------------------------------------------ */
 
 function Starfield() {
   const { scrollY } = useScroll()
-  const parallaxY = useTransform(scrollY, [0, 600], [0, -120])
+  const reduced = useReducedMotion()
+
+  const deepParallax = useTransform(scrollY, [0, 800], [0, -20])
+  const farParallax = useTransform(scrollY, [0, 600], [0, -120])
   const midParallax = useTransform(scrollY, [0, 600], [0, -40])
   const nearParallax = useTransform(scrollY, [0, 600], [0, -80])
+  const auroraParallax = useTransform(scrollY, [0, 800], [0, -60])
+  const zero = useTransform(() => 0)
 
   const [layers] = useState(() => {
     const makeStars = (count: number, sizeRange: [number, number], opacityRange: [number, number]) =>
@@ -28,45 +34,77 @@ function Starfield() {
         duration: 2 + Math.random() * 3,
       }))
 
+    const makeAurora = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `aurora-${i}`,
+        left: `${Math.random() * 100}%`,
+        top: `${20 + Math.random() * 60}%`,
+        size: 2 + Math.random() * 4,
+        opacity: 0.15 + Math.random() * 0.25,
+        delay: Math.random() * 6,
+        duration: 3 + Math.random() * 4,
+        color: ['#7c3aed', '#a855f7', '#c084fc', '#818cf8', '#6366f1'][
+          Math.floor(Math.random() * 5)
+        ],
+      }))
+
     return {
-      far: makeStars(80, [1, 2], [0.2, 0.5]),
-      mid: makeStars(50, [2, 3], [0.4, 0.7]),
-      near: makeStars(20, [3, 4], [0.6, 1]),
+      deep: makeStars(40, [0.5, 1], [0.1, 0.3]),
+      far: makeStars(40, [1, 2], [0.2, 0.5]),
+      mid: makeStars(30, [2, 3], [0.4, 0.7]),
+      near: makeStars(15, [3, 4], [0.6, 1]),
+      aurora: makeAurora(25),
     }
   })
 
-  const renderLayer = (stars: typeof layers.far, yValue: MotionValue<number>) =>
+  const yFor = (mv: MotionValue<number>) => (reduced ? zero : mv)
+
+  const renderLayer = (
+    stars: typeof layers.far,
+    yValue: MotionValue<number>,
+    isAurora = false,
+  ) =>
     stars.map((star) => (
       <motion.div
         key={star.id}
-        className="absolute rounded-full bg-white"
+        className="absolute rounded-full"
         style={{
           left: star.left,
           top: star.top,
           width: star.size,
           height: star.size,
           y: yValue,
+          background: isAurora && 'color' in star ? (star as { color: string }).color : 'white',
         }}
-        animate={{ opacity: [star.opacity, star.opacity * 0.3, star.opacity] }}
-        transition={{
-          duration: star.duration,
-          repeat: Infinity,
-          repeatType: 'reverse',
-          delay: star.delay,
-        }}
+        animate={
+          reduced
+            ? {}
+            : { opacity: [star.opacity, star.opacity * 0.3, star.opacity] }
+        }
+        transition={
+          reduced
+            ? {}
+            : {
+                duration: star.duration,
+                repeat: Infinity,
+                repeatType: 'reverse',
+                delay: star.delay,
+              }
+        }
       />
     ))
 
   return (
-    <motion.div
+    <div
       className="pointer-events-none absolute inset-0 overflow-hidden"
-      style={{ y: parallaxY }}
       aria-hidden="true"
     >
-      {renderLayer(layers.far, midParallax)}
-      {renderLayer(layers.mid, midParallax)}
-      {renderLayer(layers.near, nearParallax)}
-    </motion.div>
+      {renderLayer(layers.deep, yFor(deepParallax))}
+      {renderLayer(layers.far, yFor(farParallax))}
+      {renderLayer(layers.mid, yFor(midParallax))}
+      {renderLayer(layers.near, yFor(nearParallax))}
+      {renderLayer(layers.aurora, yFor(auroraParallax), true)}
+    </div>
   )
 }
 
@@ -78,22 +116,59 @@ const easeInOut: Transition['ease'] = 'easeInOut'
 const easeOut: Transition['ease'] = 'easeOut'
 
 function GlowOrbs() {
+  const { scrollY } = useScroll()
+  const reduced = useReducedMotion()
+
+  const orb1Y = useTransform(scrollY, [0, 600], [0, -80])
+  const orb2Y = useTransform(scrollY, [0, 600], [0, -50])
+  const orb3Y = useTransform(scrollY, [0, 600], [0, -100])
+  const zero = useTransform(() => 0)
+
+  const yFor = (mv: MotionValue<number>) => (reduced ? zero : mv)
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       <motion.div
         className="absolute -left-32 top-1/4 h-64 w-64 rounded-full bg-cosmic-accent/20 blur-3xl"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-        transition={{ duration: 8, repeat: Infinity, ease: easeInOut }}
+        style={{ y: yFor(orb1Y) }}
+        animate={
+          reduced
+            ? {}
+            : { scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }
+        }
+        transition={
+          reduced
+            ? {}
+            : { duration: 8, repeat: Infinity, ease: easeInOut }
+        }
       />
       <motion.div
         className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-cosmic-accent-2/15 blur-3xl"
-        animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.1, 0.2, 0.1] }}
-        transition={{ duration: 10, repeat: Infinity, ease: easeInOut, delay: 2 }}
+        style={{ y: yFor(orb2Y) }}
+        animate={
+          reduced
+            ? {}
+            : { scale: [1.1, 0.9, 1.1], opacity: [0.1, 0.2, 0.1] }
+        }
+        transition={
+          reduced
+            ? {}
+            : { duration: 10, repeat: Infinity, ease: easeInOut, delay: 2 }
+        }
       />
       <motion.div
         className="absolute bottom-1/4 left-1/3 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl"
-        animate={{ scale: [0.9, 1.1, 0.9], opacity: [0.08, 0.18, 0.08] }}
-        transition={{ duration: 12, repeat: Infinity, ease: easeInOut, delay: 4 }}
+        style={{ y: yFor(orb3Y) }}
+        animate={
+          reduced
+            ? {}
+            : { scale: [0.9, 1.1, 0.9], opacity: [0.08, 0.18, 0.08] }
+        }
+        transition={
+          reduced
+            ? {}
+            : { duration: 12, repeat: Infinity, ease: easeInOut, delay: 4 }
+        }
       />
     </div>
   )
@@ -140,6 +215,19 @@ function makeTextVariants(): Variants {
 export function Hero() {
   const { title, subtitle } = mockCms.settings.hero
   const textVariants = makeTextVariants()
+  const { scrollY } = useScroll()
+  const reduced = useReducedMotion()
+
+  const contentOpacity = useTransform(scrollY, [0, 400], [1, 0])
+  const contentScale = useTransform(scrollY, [0, 400], [1, 0.95])
+  const contentY = useTransform(scrollY, [0, 400], [0, -50])
+  const zeroOpacity = useTransform(() => 1)
+  const oneScale = useTransform(() => 1)
+  const zeroY = useTransform(() => 0)
+
+  const contentStyle = reduced
+    ? { opacity: zeroOpacity, scale: oneScale, y: zeroY }
+    : { opacity: contentOpacity, scale: contentScale, y: contentY }
 
   return (
     <section
@@ -154,7 +242,10 @@ export function Hero() {
       <GlowOrbs />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-16 text-center md:py-20">
+      <motion.div
+        className="relative z-10 mx-auto max-w-4xl px-4 py-16 text-center md:py-20"
+        style={contentStyle}
+      >
         {/* Logo text */}
         <motion.div
           className="mb-3 text-sm font-semibold uppercase tracking-widest text-cosmic-accent-2/80"
@@ -203,20 +294,20 @@ export function Hero() {
             Пробное занятие — бесплатно. Без обязательств.
           </p>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div
         className="absolute bottom-20 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: easeInOut }}
+        animate={reduced ? {} : { y: [0, 8, 0] }}
+        transition={reduced ? {} : { duration: 2, repeat: Infinity, ease: easeInOut }}
         aria-hidden="true"
       >
         <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-white/30 p-1">
           <motion.div
             className="h-2 w-1 rounded-full bg-white/60"
-            animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: easeInOut }}
+            animate={reduced ? {} : { y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+            transition={reduced ? {} : { duration: 2, repeat: Infinity, ease: easeInOut }}
           />
         </div>
       </motion.div>

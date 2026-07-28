@@ -73,3 +73,31 @@ a {
   outline: 2px solid var(--cosmic-accent);
   outline-offset: 2px;
 }
+
+/* Pinned section layout */
+.pinned-section-track {
+  position: relative;
+}
+
+.pinned-section-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/cn'
 
 const NAV = [
@@ -14,6 +15,28 @@ const NAV = [
 ]
 
 export function Header() {
+  const [active, setActive] = useState('hero')
+
+  useEffect(() => {
+    const sections = NAV.map((n) => n.href.replace('#', ''))
+    const observers: IntersectionObserver[] = []
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id)
+      if (!el) return
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(id)
+        },
+        { threshold: 0.3 }
+      )
+      observer.observe(el)
+      observers.push(observer)
+    })
+
+    return () => observers.forEach((o) => o.disconnect())
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 bg-cosmic-bg text-white shadow-lg shadow-black/20">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -25,7 +48,10 @@ export function Header() {
             <a
               key={item.href}
               href={item.href}
-              className={cn('transition-colors hover:text-cosmic-accent-2')}
+              className={cn(
+                'transition-colors hover:text-cosmic-accent-2',
+                active === item.href.replace('#', '') && 'text-cosmic-accent-2 font-medium'
+              )}
             >
               {item.label}
             </a>
