@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/cn'
 
@@ -9,28 +9,26 @@ interface ScrollRevealProps {
   direction?: 'up' | 'down' | 'left' | 'right'
   /** Slide distance in pixels. Defaults to 40. */
   distance?: number
-  /** Normalised progress start [0–1]. Defaults to 0. */
-  start?: number
-  /** Normalised progress end [0–1]. Defaults to 1. */
-  end?: number
+  /** Delay before animation starts (seconds). Defaults to 0. */
+  delay?: number
   className?: string
 }
 
 function translateOffsets(
   dir: ScrollRevealProps['direction'],
   dist: number,
-): { xStart: number; yStart: number } {
+): { x: number; y: number } {
   switch (dir) {
     case 'up':
-      return { xStart: 0, yStart: dist }
+      return { x: 0, y: dist }
     case 'down':
-      return { xStart: 0, yStart: -dist }
+      return { x: 0, y: -dist }
     case 'left':
-      return { xStart: dist, yStart: 0 }
+      return { x: dist, y: 0 }
     case 'right':
-      return { xStart: -dist, yStart: 0 }
+      return { x: -dist, y: 0 }
     default:
-      return { xStart: 0, yStart: dist }
+      return { x: 0, y: dist }
   }
 }
 
@@ -38,21 +36,12 @@ export function ScrollReveal({
   children,
   direction = 'up',
   distance = 40,
-  start = 0,
-  end = 1,
+  delay = 0,
   className,
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement | null>(null)
   const reduced = useReducedMotion()
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
-
-  const { xStart, yStart } = translateOffsets(direction, distance)
-  const opacity = useTransform(scrollYProgress, [start, end], [0, 1])
-  const x = useTransform(scrollYProgress, [start, end], [xStart, 0])
-  const y = useTransform(scrollYProgress, [start, end], [yStart, 0])
+  const { x, y } = translateOffsets(direction, distance)
 
   if (reduced) {
     return <div className={cn(className)}>{children}</div>
@@ -61,8 +50,11 @@ export function ScrollReveal({
   return (
     <motion.div
       ref={ref}
-      className={cn('will-change-transform', className)}
-      style={{ opacity, x, y }}
+      className={cn(className)}
+      initial={{ opacity: 0, x, y }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7, delay, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {children}
     </motion.div>

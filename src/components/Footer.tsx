@@ -2,7 +2,7 @@ import type { SiteSettings } from '@/types/cms'
 
 export function Footer({ settings }: { settings: SiteSettings }) {
   return (
-    <footer className="bg-min-bg border-t border-min-border px-4 py-12 text-min-muted">
+    <footer className="neu-raised rounded-t-3xl px-4 py-12 text-min-muted">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-lg font-bold text-min-text">

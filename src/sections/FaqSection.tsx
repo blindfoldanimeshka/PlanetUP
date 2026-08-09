@@ -1,28 +1,22 @@
-import { motion } from 'framer-motion'
 import * as Accordion from '@radix-ui/react-accordion'
 import type { CmsData } from '@/types/cms'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
+import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
+import { CircleHelpIcon } from 'lucide-animated'
+import { ChevronDownIcon } from '@/components/icons/chevron-down'
 
 export function FaqSection({ cms }: { cms: CmsData }) {
   const sorted = [...cms.faq].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
     <Section id="faq">
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: '-80px' }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
-          Часто задаваемые вопросы
-        </h2>
-
-        <div className="mx-auto max-w-3xl">
-          <Accordion.Root type="single" collapsible className="flex flex-col gap-3">
-            {sorted.map((item) => (
-              <Card key={item.id} className="p-0 overflow-hidden">
+      <SectionHeading id="faq" icon={CircleHelpIcon}>Часто задаваемые вопросы</SectionHeading>
+      <div className="mx-auto max-w-3xl">
+        <Accordion.Root type="single" collapsible className="flex flex-col gap-3">
+          {sorted.map((item) => (
+            <div key={item.id} data-stagger-card className="h-full">
+              <Card className="overflow-hidden">
                 <Accordion.Item value={item.id}>
                   <Accordion.Header>
                     <Accordion.Trigger
@@ -33,12 +27,12 @@ export function FaqSection({ cms }: { cms: CmsData }) {
                     >
                       <span>{item.question}</span>
                       <span
-                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm
-                          border border-min-border text-xs text-min-muted transition-transform
-                          duration-200 group-data-[state=open]:rotate-45 group-data-[state=open]:border-min-accent"
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full
+                          neu-pressed-sm text-min-muted transition-colors
+                          group-data-[state=open]:text-min-accent"
                         aria-hidden="true"
                       >
-                        +
+                        <ChevronDownIcon className="size-4" size={16} />
                       </span>
                     </Accordion.Trigger>
                   </Accordion.Header>
@@ -51,10 +45,10 @@ export function FaqSection({ cms }: { cms: CmsData }) {
                   </Accordion.Content>
                 </Accordion.Item>
               </Card>
-            ))}
-          </Accordion.Root>
-        </div>
-      </motion.div>
+            </div>
+          ))}
+        </Accordion.Root>
+      </div>
     </Section>
   )
 }

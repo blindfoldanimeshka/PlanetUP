@@ -22,8 +22,8 @@ export function ScrollProgressBar() {
         height: 3,
       }}
     >
-      <motion.div
-        className="h-full bg-gradient-to-r from-cosmic-accent to-cosmic-accent-2"
+        <motion.div
+        className="h-full bg-min-accent"
         style={{ scaleX, transformOrigin: '0% 50%' }}
       />
     </div>

@@ -3,9 +3,9 @@ import type { CmsData } from '@/types/cms'
 // MOCK content. Replace via Google Sheets CMS at build time (see docs/PLAN.md).
 // Photo URLs are placeholders (picsum/pravatar) — swap for Google Drive links later.
 
-const img = (seed: string, w = 800, h = 600) =>
-  `https://picsum.photos/seed/${seed}/${w}/${h}`
-const avatar = (n: number) => `https://i.pravatar.cc/400?img=${n}`
+const PLACEHOLDER = '/img-mock/20180729112403927.jpg'
+const img = (_seed: string, _w = 800, _h = 600) => PLACEHOLDER
+const avatar = (_n: number) => PLACEHOLDER
 
 export const mockCms: CmsData = {
   settings: {

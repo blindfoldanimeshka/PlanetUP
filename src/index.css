@@ -2,16 +2,16 @@
 @import "tailwindcss";
 
 @theme {
-  /* Minimal monochrome palette */
-  --color-min-bg: #fafafa;
-  --color-min-surface: #ffffff;
-  --color-min-text: #111111;
-  --color-min-muted: #666666;
-  --color-min-accent: #FF6B35;
-  --color-min-border: #e5e5e5;
+  /* Dark theme palette */
+  --color-min-bg: #0a0a0a;
+  --color-min-surface: #141414;
+  --color-min-text: #f2f2f2;
+  --color-min-muted: #888888;
+  --color-min-accent: #A855F7;
+  --color-min-border: #262626;
 
   /* Semantic */
-  --color-min-error: #dc2626;
+  --color-min-error: #ef4444;
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -24,13 +24,48 @@
 }
 
 :root {
-  --min-bg: #fafafa;
-  --min-surface: #ffffff;
-  --min-text: #111111;
-  --min-muted: #666666;
-  --min-accent: #FF6B35;
-  --min-border: #e5e5e5;
-  --min-error: #dc2626;
+  --min-bg: #0a0a0a;
+  --min-surface: #141414;
+  --min-text: #f2f2f2;
+  --min-muted: #888888;
+  --min-accent: #A855F7;
+  --min-border: #262626;
+  --min-error: #ef4444;
+
+  /* Neumorphic shadow tokens (dark soft-UI) */
+  --min-neu-shadow-dark: #080808;
+  --min-neu-shadow-light: #202020;
+}
+
+/* Neumorphic utilities — soft-UI dual shadows.
+   Elements sit on a solid surface (#141414) so dual shadows read correctly
+   over the ambient gradient page background. */
+@utility neu-raised {
+  background-color: var(--min-surface);
+  box-shadow:
+    6px 6px 12px var(--min-neu-shadow-dark),
+    -6px -6px 12px var(--min-neu-shadow-light);
+}
+
+@utility neu-raised-sm {
+  background-color: var(--min-surface);
+  box-shadow:
+    4px 4px 8px var(--min-neu-shadow-dark),
+    -4px -4px 8px var(--min-neu-shadow-light);
+}
+
+@utility neu-pressed {
+  background-color: var(--min-surface);
+  box-shadow:
+    inset 5px 5px 10px var(--min-neu-shadow-dark),
+    inset -5px -5px 10px var(--min-neu-shadow-light);
+}
+
+@utility neu-pressed-sm {
+  background-color: var(--min-surface);
+  box-shadow:
+    inset 3px 3px 6px var(--min-neu-shadow-dark),
+    inset -3px -3px 6px var(--min-neu-shadow-light);
 }
 
 html {

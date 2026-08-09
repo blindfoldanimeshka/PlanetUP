@@ -1,0 +1,432 @@
+- generic [ref=e2]:
+  - link "Перейти к содержимому" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Планета UP" [ref=e6] [cursor=pointer]:
+        - /url: "#hero"
+      - navigation [ref=e7]:
+        - link "Главная" [ref=e8] [cursor=pointer]:
+          - /url: "#hero"
+        - link "Взрослым" [ref=e9] [cursor=pointer]:
+          - /url: "#adults"
+        - link "Детям" [ref=e10] [cursor=pointer]:
+          - /url: "#kids"
+        - link "Абонементы" [ref=e11] [cursor=pointer]:
+          - /url: "#subscriptions"
+        - link "Команда" [ref=e12] [cursor=pointer]:
+          - /url: "#team"
+        - link "Галерея" [ref=e13] [cursor=pointer]:
+          - /url: "#gallery"
+        - link "Жизнь" [ref=e14] [cursor=pointer]:
+          - /url: "#life"
+        - link "Отзывы" [ref=e15] [cursor=pointer]:
+          - /url: "#reviews"
+        - link "FAQ" [ref=e16] [cursor=pointer]:
+          - /url: "#faq"
+        - link "Контакты" [ref=e17] [cursor=pointer]:
+          - /url: "#contacts"
+  - main [ref=e18]:
+    - region "Главный экран — студия акробатики Планета UP" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Студия акробатики
+        - heading "Планета UP — студия акробатики" [level=1] [ref=e22]
+        - paragraph [ref=e23]: "Раскройте своё тело в космосе движения. Занятия для взрослых и детей: от первой стойки на руках до воздушной акробатики."
+        - generic [ref=e24]:
+          - form "Форма записи на пробное занятие" [ref=e29]:
+            - generic [ref=e30]:
+              - generic [ref=e31]: Ваше имя
+              - textbox "Ваше имя" [active] [ref=e32]
+              - paragraph [ref=e410]: Введите имя
+            - generic [ref=e33]:
+              - generic [ref=e34]: Телефон
+              - textbox "Телефон" [ref=e35]:
+                - /placeholder: +7 (___) ___-__-__
+              - paragraph [ref=e411]: Invalid input
+            - generic [ref=e36]:
+              - generic [ref=e37]: Направление
+              - combobox "Направление" [ref=e38]:
+                - option "Направление" [selected]
+                - option "Взрослым"
+                - option "Детям"
+                - option "Общая заявка"
+            - generic [ref=e39]:
+              - generic [ref=e40]: Удобное время
+              - textbox "Удобное время" [ref=e41]:
+                - /placeholder: Удобное время/день
+              - paragraph [ref=e412]: Укажите удобное время и день
+            - generic [ref=e42]:
+              - checkbox "Согласен на обработку персональных данных" [ref=e43]
+              - generic [ref=e44]:
+                - text: Согласен на обработку
+                - link "персональных данных" [ref=e45] [cursor=pointer]:
+                  - /url: /privacy
+            - paragraph [ref=e413]: Необходимо согласие на обработку персональных данных
+            - button "Записаться" [ref=e47]
+          - paragraph [ref=e25]: Пробное занятие — бесплатно. Без обязательств.
+    - generic [ref=e50]:
+      - heading "Взрослым" [level=2] [ref=e51]
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - img "Акробатика. База (взрослые)" [ref=e54]
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - heading "Акробатика. База (взрослые)" [level=3] [ref=e57]
+              - generic [ref=e58]: Начальный
+            - paragraph [ref=e59]: "Основы акробатики: растяжка, опорные стойки, кувырки, подготовка тела. Для тех, кто начинает с нуля."
+            - button "Записаться" [ref=e60]
+        - generic [ref=e61]:
+          - img "Акробатика. Продвинутые (взрослые)" [ref=e62]
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - heading "Акробатика. Продвинутые (взрослые)" [level=3] [ref=e65]
+              - generic [ref=e66]: Продвинутый
+            - paragraph [ref=e67]: Сложные связки, стойки на руках, динамическая акробатика. Требуется база.
+            - button "Записаться" [ref=e68]
+        - generic [ref=e69]:
+          - img "Воздушная акробатика (взрослые)" [ref=e70]
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Воздушная акробатика (взрослые)" [level=3] [ref=e73]
+              - generic [ref=e74]: Средний
+            - paragraph [ref=e75]: Полотно, кольца, трапеция. Работа с гравитацией и полётом.
+            - button "Записаться" [ref=e76]
+      - generic [ref=e77]:
+        - tablist [ref=e78]:
+          - tab "Пн" [selected] [ref=e79]
+          - tab "Вт" [ref=e80]
+          - tab "Ср" [ref=e81]
+          - tab "Чт" [ref=e82]
+          - tab "Пт" [ref=e83]
+          - tab "Сб" [ref=e84]
+          - tab "Вс" [ref=e85]
+        - tabpanel "Пн" [ref=e86]:
+          - list [ref=e87]:
+            - listitem [ref=e88]:
+              - generic [ref=e89]: 19:00–20:30
+              - generic [ref=e90]: Акробатика. База (взрослые)
+            - listitem [ref=e91]:
+              - generic [ref=e92]: 20:30–22:00
+              - generic [ref=e93]: Воздушная акробатика (взрослые)
+    - generic [ref=e96]:
+      - heading "Детям" [level=2] [ref=e97]
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - img "Акробатика. Младшая (дети 4–6)" [ref=e100]
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - heading "Акробатика. Младшая (дети 4–6)" [level=3] [ref=e103]
+              - generic [ref=e104]: Младшая
+            - paragraph [ref=e105]: Игровая акробатика, координация, ловкость. Первый шаг в спорт через радость движения.
+            - button "Записаться" [ref=e106]
+        - generic [ref=e107]:
+          - img "Акробатика. Средняя (дети 7–10)" [ref=e108]
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - heading "Акробатика. Средняя (дети 7–10)" [level=3] [ref=e111]
+              - generic [ref=e112]: Средняя
+            - paragraph [ref=e113]: Базовые элементы, мостик, стойка, акробатические связки в парах.
+            - button "Записаться" [ref=e114]
+        - generic [ref=e115]:
+          - img "Акро-гимнастика (дети 10+)" [ref=e116]
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - heading "Акро-гимнастика (дети 10+)" [level=3] [ref=e119]
+              - generic [ref=e120]: Старшая
+            - paragraph [ref=e121]: Парная и групповая акробатика, выступления на сборах и фестивалях.
+            - button "Записаться" [ref=e122]
+      - generic [ref=e123]:
+        - tablist [ref=e124]:
+          - tab "Пн" [selected] [ref=e125]
+          - tab "Вт" [ref=e126]
+          - tab "Ср" [ref=e127]
+          - tab "Чт" [ref=e128]
+          - tab "Пт" [ref=e129]
+          - tab "Сб" [ref=e130]
+          - tab "Вс" [ref=e131]
+        - tabpanel "Пн" [ref=e132]:
+          - list [ref=e133]:
+            - listitem [ref=e134]:
+              - generic [ref=e135]: 17:00–18:15
+              - generic [ref=e136]: Акробатика. Средняя (дети 7–10)
+    - generic [ref=e138]:
+      - heading "Абонементы" [level=2] [ref=e139]
+      - generic [ref=e140]:
+        - generic [ref=e142]:
+          - heading "Пробное" [level=3] [ref=e143]
+          - paragraph [ref=e144]: 0 ₽
+          - paragraph [ref=e145]: Одно бесплатное пробное занятие для новичков.
+          - paragraph [ref=e146]: По предварительной записи. Доступно один раз.
+          - button "Записаться" [ref=e147]
+        - generic [ref=e149]:
+          - heading "Старт" [level=3] [ref=e150]
+          - paragraph [ref=e151]: 4 500 ₽/мес
+          - paragraph [ref=e152]: 8 занятий в месяц. Идеально для тех, кто только начинает.
+          - paragraph [ref=e153]: Заморозка до 14 дней. Перенос занятия за 12 часов.
+          - button "Записаться" [ref=e154]
+        - generic [ref=e156]:
+          - heading "Комфорт" [level=3] [ref=e157]
+          - paragraph [ref=e158]: 6 900 ₽/мес
+          - paragraph [ref=e159]: 12 занятий в месяц. Гибкое расписание всех направлений.
+          - paragraph [ref=e160]: Заморозка до 30 дней. Групповые и индивидуальные.
+          - button "Записаться" [ref=e161]
+        - generic [ref=e163]:
+          - heading "Безлимит" [level=3] [ref=e164]
+          - paragraph [ref=e165]: 9 900 ₽/мес
+          - paragraph [ref=e166]: Безлимитные посещения всех групп и направлений.
+          - paragraph [ref=e167]: Заморозка до 30 дней. Приоритетная запись.
+          - button "Записаться" [ref=e168]
+    - generic [ref=e171]:
+      - heading "Наша команда" [level=2] [ref=e172]
+      - generic [ref=e173]:
+        - generic [ref=e175]:
+          - img "Анна Северова" [ref=e176]
+          - generic [ref=e177]:
+            - heading "Анна Северова" [level=3] [ref=e178]
+            - paragraph [ref=e179]: Воздушная акробатика
+          - paragraph [ref=e180]: Мастер спорта по художественной гимнастике. 10 лет ведёт взрослые группы по воздушному полотну и кольцам.
+          - link "Профиль тренера →" [ref=e181] [cursor=pointer]:
+            - /url: https://vk.ru/annacro
+        - generic [ref=e183]:
+          - img "Дмитрий Орлов" [ref=e184]
+          - generic [ref=e185]:
+            - heading "Дмитрий Орлов" [level=3] [ref=e186]
+            - paragraph [ref=e187]: Акробатика и партер
+          - paragraph [ref=e188]: Бывший артист цирка. Специализируется на силовой акробатике, стойках и акробатических связках.
+        - generic [ref=e190]:
+          - img "Елена Звягина" [ref=e191]
+          - generic [ref=e192]:
+            - heading "Елена Звягина" [level=3] [ref=e193]
+            - paragraph [ref=e194]: Детские группы
+          - paragraph [ref=e195]: Педагог дошкольного и дополнительного образования. Ведёт младшую и среднюю группы с любовью к каждому ребёнку.
+        - generic [ref=e197]:
+          - img "Максим Лебедев" [ref=e198]
+          - generic [ref=e199]:
+            - heading "Максим Лебедев" [level=3] [ref=e200]
+            - paragraph [ref=e201]: Акро-гимнастика и парная акробатика
+          - paragraph [ref=e202]: Чемпион города по спортивной акробатике. Обожает парные связки и доверие в паре.
+    - generic [ref=e205]:
+      - heading "Галерея" [level=2] [ref=e206]
+      - group "Фильтр галереи" [ref=e207]:
+        - button "Все" [pressed] [ref=e208]
+        - button "Взрослые" [ref=e209]
+        - button "Дети" [ref=e210]
+        - button "Соревнования" [ref=e211]
+      - generic [ref=e212]:
+        - button "Открыть фото из категории Взрослые" [ref=e353] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e354]
+        - button "Открыть фото из категории Дети" [ref=e355] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e356]
+        - button "Открыть фото из категории Соревнования" [ref=e357] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e358]
+        - button "Открыть фото из категории Взрослые" [ref=e359] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e360]
+        - button "Открыть фото из категории Дети" [ref=e361] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e362]
+        - button "Открыть фото из категории Соревнования" [ref=e363] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e364]
+        - button "Открыть фото из категории Взрослые" [ref=e365] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e366]
+        - button "Открыть фото из категории Дети" [ref=e367] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e368]
+        - button "Открыть фото из категории Соревнования" [ref=e369] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e370]
+        - button "Открыть фото из категории Взрослые" [ref=e371] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e372]
+        - button "Открыть фото из категории Дети" [ref=e373] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e374]
+        - button "Открыть фото из категории Соревнования" [ref=e375] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e376]
+        - button "Открыть фото из категории Взрослые" [ref=e377] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e378]
+        - button "Открыть фото из категории Дети" [ref=e379] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e380]
+        - button "Открыть фото из категории Соревнования" [ref=e381] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e382]
+        - button "Открыть фото из категории Взрослые" [ref=e383] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e384]
+        - button "Открыть фото из категории Дети" [ref=e385] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e386]
+        - button "Открыть фото из категории Соревнования" [ref=e387] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e388]
+        - button "Открыть фото из категории Взрослые" [ref=e389] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e390]
+        - button "Открыть фото из категории Дети" [ref=e391] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e392]
+        - button "Открыть фото из категории Соревнования" [ref=e393] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e394]
+        - button "Открыть фото из категории Взрослые" [ref=e395] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e396]
+        - button "Открыть фото из категории Дети" [ref=e397] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e398]
+        - button "Открыть фото из категории Соревнования" [ref=e399] [cursor=pointer]:
+          - img "Фото из категории Соревнования" [ref=e400]
+        - button "Открыть фото из категории Взрослые" [ref=e401] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e402]
+        - button "Открыть фото из категории Дети" [ref=e403] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e404]
+        - button "Открыть фото из категории Взрослые" [ref=e405] [cursor=pointer]:
+          - img "Фото из категории Взрослые" [ref=e406]
+        - button "Открыть фото из категории Дети" [ref=e407] [cursor=pointer]:
+          - img "Фото из категории Дети" [ref=e408]
+    - generic [ref=e214]:
+      - heading "Жизнь коллектива" [level=2] [ref=e215]
+      - generic [ref=e216]:
+        - generic [ref=e218]:
+          - img "Фестиваль «Акро-Весна 2026»" [ref=e219]
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - heading "Фестиваль «Акро-Весна 2026»" [level=3] [ref=e222]
+              - time [ref=e223]: 18 мая 2026 г.
+            - paragraph [ref=e224]: Наши группы выступили на городском фестивале. Гордимся каждым! Спасибо родителям за поддержку.
+            - button "Показать альбом (3)" [ref=e226]
+        - generic [ref=e228]:
+          - img "Летние сборы в Подмосковье" [ref=e229]
+          - generic [ref=e230]:
+            - generic [ref=e231]:
+              - heading "Летние сборы в Подмосковье" [level=3] [ref=e232]
+              - time [ref=e233]: 4 июля 2026 г.
+            - paragraph [ref=e234]: "Неделя интенсива: акробатика, воздух, парковые тренировки и вечерний костёр."
+            - button "Показать альбом (2)" [ref=e236]
+        - generic [ref=e238]:
+          - img "Открытый урок для родителей" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - heading "Открытый урок для родителей" [level=3] [ref=e242]
+              - time [ref=e243]: 12 июня 2026 г.
+            - paragraph [ref=e244]: Показали, чему научились за год. Слёзы счастья и бурные аплодисменты.
+            - button "Показать альбом (4)" [ref=e246]
+    - generic [ref=e248]:
+      - heading "Отзывы" [level=2] [ref=e249]
+      - generic [ref=e250]:
+        - generic [ref=e252]:
+          - img "Мария К." [ref=e253]
+          - blockquote [ref=e254]: “Пришла «ничего не умею», через месяц стою на руках у стенки. Атмосфера — космос!”
+          - paragraph [ref=e255]: — Мария К.
+        - generic [ref=e257]:
+          - blockquote [ref=e258]: “Сын в восторге от акро-гимнастики. Тренеры — профессионалы и душа компании.”
+          - paragraph [ref=e259]: — Игорь П.
+        - generic [ref=e261]:
+          - img "Светлана В." [ref=e262]
+          - blockquote [ref=e263]: “Воздушное полотно — лучший антистресс после работы. Рекомендую всем подругам.”
+          - paragraph [ref=e264]: — Светлана В.
+        - generic [ref=e266]:
+          - blockquote [ref=e267]: “Пробное было бесплатным, остался на «Комфорт». Гибкое расписание — то, что нужно.”
+          - paragraph [ref=e268]: — Денис Т.
+        - generic [ref=e270]:
+          - img "Ольга Р." [ref=e271]
+          - blockquote [ref=e272]: “Дочка (5 лет) бежит на занятия как на праздник. Спасибо Елене!”
+          - paragraph [ref=e273]: — Ольга Р.
+        - generic [ref=e275]:
+          - blockquote [ref=e276]: “Крутая студия, современный зал, адекватные цены. Нашёл свою форму через акробатику.”
+          - paragraph [ref=e277]: — Павел С.
+    - generic [ref=e280]:
+      - heading "Часто задаваемые вопросы" [level=2] [ref=e281]
+      - generic [ref=e283]:
+        - heading [level=3] [ref=e286]:
+          - button "Нужна ли спортивная подготовка, чтобы начать?" [ref=e287]:
+            - generic [ref=e289]: +
+        - heading [level=3] [ref=e292]:
+          - button "С какого возраста принимаете детей?" [ref=e293]:
+            - generic [ref=e295]: +
+        - heading [level=3] [ref=e298]:
+          - button "Что взять с собой на первое занятие?" [ref=e299]:
+            - generic [ref=e301]: +
+        - heading [level=3] [ref=e304]:
+          - button "Можно ли заморозить абонемент?" [ref=e305]:
+            - generic [ref=e307]: +
+        - heading [level=3] [ref=e310]:
+          - button "Есть ли пробное занятие?" [ref=e311]:
+            - generic [ref=e313]: +
+        - heading [level=3] [ref=e316]:
+          - button "Как часто нужно заниматься для результата?" [ref=e317]:
+            - generic [ref=e319]: +
+    - generic [ref=e322]:
+      - heading "Контакты" [level=2] [ref=e323]
+      - generic [ref=e324]:
+        - generic [ref=e326]:
+          - heading "Как нас найти" [level=3] [ref=e327]
+          - generic [ref=e328]:
+            - paragraph [ref=e329]: Москва, ул. Звёздная, 12, м. «Космонавтов»
+            - paragraph [ref=e330]:
+              - link "+7 (925) 123-45-67" [ref=e331] [cursor=pointer]:
+                - /url: tel:79251234567
+            - paragraph [ref=e332]:
+              - link "hello@planetaup.ru" [ref=e333] [cursor=pointer]:
+                - /url: mailto:hello@planetaup.ru
+          - generic [ref=e334]:
+            - link "VK" [ref=e335] [cursor=pointer]:
+              - /url: https://vk.ru/planetaupacro
+            - link "Telegram" [ref=e336] [cursor=pointer]:
+              - /url: https://t.me/planetup_acro
+            - link "WhatsApp" [ref=e337] [cursor=pointer]:
+              - /url: https://wa.me/79991234567
+          - button "Записаться на пробное занятие" [ref=e338]
+        - iframe [ref=e409]:
+          - generic [ref=f1e2]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic [ref=f1e8]:
+                        - generic [ref=f1e9]:
+                          - button [ref=f1e12] [cursor=pointer]
+                          - button "Пробки" [ref=f1e14] [cursor=pointer]
+                        - iframe [ref=f1e18]:
+                          
+                      - generic [ref=f1e19]:
+                        - generic [ref=f1e22]:
+                          - button "Приблизить" [ref=f1e24] [cursor=pointer]
+                          - button "Отдалить" [ref=f1e26] [cursor=pointer]
+                        - iframe [ref=f1e27]:
+                          
+                      - generic [ref=f1e28]:
+                        - button "Моё местоположение" [ref=f1e31] [cursor=pointer]
+                        - iframe [ref=f1e32]:
+                          
+                      - generic:
+                        - generic:
+                          - generic:
+                            - button "Открыть в Яндекс Картах"
+                        - iframe [ref=f1e33]:
+                          
+                      - generic [ref=f1e34]:
+                        - button "Открыть в Картах" [ref=f1e37] [cursor=pointer]
+                        - iframe [ref=f1e39]:
+                          
+                      - generic:
+                        - generic:
+                          - generic:
+                            - button
+                        - iframe [ref=f1e40]:
+                          
+                    - generic:
+                      - generic:
+                        - contentinfo:
+                          - generic [ref=f1e42]:
+                            - generic [ref=f1e43]: © Яндекс
+                            - link "Условия использования" [ref=f1e44] [cursor=pointer]:
+                              - /url: https://yandex.ru/legal/maps_termsofuse/?lang=ru
+                            - link "Конфиденциальность" [ref=f1e45] [cursor=pointer]:
+                              - /url: https://yandex.ru/legal/confidential/?lang=ru
+                      - generic: 200 м
+                    - iframe [ref=f1e46]:
+                      
+                - iframe [ref=f1e47]:
+                  
+  - contentinfo [ref=e342]:
+    - generic [ref=e343]:
+      - generic [ref=e344]:
+        - paragraph [ref=e345]: Планета UP
+        - paragraph [ref=e346]: Москва, ул. Звёздная, 12, м. «Космонавтов»
+        - paragraph [ref=e347]: +7 (925) 123-45-67
+      - generic [ref=e348]:
+        - link "VK" [ref=e349] [cursor=pointer]:
+          - /url: https://vk.ru/planetaupacro
+        - link "Telegram" [ref=e350] [cursor=pointer]:
+          - /url: https://t.me/planetup_acro
+        - link "WhatsApp" [ref=e351] [cursor=pointer]:
+          - /url: https://wa.me/79991234567
+        - link "Политика" [ref=e352] [cursor=pointer]:
+          - /url: /privacy

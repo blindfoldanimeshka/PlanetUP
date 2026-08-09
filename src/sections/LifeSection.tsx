@@ -1,21 +1,17 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import type { CmsData, LifePost } from '@/types/cms'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
+import { CalendarDaysIcon } from 'lucide-animated'
 
-function LifePostCard({ post, index }: { post: LifePost; index: number }) {
+function LifePostCard({ post }: { post: LifePost }) {
   const [expanded, setExpanded] = useState(false)
   const hasAlbum = post.albumPhotoUrls.length > 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-    >
+    <div data-stagger-card className="h-full">
       <Card className="flex flex-col overflow-hidden p-0">
         <img
           src={post.coverPhotoUrl}
@@ -36,7 +32,6 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
           </div>
           <p className="text-sm leading-relaxed text-min-muted">{post.text}</p>
 
-          {/* Expandable album */}
           {hasAlbum && (
             <div>
               <Button
@@ -65,19 +60,17 @@ function LifePostCard({ post, index }: { post: LifePost; index: number }) {
           )}
         </div>
       </Card>
-    </motion.div>
+    </div>
   )
 }
 
 export function LifeSection({ cms }: { cms: CmsData }) {
   return (
     <Section id="life">
-      <h2 className="mb-12 font-display text-center leading-tight tracking-tight text-min-text md:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.03em' }}>
-        Жизнь коллектива
-      </h2>
+      <SectionHeading id="life" icon={CalendarDaysIcon}>Жизнь коллектива</SectionHeading>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {cms.lifePosts.map((post, i) => (
-          <LifePostCard key={post.id} post={post} index={i} />
+        {cms.lifePosts.map((post) => (
+          <LifePostCard key={post.id} post={post} />
         ))}
       </div>
     </Section>

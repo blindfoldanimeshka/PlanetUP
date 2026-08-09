@@ -16,7 +16,7 @@ function formatPhone(digits: string): string {
 }
 
 const inputBase =
-  'w-full border border-min-border bg-min-surface px-4 py-3 text-min-text placeholder-min-muted transition-colors focus:border-min-accent focus:outline-none focus:ring-1 focus:ring-min-accent'
+  'w-full neu-pressed rounded-xl px-4 py-3 text-min-text placeholder-min-muted transition-colors focus:border-min-accent focus:outline-none focus:ring-1 focus:ring-min-accent'
 
 export function BookingForm({ interest }: { interest?: string }) {
   const [success, setSuccess] = useState(false)
@@ -64,7 +64,7 @@ export function BookingForm({ interest }: { interest?: string }) {
 
   if (success) {
     return (
-      <div className="border border-min-border bg-min-surface p-6 text-center">
+       <div className="neu-raised rounded-2xl p-6 text-center">
         <p className="text-lg font-semibold text-min-text">Заявка отправлена!</p>
         <p className="mt-2 text-sm text-min-muted">
           Мы свяжемся с вами в ближайшее время.

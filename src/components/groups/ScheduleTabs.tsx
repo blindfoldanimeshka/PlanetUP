@@ -18,13 +18,13 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
 
   return (
     <Tabs.Root defaultValue="Пн" className="mt-10">
-      <Tabs.List className="flex gap-1 overflow-x-auto pb-2">
+      <Tabs.List className="neu-raised rounded-2xl flex gap-1 overflow-x-auto p-2">
         {DAYS.map((day) => (
           <Tabs.Trigger
             key={day}
             value={day}
-            className="rounded-sm px-4 py-2 text-sm font-medium transition-colors
-              data-[state=active]:bg-min-accent data-[state=active]:text-white
+            className="rounded-xl px-4 py-2 text-sm font-medium transition-all
+              data-[state=active]:neu-pressed data-[state=active]:text-min-accent
               text-min-muted hover:text-min-text focus-visible:outline-none focus-visible:ring-2
               focus-visible:ring-min-accent whitespace-nowrap"
           >
@@ -39,7 +39,7 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
           <Tabs.Content
             key={day}
             value={day}
-            className="mt-4 rounded-sm border border-min-border bg-min-surface p-4
+            className="mt-4 neu-raised rounded-2xl p-4
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
           >
             {items.length === 0 ? (
@@ -49,7 +49,7 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
                 {items.map((item, i) => (
                   <li
                     key={`${item.groupName}-${i}`}
-                    className="flex items-center justify-between rounded-sm bg-min-bg px-4 py-3"
+                    className="flex items-center justify-between neu-pressed-sm rounded-xl px-4 py-3"
                   >
                     <div>
                       <span className="text-sm font-semibold text-min-text">{item.time}</span>

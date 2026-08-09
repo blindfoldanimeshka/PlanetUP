@@ -1,7 +1,8 @@
 import { forwardRef } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/cn'
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd'> & {
   variant?: 'primary' | 'secondary' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   children: React.ReactNode
@@ -10,13 +11,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', className, children, ...props }, ref) => {
     const base =
-      'inline-flex items-center justify-center font-semibold transition-all duration-200 ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+      'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent focus-visible:ring-offset-2 focus-visible:ring-offset-min-bg disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variants = {
       primary:
-        'bg-min-accent text-white border-2 border-min-accent hover:bg-transparent hover:text-min-accent',
+        'neu-raised text-min-accent border border-min-accent/50 hover:neu-pressed',
       secondary:
-        'border-2 border-min-text text-min-text bg-transparent hover:bg-min-text hover:text-min-surface',
+        'neu-raised text-min-text border border-min-border/60 hover:neu-pressed',
       ghost:
         'text-min-muted hover:text-min-accent',
     }
@@ -28,13 +29,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
-      <button
+      <motion.button
         ref={ref}
         className={cn(base, variants[variant], sizes[size], className)}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         {...props}
       >
         {children}
-      </button>
+      </motion.button>
     )
   }
 )

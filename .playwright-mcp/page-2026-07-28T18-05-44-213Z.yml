@@ -1,0 +1,35 @@
+- generic [ref=e2]:
+  - link "Перейти к содержимому" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Планета UP" [ref=e6] [cursor=pointer]:
+        - /url: "#hero"
+      - navigation [ref=e7]:
+        - link "Главная" [ref=e8] [cursor=pointer]:
+          - /url: "#hero"
+        - link "Взрослым" [ref=e9] [cursor=pointer]:
+          - /url: "#adults"
+        - link "Детям" [ref=e10] [cursor=pointer]:
+          - /url: "#kids"
+        - link "Абонементы" [ref=e11] [cursor=pointer]:
+          - /url: "#subscriptions"
+        - link "Команда" [ref=e12] [cursor=pointer]:
+          - /url: "#team"
+        - link "Галерея" [ref=e13] [cursor=pointer]:
+          - /url: "#gallery"
+        - link "Жизнь" [ref=e14] [cursor=pointer]:
+          - /url: "#life"
+        - link "Отзывы" [ref=e15] [cursor=pointer]:
+          - /url: "#reviews"
+        - link "FAQ" [ref=e16] [cursor=pointer]:
+          - /url: "#faq"
+        - link "Контакты" [ref=e17] [cursor=pointer]:
+          - /url: "#contacts"
+  - main [ref=e18]:
+    - region "Главный экран — студия акробатики Планета UP" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Студия акробатики
+        - heading "Планета UP — студия акробатики" [level=1] [ref=e22]
+        - paragraph [ref=e23]: "Раскройте своё тело в космосе движения. Занятия для взрослых и детей: от первой стойки на руках до воздушной акробатики."
+        - paragraph [ref=e25]: Пробное занятие — бесплатно. Без обязательств.

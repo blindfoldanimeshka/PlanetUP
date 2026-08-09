@@ -6,7 +6,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({ children, className, ...props }: CardProps) {
   return (
-    <div className={cn('bg-min-surface border border-min-border p-6', className)} {...props}>
+      <div className={cn('neu-raised rounded-2xl p-6 h-full', className)} {...props}>
       {children}
     </div>
   )
