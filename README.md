@@ -30,3 +30,18 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## CI / Deployment
+
+- **Node version** is pinned in `.nvmrc` (Node 22).
+- **GitHub Actions** runs `.github/workflows/ci.yml` on every push and pull request to `main`:
+  - `npm ci` (with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`)
+  - `npm run lint`
+  - `npm run test`
+  - `npm run build`
+- **Deployment** is handled by Vercel Git Integration:
+  - Pushes to `main` deploy to production.
+  - Pull requests get preview deployments.
+  - No deploy secrets are stored in this repository.
+
+If you ever need a manual deploy step in CI, store `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub Actions secrets and reference them only via `${{ secrets.XXX }}`. Never hardcode tokens in the workflow file.
