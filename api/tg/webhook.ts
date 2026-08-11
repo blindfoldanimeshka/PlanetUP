@@ -17,7 +17,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import {
   getAdminState,
   isAdmin,
-} from '@/lib/storage.js'
+} from '../../src/lib/storage.js'
 import { handleCommand, handleCallback } from './bot.js'
 
 const TELEGRAM_API = (token: string) => `https://api.telegram.org/bot${token}`

@@ -2,13 +2,27 @@ import { Redis } from '@upstash/redis'
 import type { CmsData, GalleryItem, Group, Subscription, Trainer, LifePost, Testimonial } from '@/types/cms.ts'
 
 /* ------------------------------------------------------------------ */
-/*  Redis connection                                                   */
-/*  Upstash REST works in Vercel edge/node without TCP.                */
+/*  Redis connection (lazy)                                             */
+/*  Created on first use so env vars are loaded by then.               */
 /* ------------------------------------------------------------------ */
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL ?? '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN ?? '',
+let _redis: Redis | null = null
+
+function getRedis(): Redis {
+  if (!_redis) {
+    _redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL ?? '',
+      token: process.env.UPSTASH_REDIS_REST_TOKEN ?? '',
+    })
+  }
+  return _redis
+}
+
+// Direct access if needed (forces init)
+const redis = new Proxy({} as Redis, {
+  get(_target, prop) {
+    return (getRedis() as any)[prop]
+  },
 })
 
 /* ------------------------------------------------------------------ */

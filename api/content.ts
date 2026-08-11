@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getContent } from '@/lib/storage.js'
+import { getContent } from '../src/lib/storage.js'
 
 /**
  * Public API — returns the full CMS content from Redis.

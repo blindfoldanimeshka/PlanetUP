@@ -22,8 +22,8 @@ import {
   setAdminState,
   clearAdminState,
   type AdminState,
-} from '@/lib/storage.js'
-import type { Group, Subscription, Trainer, LifePost, Testimonial, GalleryItem } from '@/types/cms.js'
+} from '../../src/lib/storage.js'
+import type { Group, Subscription, Trainer, LifePost, Testimonial, GalleryItem } from '../../src/types/cms.js'
 import { sendMessage } from './webhook.js'
 
 /* ------------------------------------------------------------------ */
