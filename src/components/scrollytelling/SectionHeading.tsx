@@ -1,6 +1,6 @@
 import { useRef, useEffect, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { animate, svg, stagger } from 'animejs'
+import { animate, svg, stagger, set } from 'animejs'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface SectionHeadingProps {
@@ -20,6 +20,14 @@ export function SectionHeading({ children, id, icon: Icon }: SectionHeadingProps
     if (reduced) return
     const el = ref.current
     if (!el) return
+
+    // Pre-hide child cards immediately so the stagger reveal animates from
+    // hidden — without this they flash visible before the animation starts.
+    const section = el.closest('section')
+    const cards = section?.querySelectorAll('[data-stagger-card]')
+    if (cards && cards.length > 0) {
+      set(cards, { opacity: 0, translateY: 30 })
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {

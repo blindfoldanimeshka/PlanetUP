@@ -18,16 +18,13 @@ export function PageBackground() {
         style={{
           background: `linear-gradient(180deg,
             #1B1035 0%,
-            #2a1f55 6%,
-            #4A3A8C 14%,
-            #7B5AA9 20%,
-            #B58AC9 26%,
-            #E5C6E0 32%,
-            #c0a0b8 40%,
-            #604070 50%,
-            #2a1a40 58%,
-            #0f0a1a 66%,
-            #0a0a0a 74%,
+            #2a1f55 12%,
+            #3d3066 24%,
+            #4a3a7a 36%,
+            #3d3066 48%,
+            #2a1f55 60%,
+            #1B1035 72%,
+            #0f0a1a 84%,
             #0a0a0a 100%
           )`,
         }}

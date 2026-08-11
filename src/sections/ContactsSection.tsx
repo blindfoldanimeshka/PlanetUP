@@ -103,7 +103,7 @@ export function ContactsSection({ cms }: { cms: CmsData }) {
             <Button
               variant="primary"
               size="md"
-              className="mt-2 self-start"
+              className="mt-4 self-stretch"
               onClick={scrollToHero}
             >
               Записаться на пробное занятие

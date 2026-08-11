@@ -7,7 +7,6 @@ import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ScrollProgress } from '@/components/scrollytelling/ScrollProgress'
-import { StickyTransitionSection } from '@/components/scrollytelling/StickyTransitionSection'
 import { PageBackground } from '@/components/PageBackground'
 import {
   AdultsSection,
@@ -25,33 +24,15 @@ function MainSections({ cms }: { cms: CmsData | null }) {
   if (!cms) return null
   return (
     <>
-      <StickyTransitionSection>
-        <AdultsSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <KidsSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <SubscriptionsSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <TeamSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <GallerySection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <LifeSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <ReviewsSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <FaqSection cms={cms} />
-      </StickyTransitionSection>
-      <StickyTransitionSection>
-        <ContactsSection cms={cms} />
-      </StickyTransitionSection>
+      <AdultsSection cms={cms} />
+      <KidsSection cms={cms} />
+      <SubscriptionsSection cms={cms} />
+      <TeamSection cms={cms} />
+      <GallerySection cms={cms} />
+      <LifeSection cms={cms} />
+      <ReviewsSection cms={cms} />
+      <FaqSection cms={cms} />
+      <ContactsSection cms={cms} />
     </>
   )
 }
@@ -95,9 +76,7 @@ export default function App() {
       <main id="main-content" className="relative">
         <PageBackground />
         <ErrorBoundary>
-          <StickyTransitionSection isHero>
-            <Hero />
-          </StickyTransitionSection>
+          <Hero />
           <MainSections cms={cms} />
         </ErrorBoundary>
       </main>

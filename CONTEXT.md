@@ -41,11 +41,11 @@ No fixed hex values yet. Direction: deep blue/purple cosmic hero (`#0B1026`-clas
 
 ## Content Management
 
-**Lightweight CMS: Google Sheets**  
-All editable content (trainer profiles, subscription prices, schedule, FAQ, gallery links) is stored in Google Sheets and pulled at build time. No headless CMS. The studio admin edits the spreadsheet directly; site rebuilds automatically on changes.
+**Local TypeScript CMS**  
+All editable content (trainer profiles, subscription prices, schedule, FAQ, gallery, testimonials, life posts, site settings) lives in `src/data/content.ts` and is version-controlled. `src/api/cms.ts` returns this object directly. No runtime CMS fetch.
 
-**MOCK-first content strategy**  
-All development proceeds with realistic MOCK data (generated text, placeholder images). Real content from the client replaces MOCK data via Google Sheets when available. This unblocks development immediately and prevents deadline risk from content delays.
+**Content updates**  
+Text changes are made by editing `src/data/content.ts`. New images are added to `raw-assets/`, optimized via `scripts/optimize-media.mjs` into `public/media/`, and then referenced from `content.ts`.
 
 ## Form Validation & Spam Protection
 
@@ -57,8 +57,8 @@ User types digits only; the field auto-formats to `+7 (XXX) XXX-XX-XX` in real t
 
 ## Media Storage
 
-**Image hosting: Google Drive (public links)**  
-All images (gallery, trainer photos, hero backgrounds) are stored in a shared Google Drive folder. Public direct links referenced in Google Sheets CMS. No local image files in repo. Free, no additional infrastructure required.
+**Image hosting: local `public/media/` WebP files**  
+All images (gallery, trainer photos, life posts, hero backgrounds) are stored as optimized WebP files in `public/media/`. The raw client dump lives in `raw-assets/для-сайта/` and is not committed. The media pipeline converts HEIC/JPEG/PNG to WebP and renames files consistently. References are plain `/media/...` paths in `src/data/content.ts`.
 
 ## Infrastructure
 

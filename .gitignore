@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Raw client assets and secrets
+raw-assets/
+.env
+.env.local
+public/cms.json
+
+# Locked empty remnant of client dump (content moved to raw-assets/)
+public/Для сайта-20260809T142710Z-1-001/
+
+# Agent / QA artifacts
+.omo/
+.playwright-mcp/
+tmp/
+qa-*.png
+*.traineddata
+.scratch/
+.opencode/skills/**/__pycache__/

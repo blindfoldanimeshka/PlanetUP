@@ -25,7 +25,7 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
         <Button
           variant="primary"
           size="md"
-          className="self-start"
+          className="self-stretch mt-4"
           onClick={scrollToHero}
         >
           Записаться

@@ -1,4 +1,4 @@
-// CMS entity types — mirror the 8 Google Sheets tabs (see docs/PLAN.md).
+// CMS entity types for the local content module (see src/data/content.ts).
 
 export type GroupCategory = 'adults' | 'kids'
 export type GalleryCategory = 'adults' | 'kids' | 'competitions'
@@ -70,6 +70,7 @@ export interface GalleryItem {
 
 export interface SiteSettings {
   phone: string
+  phoneHref: string
   address: string
   email: string
   social: {

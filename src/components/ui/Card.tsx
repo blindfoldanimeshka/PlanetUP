@@ -5,9 +5,19 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ children, className, ...props }: CardProps) {
+  const hasPaddingOverride = /(?:^|\s)p-\d+(?:\s|$)/.test(className || '')
+
   return (
-      <div className={cn('neu-raised rounded-2xl p-6 h-full', className)} {...props}>
-      {children}
+    <div
+      className={cn(
+        'rounded-2xl h-full bg-white/8 backdrop-blur-md border border-white/15',
+        className
+      )}
+      {...props}
+    >
+      <div className={cn('h-full', !hasPaddingOverride && 'p-6')}>
+        {children}
+      </div>
     </div>
   )
 }

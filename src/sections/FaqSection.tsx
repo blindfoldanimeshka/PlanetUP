@@ -28,8 +28,8 @@ export function FaqSection({ cms }: { cms: CmsData }) {
                       <span>{item.question}</span>
                       <span
                         className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full
-                          neu-pressed-sm text-min-muted transition-colors
-                          group-data-[state=open]:text-min-accent"
+                          glass-input text-min-muted transition-all duration-300
+                          group-data-[state=open]:text-min-accent group-data-[state=open]:rotate-180"
                         aria-hidden="true"
                       >
                         <ChevronDownIcon className="size-4" size={16} />
