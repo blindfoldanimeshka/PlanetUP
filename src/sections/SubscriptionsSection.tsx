@@ -40,7 +40,7 @@ export function SubscriptionsSection({ cms }: { cms: CmsData }) {
 
   return (
     <Section id="subscriptions">
-      <SectionHeading id="subscriptions" icon={CreditCardIcon}>Абонементы</SectionHeading>
+      <SectionHeading id="subscriptions" icon={CreditCardIcon}>Цены</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {sorted.map((sub) => (
           <SubscriptionCard key={sub.id} subscription={sub} />

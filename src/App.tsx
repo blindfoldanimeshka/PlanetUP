@@ -12,6 +12,7 @@ import {
   AdultsSection,
   KidsSection,
   SubscriptionsSection,
+  FeaturesSection,
   TeamSection,
   GallerySection,
   LifeSection,
@@ -24,6 +25,7 @@ function MainSections({ cms }: { cms: CmsData | null }) {
   if (!cms) return null
   return (
     <>
+      <FeaturesSection />
       <AdultsSection cms={cms} />
       <KidsSection cms={cms} />
       <SubscriptionsSection cms={cms} />

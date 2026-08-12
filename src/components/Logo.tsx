@@ -4,9 +4,29 @@ type LogoProps = {
   className?: string
   showWordmark?: boolean
   size?: number
+  /** Использовать оригинальный растровый логотип вместо SVG-планеты (для тёмного фона) */
+  src?: string
 }
 
-export function Logo({ className, showWordmark = true, size = 48 }: LogoProps) {
+export function Logo({ className, showWordmark = true, size = 48, src }: LogoProps) {
+  if (src) {
+    return (
+      <div className={cn('flex flex-col items-center gap-2', className)}>
+        <img
+          src={src}
+          alt="Планета UP — студия акробатики"
+          className="h-auto w-auto max-h-24 select-none"
+          style={{ height: size * 1.6 }}
+        />
+        {showWordmark && (
+          <span className="font-display text-xl font-bold tracking-tight text-min-text md:text-2xl">
+            Планета UP
+          </span>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
       <svg

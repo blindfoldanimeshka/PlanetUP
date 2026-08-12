@@ -1,5 +1,4 @@
 import { lazy, Suspense, useState, useCallback } from 'react'
-import { AnimatePresence } from 'framer-motion'
 import 'yet-another-react-lightbox/styles.css'
 
 const Lightbox = lazy(() => import('yet-another-react-lightbox'))
@@ -8,7 +7,6 @@ import { Section } from '@/components/ui/Section'
 import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { SparklesIcon } from 'lucide-animated'
-import { AccordionGallery } from '@/components/gallery/AccordionGallery'
 
 const CATEGORY_LABELS: Record<GalleryCategory | 'all', string> = {
   all: 'Все',
@@ -17,7 +15,7 @@ const CATEGORY_LABELS: Record<GalleryCategory | 'all', string> = {
   competitions: 'Соревнования',
 }
 
-const ACCORDION_ITEMS = 6
+const FILTERS: (GalleryCategory | 'all')[] = ['all', 'kids', 'adults', 'competitions']
 
 export function GallerySection({ cms }: { cms: CmsData }) {
   const [filter, setFilter] = useState<GalleryCategory | 'all'>('all')
@@ -30,13 +28,6 @@ export function GallerySection({ cms }: { cms: CmsData }) {
 
   const sorted = [...filtered].sort((a, b) => a.sortOrder - b.sortOrder)
   const slides = sorted.map((item) => ({ src: item.photoUrl }))
-
-  // First N images for the accordion showcase
-  const accordionItems = sorted.slice(0, ACCORDION_ITEMS).map((item, i) => ({
-    image: item.photoUrl,
-    label: CATEGORY_LABELS[item.category],
-    index: i,
-  }))
 
   const handleOpen = useCallback((index: number) => {
     setLightboxIndex(index)
@@ -66,7 +57,7 @@ export function GallerySection({ cms }: { cms: CmsData }) {
         role="group"
         aria-label="Фильтр галереи"
       >
-        {(['all', 'adults', 'competitions'] as const).map((cat) => (
+        {FILTERS.map((cat) => (
           <Button
             key={cat}
             variant={filter === cat ? 'primary' : 'secondary'}
@@ -79,44 +70,25 @@ export function GallerySection({ cms }: { cms: CmsData }) {
         ))}
       </div>
 
-      {/* Interactive accordion gallery */}
-      <AnimatePresence mode="wait">
-        <AccordionGallery
-          key={filter}
-          items={accordionItems}
-          defaultIndex={0}
-          expandRatio={0.55}
-          trigger="hover"
-          accentColor="#A855F7"
-          overlayColor="rgba(10, 0, 16, 0.4)"
-          textColor="#ffffff"
-          grayscale
-          showLabels
-          duration={0.6}
-          ease="power3.out"
-          parallax={0.5}
-          tilt={6}
-          stagger={0.06}
-          height={460}
-          gap={10}
-          radius={16}
-          orientation="horizontal"
-          onSelect={handleOpen}
-        />
-      </AnimatePresence>
-
-      {/* View all button if more images exist */}
-      {sorted.length > ACCORDION_ITEMS && (
-        <div className="mt-6 flex justify-center">
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => handleOpen(ACCORDION_ITEMS)}
+      {/* Grid gallery — masonry columns keep full photos (no cropped bodies) */}
+      <div className="columns-2 gap-3 md:columns-3 lg:columns-4 [column-fill:_balance]">
+        {sorted.map((item, i) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => handleOpen(i)}
+            className="group mb-3 block w-full break-inside-avoid overflow-hidden rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
+            aria-label="Открыть фото"
           >
-            Смотреть все ({sorted.length})
-          </Button>
-        </div>
-      )}
+            <img
+              src={item.photoUrl}
+              alt=""
+              loading="lazy"
+              className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+          </button>
+        ))}
+      </div>
 
       {/* Lightbox */}
       {lightboxIndex !== null && (

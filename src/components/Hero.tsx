@@ -67,7 +67,7 @@ export function Hero() {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, ease: 'easeOut' }}
         >
-          <Logo />
+          <Logo src="/media/logo/logo-white.png" />
         </motion.div>
 
         {/* Eyebrow */}

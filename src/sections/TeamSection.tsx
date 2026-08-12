@@ -45,6 +45,12 @@ export function TeamSection({ cms }: { cms: CmsData }) {
       <SectionHeading id="team" icon={UserCheckIcon}>
         Наша команда
       </SectionHeading>
+      <p className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-min-muted">
+        Наши педагоги — профессиональные тренеры с большим опытом. Они работают
+        и с детьми, и со взрослыми: от первых шагов в акробатике до сложных
+        парных постановок и выступлений. Каждый тренер «Планеты UP» помогает
+        ученику раскрыть потенциал и полюбить движение.
+      </p>
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2 md:gap-12">
         {cms.trainers.map((trainer) => (
           <TrainerCard key={trainer.id} trainer={trainer} />

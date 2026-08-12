@@ -1,6 +1,7 @@
 export { AdultsSection } from './AdultsSection'
 export { KidsSection } from './KidsSection'
 export { SubscriptionsSection } from './SubscriptionsSection'
+export { FeaturesSection } from './FeaturesSection'
 export { TeamSection } from './TeamSection'
 export { GallerySection } from './GallerySection'
 export { LifeSection } from './LifeSection'

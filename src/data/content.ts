@@ -2,7 +2,7 @@ import type { CmsData } from '@/types/cms'
 
 const phone = '+7 (962) 908-05-54'
 const phoneHref = 'tel:+79629080554'
-const address = 'Московская улица, 54, Долгопрудный'
+const address = 'Набережная улица, 25, Долгопрудный, Московская область'
 const email = 'aleksandra.danichek@mail.ru'
 const vk = 'https://vk.com/planetaupacro'
 const telegram = 'https://t.me/planetup_acro'
@@ -39,13 +39,6 @@ export const siteContent: CmsData = {
       bio: 'Тренер-преподаватель по спортивной акробатике, хореографии и современной хореографии. Создала «Планету UP» как место, где взрослые и дети открывают своё тело через радость движения.',
       photoUrl: media('team/img-9617.webp'),
       social: vk,
-    },
-    {
-      id: 'trainer-2',
-      name: 'Команда тренеров Планеты UP',
-      specialization: 'Акробатика, акро-гимнастика, растяжка',
-      bio: 'Педагоги студии работают с детьми и взрослыми, готовят постановки, проводят летние сборы и городские выступления.',
-      photoUrl: media('team/img-9637.webp'),
     },
   ],
 
@@ -90,6 +83,22 @@ export const siteContent: CmsData = {
       conditions: 'Срок действия — 1 месяц. Заморозка до 14 дней.',
       sortOrder: 5,
     },
+    {
+      id: 'individual',
+      name: 'Индивидуальное занятие',
+      price: '2 500 ₽',
+      description: 'Персональная тренировка один на один с тренером. Максимум внимания и прогресса.',
+      conditions: 'Длительность — 60 минут. Запись по договорённости.',
+      sortOrder: 6,
+    },
+    {
+      id: 'split',
+      name: 'Сплит-занятие',
+      price: '4 000 ₽',
+      description: 'Занятие на двоих: тренируйтесь вдвоём с другом или партнёром по выгодной цене.',
+      conditions: 'Длительность — 60 минут. Цена за пару.',
+      sortOrder: 7,
+    },
   ],
 
   groups: [
@@ -115,6 +124,19 @@ export const siteContent: CmsData = {
       description:
         'Комплексная растяжка для гибкости, коррекции осанки и восстановления после рабочей недели.',
       photoUrl: media('adults/img-9846.webp'),
+    },
+    {
+      id: 'adults-pro',
+      name: 'Акробатика для взрослых — профи',
+      category: 'adults',
+      level: 'Продвинутый',
+      schedule: [
+        { day: 'Вт', time: '20:30–22:00' },
+        { day: 'Чт', time: '20:30–22:00' },
+      ],
+      description:
+        'Усложнённые связки, работа в парах, подготовка к выступлениям. Для тех, кто уверенно владеет базой.',
+      photoUrl: media('adults/img-5223.webp'),
     },
     {
       id: 'kids-4-6',

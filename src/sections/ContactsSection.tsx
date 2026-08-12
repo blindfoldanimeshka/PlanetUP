@@ -33,7 +33,7 @@ function LazyYandexMap() {
     <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-sm">
       {loaded ? (
         <iframe
-          src="https://yandex.ru/map-widget/v1/?ll=37.6173%2C55.7558&z=15&l=map"
+          src="https://yandex.ru/map-widget/v1/?ll=37.520518%2C55.963214&z=16&l=map"
           className="absolute inset-0 h-full w-full border-0"
           title="Студия Планета UP на карте Яндекс"
           loading="lazy"

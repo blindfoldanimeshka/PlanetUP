@@ -480,8 +480,8 @@ function SourceField({
 }: React.SelectHTMLAttributes<HTMLSelectElement> & { error?: string; id: string }) {
   return (
     <div className="sm:col-span-1">
-      <label htmlFor={id} className="sr-only">
-        Как вы о нас узнали
+      <label htmlFor={id} className="mb-2 block text-sm text-min-muted">
+        Как Вы о нас узнали?
       </label>
       <select
         id={id}
