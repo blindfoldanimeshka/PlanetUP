@@ -7,6 +7,7 @@ import { HeartIcon } from 'lucide-animated'
 
 export function KidsSection({ cms }: { cms: CmsData }) {
   const kidsGroups = cms.groups.filter((g) => g.category === 'kids')
+  if (kidsGroups.length === 0) return null
 
   return (
     <Section id="kids">

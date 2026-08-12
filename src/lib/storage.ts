@@ -234,4 +234,52 @@ export async function isAdmin(chatId: number): Promise<boolean> {
   return ids.includes(chatId)
 }
 
+/* ---------- Submissions (booking inquiries) ---------- */
+
+const SUBMISSIONS_KEY = 'cms:submissions'
+
+export interface Submission {
+  id: string
+  createdAt: string
+  status?: 'new' | 'processed'
+  payload: Record<string, unknown>
+}
+
+export async function addSubmission(payload: Record<string, unknown>): Promise<Submission> {
+  const sub: Submission = {
+    id: `sub-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    status: 'new',
+    payload,
+  }
+  await redis.lpush(SUBMISSIONS_KEY, sub)
+  return sub
+}
+
+export async function getSubmissions(): Promise<Submission[]> {
+  const raw = await redis.lrange<Submission>(SUBMISSIONS_KEY, 0, -1)
+  return raw ?? []
+}
+
+export async function deleteSubmission(id: string): Promise<void> {
+  const all = await getSubmissions()
+  const next = all.filter((s) => s.id !== id)
+  await redis.del(SUBMISSIONS_KEY)
+  if (next.length > 0) {
+    await redis.lpush(SUBMISSIONS_KEY, ...next)
+  }
+}
+
+export async function updateSubmissionStatus(
+  id: string,
+  status: 'new' | 'processed'
+): Promise<void> {
+  const all = await getSubmissions()
+  const next = all.map((s) => (s.id === id ? { ...s, status } : s))
+  await redis.del(SUBMISSIONS_KEY)
+  if (next.length > 0) {
+    await redis.lpush(SUBMISSIONS_KEY, ...next)
+  }
+}
+
 export { redis }

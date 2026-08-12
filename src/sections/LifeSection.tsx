@@ -121,6 +121,7 @@ function LifePostCard({ post }: { post: LifePost }) {
 }
 
 export function LifeSection({ cms }: { cms: CmsData }) {
+  if (cms.lifePosts.length === 0) return null
   return (
     <Section id="life">
       <SectionHeading id="life" icon={CalendarDaysIcon}>

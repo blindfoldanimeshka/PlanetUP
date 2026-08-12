@@ -8,6 +8,7 @@ import { ChevronDownIcon } from '@/components/icons/chevron-down'
 
 export function FaqSection({ cms }: { cms: CmsData }) {
   const sorted = [...cms.faq].sort((a, b) => a.sortOrder - b.sortOrder)
+  if (sorted.length === 0) return null
 
   return (
     <Section id="faq">

@@ -45,6 +45,8 @@ export function GallerySection({ cms }: { cms: CmsData }) {
     [setFilter]
   )
 
+  if (cms.gallery.length === 0) return null
+
   return (
     <Section id="gallery">
       <SectionHeading id="gallery" icon={SparklesIcon}>

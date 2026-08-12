@@ -40,6 +40,7 @@ function TrainerCard({ trainer }: { trainer: Trainer }) {
 }
 
 export function TeamSection({ cms }: { cms: CmsData }) {
+  if (cms.trainers.length === 0) return null
   return (
     <Section id="team">
       <SectionHeading id="team" icon={UserCheckIcon}>

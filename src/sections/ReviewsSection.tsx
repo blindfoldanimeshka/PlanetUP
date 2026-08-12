@@ -5,6 +5,7 @@ import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { MessageSquareIcon } from 'lucide-animated'
 
 export function ReviewsSection({ cms }: { cms: CmsData }) {
+  if (cms.testimonials.length === 0) return null
   return (
     <Section id="reviews">
       <SectionHeading id="reviews" icon={MessageSquareIcon}>Отзывы</SectionHeading>

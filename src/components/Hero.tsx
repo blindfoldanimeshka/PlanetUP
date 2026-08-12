@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import * as Dialog from '@radix-ui/react-dialog'
 import { svg, animate } from 'animejs'
 import { siteContent } from '@/data/content'
+import type { CmsData } from '@/types/cms'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Starfield } from '@/components/Starfield'
 import { Logo } from '@/components/Logo'
@@ -28,8 +29,12 @@ function ScrollIndicator() {
 /*  Hero — cosmic hyper-minimalism                                     */
 /* ------------------------------------------------------------------ */
 
-export function Hero() {
-  const { title } = siteContent.settings.hero
+export function Hero({ cms }: { cms?: CmsData | null }) {
+  const { title: staticTitle } = siteContent.settings.hero
+  const title = cms?.settings.hero.title ?? staticTitle
+  const subtitle =
+    cms?.settings.hero.subtitle ??
+    'Занятия для взрослых и детей в Долгопрудном. Пробное занятие — бесплатно.'
   const reduced = useReducedMotion()
   const [showForm, setShowForm] = useState(false)
 
@@ -38,6 +43,7 @@ export function Hero() {
 
   useEffect(() => {
     if (reduced) return
+    if (!document.querySelector('.hero-underline')) return
     const [drawable] = svg.createDrawable('.hero-underline')
     animate(drawable, {
       draw: ['0 0', '1 1'],
@@ -60,14 +66,19 @@ export function Hero() {
         className="relative z-10 mx-auto max-w-4xl text-center"
         style={reduced ? undefined : { y: heroY }}
       >
-        {/* Logo mark */}
+        {/* Logo mark — larger */}
         <motion.div
-          className="mb-8 md:mb-10"
+          className="mb-4 md:mb-6"
           initial={reduced ? undefined : { opacity: 0, y: 20 }}
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, ease: 'easeOut' }}
         >
-          <Logo src="/media/logo/logo-white.png" />
+          <Logo
+            src="/media/logo/logo-white.png"
+            size={96}
+            showWordmark={false}
+            className="[&_img]:max-h-none"
+          />
         </motion.div>
 
         {/* Eyebrow */}
@@ -124,7 +135,7 @@ export function Hero() {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, delay: 0.45, ease: 'easeOut' }}
         >
-          Занятия для взрослых и детей в Долгопрудном. Пробное занятие — бесплатно.
+          {subtitle}
         </motion.p>
 
         {/* Booking CTA — opens modal dialog with booking form */}

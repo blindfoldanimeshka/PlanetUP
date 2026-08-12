@@ -7,7 +7,7 @@ import { siteContent } from '@/data/content'
  */
 export async function getCmsData(): Promise<CmsData> {
   try {
-    const res = await fetch('/api/content')
+    const res = await fetch('/api/content', { cache: 'no-store' })
     if (res.ok) {
       return await res.json()
     }

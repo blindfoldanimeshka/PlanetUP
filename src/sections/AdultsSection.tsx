@@ -7,6 +7,7 @@ import { UsersIcon } from 'lucide-animated'
 
 export function AdultsSection({ cms }: { cms: CmsData }) {
   const adultsGroups = cms.groups.filter((g) => g.category === 'adults')
+  if (adultsGroups.length === 0) return null
 
   return (
     <Section id="adults">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import type { CmsData } from '@/types/cms'
 import { getCmsData } from '@/api/cms'
+import { onContentChanged } from '@/lib/cmsSync'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
@@ -44,11 +45,21 @@ export default function App() {
 
   useEffect(() => {
     let mounted = true
-    getCmsData().then((data) => {
-      if (mounted) setCms(data)
-    })
+    const load = () => {
+      getCmsData().then((data) => {
+        if (mounted) setCms(data)
+      })
+    }
+    load()
+    const unsubscribe = onContentChanged(load)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       mounted = false
+      unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [])
 
@@ -78,7 +89,7 @@ export default function App() {
       <main id="main-content" className="relative">
         <PageBackground />
         <ErrorBoundary>
-          <Hero />
+          <Hero cms={cms} />
           <MainSections cms={cms} />
         </ErrorBoundary>
       </main>

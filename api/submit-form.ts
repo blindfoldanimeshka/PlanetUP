@@ -5,6 +5,7 @@ import {
   type BookingFormData,
 } from '../src/lib/validation.js'
 import { escapeHtml } from '../src/lib/escapeHtml.js'
+import { addSubmission } from '../src/lib/storage.js'
 
 /* ------------------------------------------------------------------ */
 /*  Rate limiting — in-memory Map (resets on cold start).             */
@@ -332,6 +333,13 @@ export default async function handler(
         err instanceof Error ? err.message : err
       )
     }
+  }
+
+  // Persist submission for the admin panel (non-fatal if storage fails)
+  try {
+    await addSubmission(data as unknown as Record<string, unknown>)
+  } catch (err) {
+    console.error('Failed to persist submission:', err instanceof Error ? err.message : err)
   }
 
   return res.status(200).json({ success: true })

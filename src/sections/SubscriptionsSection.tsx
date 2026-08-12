@@ -37,6 +37,7 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
 
 export function SubscriptionsSection({ cms }: { cms: CmsData }) {
   const sorted = [...cms.subscriptions].sort((a, b) => a.sortOrder - b.sortOrder)
+  if (sorted.length === 0) return null
 
   return (
     <Section id="subscriptions">
