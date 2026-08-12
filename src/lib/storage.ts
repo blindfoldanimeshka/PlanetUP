@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis'
-import type { CmsData, GalleryItem, Group, Subscription, Trainer, LifePost, Testimonial } from '@/types/cms.ts'
+import type { CmsData, GalleryItem, Group, Subscription, Trainer, LifePost, Testimonial } from '../types/cms.js'
 
 /* ------------------------------------------------------------------ */
 /*  Redis connection (lazy)                                             */
