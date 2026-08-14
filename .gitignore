@@ -40,3 +40,6 @@ qa-*.png
 *.traineddata
 .scratch/
 .opencode/skills/**/__pycache__/
+
+.vercel
+.env*
