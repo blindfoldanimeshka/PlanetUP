@@ -1,18 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { getContent, setContent } from '../src/lib/storage.js'
 import type { CmsData } from '../src/types/cms.js'
-
-/**
- * Admin write token. Must match the client gate password
- * (VITE_ADMIN_PASSWORD) so the admin UI can authenticate its saves.
- */
-const ADMIN_TOKEN = process.env.ADMIN_API_TOKEN ?? 'changeme-admin-token'
+import { hasValidAdminSession } from '../src/lib/adminAuth.js'
 
 /**
  * Public API — returns the full CMS content from Redis.
  * Frontend fetches this on load so admin edits via Telegram are reflected live.
  *
- * PUT — admin write. Requires `x-admin-token` header === ADMIN_TOKEN.
+ * PUT — admin write. Requires a valid HttpOnly admin session cookie
+ * (issued by POST /api/admin/session) plus a matching `x-csrf-token` header.
  * Body is the full CmsData blob; it is persisted via setContent().
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -27,8 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PUT') {
-      const token = req.headers['x-admin-token']
-      if (token !== ADMIN_TOKEN) {
+      if (!hasValidAdminSession(req.headers.cookie, req.headers['x-csrf-token'])) {
         return res.status(401).json({ error: 'Unauthorized' })
       }
       const data = req.body as CmsData
