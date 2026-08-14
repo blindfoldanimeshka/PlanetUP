@@ -11,13 +11,12 @@ export function Card({ children, className, ...props }: CardProps) {
     <div
       className={cn(
         'rounded-2xl h-full bg-white/8 backdrop-blur-md border border-white/15',
+        !hasPaddingOverride && 'p-6',
         className
       )}
       {...props}
     >
-      <div className={cn('h-full', !hasPaddingOverride && 'p-6')}>
-        {children}
-      </div>
+      {children}
     </div>
   )
 }

@@ -23,7 +23,7 @@ export function GroupCard({ group }: { group: Group }) {
         <Button
           variant="primary"
           size="sm"
-          className="mt-4 self-stretch"
+          className="mt-auto self-stretch"
           onClick={scrollToHero}
         >
           Записаться
