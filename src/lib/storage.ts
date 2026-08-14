@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+import { createHash } from 'node:crypto'
 import type { CmsData, GalleryItem, Group, Subscription, Trainer, LifePost, Testimonial } from '../types/cms.js'
 
 /* ------------------------------------------------------------------ */
@@ -237,6 +238,7 @@ export async function isAdmin(chatId: number): Promise<boolean> {
 /* ---------- Submissions (booking inquiries) ---------- */
 
 const SUBMISSIONS_KEY = 'cms:submissions'
+const BOOKING_RATE_LIMIT_SECONDS = 60
 
 export interface Submission {
   id: string
@@ -254,6 +256,16 @@ export async function addSubmission(payload: Record<string, unknown>): Promise<S
   }
   await redis.lpush(SUBMISSIONS_KEY, sub)
   return sub
+}
+
+/** Atomically reserves one booking-form submission per client per minute. */
+export async function claimSubmissionRateLimit(clientIp: string): Promise<boolean> {
+  const key = createHash('sha256').update(clientIp).digest('hex')
+  const result = await redis.set(`rate:booking:${key}`, '1', {
+    nx: true,
+    ex: BOOKING_RATE_LIMIT_SECONDS,
+  })
+  return result === 'OK'
 }
 
 export async function getSubmissions(): Promise<Submission[]> {

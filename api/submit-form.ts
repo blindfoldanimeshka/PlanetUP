@@ -5,27 +5,12 @@ import {
   type BookingFormData,
 } from '../src/lib/validation.js'
 import { escapeHtml } from '../src/lib/escapeHtml.js'
-import { addSubmission } from '../src/lib/storage.js'
+import { addSubmission, claimSubmissionRateLimit } from '../src/lib/storage.js'
 
 /* ------------------------------------------------------------------ */
-/*  Rate limiting — in-memory Map (resets on cold start).             */
-/*  TODO: Replace with Vercel KV / Upstash Redis for production.      */
+/*  Rate limiting — shared Upstash Redis (atomic SET NX EX).          */
+/*  Survives cold starts and scales across serverless instances.      */
 /* ------------------------------------------------------------------ */
-const rateLimitMap = new Map<string, number>()
-const RATE_LIMIT_WINDOW = 60000 // 1 minute
-const CLEANUP_INTERVAL = 300000 // 5 minutes
-
-function cleanupOldEntries() {
-  const now = Date.now()
-  for (const [ip, last] of rateLimitMap.entries()) {
-    if (now - last > RATE_LIMIT_WINDOW) {
-      rateLimitMap.delete(ip)
-    }
-  }
-}
-
-setInterval(cleanupOldEntries, CLEANUP_INTERVAL)
-
 const sourceLabels: Record<string, string> = {
   vk: 'ВКонтакте',
   instagram: 'Instagram',
@@ -268,15 +253,18 @@ export default async function handler(
   }
 
   // Rate limit: max 1 per minute per IP
-  const now = Date.now()
-  const last = rateLimitMap.get(ipStr)
-  if (last && now - last < RATE_LIMIT_WINDOW) {
+  let allowed: boolean
+  try {
+    allowed = await claimSubmissionRateLimit(ipStr)
+  } catch (err) {
+    console.error('Booking rate limit unavailable:', err instanceof Error ? err.message : err)
+    return res.status(503).json({ error: 'Service temporarily unavailable' })
+  }
+  if (!allowed) {
     return res.status(429).json({
       error: 'Слишком много заявок. Подождите минуту.',
     })
   }
-  rateLimitMap.set(ipStr, now)
-
   // Validate body
   const parseResult = bookingSchema.safeParse(req.body)
   if (!parseResult.success) {

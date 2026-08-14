@@ -1,4 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+const { storageMocks } = vi.hoisted(() => ({
+  storageMocks: {
+    addSubmission: vi.fn(),
+    claimSubmissionRateLimit: vi.fn(),
+  },
+}))
+
+vi.mock('../src/lib/storage.js', () => ({
+  addSubmission: storageMocks.addSubmission,
+  claimSubmissionRateLimit: storageMocks.claimSubmissionRateLimit,
+}))
+
 import handler from '../api/submit-form.js'
 
 const validChildPayload = {
@@ -44,6 +57,10 @@ describe('submit-form handler', () => {
     vi.stubEnv('TELEGRAM_CHAT_ID', '12345')
     vi.stubEnv('RESEND_API_KEY', 'resend-key')
     vi.stubEnv('NOTIFICATION_EMAIL', 'admin@example.com')
+    storageMocks.addSubmission.mockReset()
+    storageMocks.addSubmission.mockResolvedValue(undefined)
+    storageMocks.claimSubmissionRateLimit.mockReset()
+    storageMocks.claimSubmissionRateLimit.mockResolvedValue(true)
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({ ok: true, text: () => Promise.resolve('{"ok":true}') } as Response)
     )
@@ -138,10 +155,20 @@ describe('submit-form handler', () => {
   })
 
   it('rate limits repeated submissions from the same IP', async () => {
+    storageMocks.claimSubmissionRateLimit.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
     const res1 = mockRes()
     const res2 = mockRes()
     await handler(mockReq(validChildPayload, '10.0.0.5') as any, res1 as any)
     await handler(mockReq(validChildPayload, '10.0.0.5') as any, res2 as any)
     expect(res2.status).toHaveBeenCalledWith(429)
+  })
+
+  it('does not send notifications when the shared rate limiter rejects a submission', async () => {
+    storageMocks.claimSubmissionRateLimit.mockResolvedValue(false)
+    const res = mockRes()
+    await handler(mockReq(validChildPayload, '10.0.0.8') as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(429)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 })
