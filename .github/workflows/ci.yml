@@ -32,6 +32,9 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
 
+      - name: Guard — no browser-exposed (VITE_) secrets
+        run: npm run check:secrets
+
       - name: Lint
         run: npm run lint
 
