@@ -156,6 +156,12 @@ NOTIFICATION_EMAIL=admin@example.com
 # Upstash Redis (обязательно для бота + контента)
 UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
 UPSTASH_REDIS_REST_TOKEN=твой_токен
+
+# Admin-панель (/admin) — ТОЛЬКО сервер, высокая энтропия (16+ символов).
+# Не используйте префикс VITE_ — эти значения не должны попадать в браузер.
+ADMIN_PASSWORD=надёжный_пароль_админа
+ADMIN_SESSION_SECRET=случайный_секрет_для_подписи_сессий
+TELEGRAM_WEBHOOK_SECRET=случайный_секрет_для_заголовка_вебхука
 ```
 
 ### Где взять значения
