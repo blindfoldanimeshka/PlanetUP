@@ -364,13 +364,9 @@ function ImageDropzone({
       </label>
 
       {hasImage ? (
-        <div className="mt-1 flex items-start gap-3">
-          <img
-            src={value}
-            alt={label}
-            className="h-28 w-28 rounded-md border border-min-border object-cover"
-          />
-          <div className="flex flex-col gap-2">
+        <div className="group relative mt-1 w-fit overflow-hidden rounded-xl border border-min-border">
+          <img src={value} alt={label} className="h-44 w-44 max-w-full bg-min-surface object-cover" />
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
             <Button variant="secondary" size="sm" onClick={() => inputRef.current?.click()}>
               Заменить
             </Button>
@@ -397,12 +393,17 @@ function ImageDropzone({
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
-          className={`mt-1 flex h-32 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-3 text-center transition-colors ${
-            dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60'
+          className={`mt-1 flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
+            dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60 hover:bg-white/[0.02]'
           }`}
         >
-          <span className="text-sm text-min-muted">Перетащите фото сюда</span>
-          <span className="text-xs text-min-muted">или нажмите для выбора (до 6 МБ)</span>
+          <svg className="h-8 w-8 text-min-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 16V4" />
+            <path d="m7 9 5-5 5 5" />
+            <path d="M5 16v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1" />
+          </svg>
+          <span className="text-sm font-medium text-min-text">Перетащите изображение сюда</span>
+          <span className="text-xs text-min-muted">или нажмите для выбора · JPG/PNG, до 6 МБ</span>
         </div>
       )}
 
@@ -476,12 +477,17 @@ function ImageListDropzone({
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`mt-1 flex h-24 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-3 text-center transition-colors ${
-          dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60'
+        className={`mt-1 flex h-28 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
+          dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60 hover:bg-white/[0.02]'
         }`}
       >
-        <span className="text-sm text-min-muted">Перетащите фотографии сюда</span>
-        <span className="text-xs text-min-muted">или нажмите для выбора</span>
+        <svg className="h-7 w-7 text-min-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="9" cy="9" r="2" />
+          <path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L4 21" />
+        </svg>
+        <span className="text-sm font-medium text-min-text">Добавить фотографии</span>
+        <span className="text-xs text-min-muted">перетащите сюда или нажмите · можно несколько</span>
       </div>
       <input
         ref={inputRef}
@@ -498,17 +504,17 @@ function ImageListDropzone({
       {value.length > 0 && (
         <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {value.map((src, i) => (
-            <div key={i} className="relative">
+            <div key={i} className="group relative overflow-hidden rounded-md border border-min-border">
               <img
                 src={src}
                 alt={`${label} ${i + 1}`}
-                className="h-20 w-full rounded-md border border-min-border object-cover"
+                className="h-20 w-full object-cover"
               />
               <button
                 type="button"
                 aria-label="Удалить фото"
                 onClick={() => removeOne(i)}
-                className="absolute -right-1 -top-1 rounded-full bg-min-error px-1.5 text-xs text-white"
+                className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 ✕
               </button>
@@ -631,6 +637,109 @@ function FieldEditor({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Collapsible CRUD item (accordion) — reduces admin overload         */
+/* ------------------------------------------------------------------ */
+
+function CrudItem({
+  def,
+  item,
+  errorMap,
+  index,
+  total,
+  onUpdate,
+  onRemove,
+  onDuplicate,
+  onMove,
+}: {
+  def: SectionDef
+  item: Record<string, unknown>
+  errorMap: Record<string, string>
+  index: number
+  total: number
+  onUpdate: (patch: Record<string, unknown>) => void
+  onRemove: () => void
+  onDuplicate: () => void
+  onMove: (dir: -1 | 1) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const invalid = Object.keys(errorMap).length > 0
+  const title = itemTitle(item)
+
+  const imgField = def.fields.find((f) => f.kind === 'image')
+  const listField = def.fields.find((f) => f.kind === 'imagelist')
+  let thumb = ''
+  if (imgField && typeof item[imgField.key] === 'string' && (item[imgField.key] as string).trim() !== '') {
+    thumb = item[imgField.key] as string
+  } else if (
+    listField &&
+    Array.isArray(item[listField.key]) &&
+    (item[listField.key] as string[]).length > 0
+  ) {
+    thumb = (item[listField.key] as string[])[0]
+  }
+
+  return (
+    <div
+      className={`overflow-hidden rounded-lg border ${invalid ? 'border-min-error' : 'border-min-border'} bg-min-surface/40`}
+    >
+      <div className="flex items-center gap-3 p-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          {thumb ? (
+            <img src={thumb} alt="" className="h-11 w-11 shrink-0 rounded-md object-cover" />
+          ) : (
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-white/5 text-xs text-min-muted">
+              #{index + 1}
+            </span>
+          )}
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-medium text-min-text">
+              {title || `Запись #${index + 1}`}
+            </span>
+            <span className="block text-xs text-min-muted">
+              {invalid ? '⚠ не заполнено' : `${def.fields.length} полей`} ·{' '}
+              {open ? 'свернуть' : 'развернуть'}
+            </span>
+          </span>
+        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Переместить вверх">
+            ↑
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Переместить вниз">
+            ↓
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onDuplicate}>
+            Дублировать
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onRemove}>
+            Удалить
+          </Button>
+        </div>
+      </div>
+      {open && (
+        <div className="border-t border-min-border p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {def.fields.map((f) => (
+              <FieldEditor
+                key={f.key}
+                field={f}
+                value={item[f.key]}
+                error={errorMap[f.key]}
+                onChange={(v) => onUpdate({ [f.key]: v })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Section editor (generic CRUD list)                                 */
 /* ------------------------------------------------------------------ */
 
@@ -684,56 +793,21 @@ function CrudList({
       {items.length === 0 ? (
         <p className="text-sm text-min-muted">Пока нет записей.</p>
       ) : (
-        <div className="space-y-4">
-          {items.map((it, idx) => {
-            const invalid = Object.keys(errors[idx]).length > 0
-            const title = itemTitle(it)
-            return (
-            <div key={String(it.id ?? idx)} className={`rounded-lg border p-4 ${invalid ? 'border-min-error' : 'border-min-border'}`}>
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-sm text-min-muted">
-                  #{idx + 1}{title ? ` · ${title}` : ''}
-                </span>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => move(idx, -1)}
-                    disabled={idx === 0}
-                    aria-label="Переместить вверх"
-                  >
-                    ↑
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => move(idx, 1)}
-                    disabled={idx === items.length - 1}
-                    aria-label="Переместить вниз"
-                  >
-                    ↓
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => duplicate(idx)}>
-                    Дублировать
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => remove(idx)}>
-                    Удалить
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {def.fields.map((f) => (
-                  <FieldEditor
-                    key={f.key}
-                    field={f}
-                    value={it[f.key]}
-                    error={errors[idx][f.key]}
-                    onChange={(v) => update(idx, { [f.key]: v })}
-                  />
-                ))}
-              </div>
-            </div>
-          )})}
+        <div className="space-y-3">
+          {items.map((it, idx) => (
+            <CrudItem
+              key={String(it.id ?? idx)}
+              def={def}
+              item={it}
+              errorMap={errors[idx]}
+              index={idx}
+              total={items.length}
+              onUpdate={(patch) => update(idx, patch)}
+              onRemove={() => remove(idx)}
+              onDuplicate={() => duplicate(idx)}
+              onMove={(dir) => move(idx, dir)}
+            />
+          ))}
         </div>
       )}
     </Card>
