@@ -23,7 +23,7 @@ One **Medium** item remains open: no HTTP security-header policy is configured i
 | SEC-002 | Fail-open default admin token | ✅ Resolved |
 | SEC-003 | Telegram webhook unauthenticated | ✅ Resolved |
 | SEC-004 | Rate limit unreliable on serverless | ✅ Resolved |
-| SEC-005 | No HTTP security-header policy | ⚠️ Open (recommended follow-up) |
+| SEC-005 | No HTTP security-header policy | ✅ Resolved |
 | SEC-006 | Production dependency advisories | ✅ Resolved |
 
 ## Resolved findings
@@ -58,14 +58,17 @@ One **Medium** item remains open: no HTTP security-header policy is configured i
 - Scoped `overrides` close the `@vercel/node` build-time advisories (`js-yaml`, `minimatch`,
   `smol-toml`, `ajv`, `path-to-regexp`) without downgrading majors. Result: `npm audit` → 0.
 
-## Open finding
+## Resolved finding
 
-### SEC-005 — HTTP security-header policy (recommended follow-up)
-`vercel.json` only declares the SPA rewrite; no CSP, `X-Frame-Options`/`frame-ancestors`,
-`X-Content-Type-Options`, `Referrer-Policy`, or `Permissions-Policy` is set. The page loads
-Yandex Metrika, so any CSP must permit its origins. Recommended: add response headers in `vercel.json`
-(start with `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, strict referrer policy),
-test against the app + Metrika, then verify on the deployed domain.
+### SEC-005 — HTTP security-header policy
+Added to `vercel.json` (applied to all routes via the `/` source): `Content-Security-Policy`
+(`default-src 'self'`; `script-src`/`style-src` allow `https://mc.yandex.ru` + `'unsafe-inline'`
+for Yandex Metrika's inline init and framer-motion's inline styles), `X-Content-Type-Options: nosniff`,
+`X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and a restrictive
+`Permissions-Policy` (camera/microphone/geolocation/payment/usb/interest-cohort disabled).
+`frame-ancestors 'none'` is set in CSP. Trade-off: `'unsafe-inline'` is required because the site is
+static (no per-request nonce) and Metrika injects an inline init script; a nonce-based strict-CSP
+would need a server-rendered HTML shell. Verified live on the deployed domain.
 
 ## Required environment variables (server-only, Vercel)
 
