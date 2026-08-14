@@ -88,7 +88,13 @@ export function localApiPlugin(): Plugin {
     apply: 'serve',
     configureServer(server) {
       loadEnvLocal(server)
-      const routes = ['/api/submit-form', '/api/tg/webhook', '/api/content']
+      const routes = [
+        '/api/submit-form',
+        '/api/tg/webhook',
+        '/api/content',
+        '/api/submissions',
+        '/api/admin/session',
+      ]
       for (const route of routes) {
         server.middlewares.use(route, (req, res) =>
           handleApiRoute(server, route, req, res)
