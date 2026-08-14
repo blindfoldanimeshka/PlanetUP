@@ -27,12 +27,17 @@ function loadEnv() {
 loadEnv()
 
 const token = process.env.TELEGRAM_BOT_TOKEN
+const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET
 const argUrl = process.argv[2]
 
 // Derive Vercel URL from env or use provided arg
 const baseUrl = argUrl || process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL
 if (!token) {
   console.error('Missing TELEGRAM_BOT_TOKEN in .env.local')
+  process.exit(1)
+}
+if (!webhookSecret || webhookSecret.length < 16) {
+  console.error('Missing or weak TELEGRAM_WEBHOOK_SECRET in .env.local')
   process.exit(1)
 }
 if (!baseUrl) {
@@ -46,7 +51,7 @@ async function setWebhook() {
   const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url: webhookUrl, drop_pending_updates: true }),
+    body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, drop_pending_updates: true }),
   })
   const body = await res.json()
   console.log('setWebhook response:', JSON.stringify(body, null, 2))

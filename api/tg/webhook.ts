@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { timingSafeEqual } from 'node:crypto'
 
 /**
  * Telegram Bot webhook handler.
@@ -21,6 +22,14 @@ import {
 import { handleCommand, handleCallback } from './bot.js'
 
 const TELEGRAM_API = (token: string) => `https://api.telegram.org/bot${token}`
+
+function matchesWebhookSecret(received: string | string[] | undefined, expected: string): boolean {
+  const value = Array.isArray(received) ? received[0] : received
+  if (!value) return false
+  const left = Buffer.from(value)
+  const right = Buffer.from(expected)
+  return left.length === right.length && timingSafeEqual(left, right)
+}
 
 async function tgFetch(token: string, method: string, body: Record<string, unknown>) {
   const res = await fetch(TELEGRAM_API(token) + `/${method}`, {
@@ -48,6 +57,11 @@ export async function sendMessage(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET
+  if (!webhookSecret || !matchesWebhookSecret(req.headers?.['x-telegram-bot-api-secret-token'], webhookSecret)) {
+    return res.status(401).json({ error: 'Unauthorized' })
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN
