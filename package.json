@@ -31,7 +31,18 @@
   },
   "overrides": {
     "undici": "^6.28.0",
-    "fast-uri": "^3.1.5"
+    "fast-uri": "^3.1.5",
+    "@vercel/python-analysis": {
+      "js-yaml": "4.3.1",
+      "minimatch": "10.2.6",
+      "smol-toml": "1.8.0"
+    },
+    "@vercel/static-config": {
+      "ajv": "8.20.0"
+    },
+    "@vercel/node": {
+      "path-to-regexp": "6.3.0"
+    }
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
