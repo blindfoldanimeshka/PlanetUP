@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from 'react'
 import type {
   CmsData,
   SiteSettings,
@@ -11,9 +11,73 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Helmet } from 'react-helmet-async'
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? ''
+const ADMIN_CSRF_STORAGE_KEY = 'planetup_admin_csrf'
+
+function adminHeaders(contentType = false): HeadersInit {
+  const csrfToken = typeof sessionStorage === 'undefined'
+    ? ''
+    : sessionStorage.getItem(ADMIN_CSRF_STORAGE_KEY) ?? ''
+  return {
+    ...(contentType ? { 'content-type': 'application/json' } : {}),
+    'x-csrf-token': csrfToken,
+  }
+}
 
 const DAYS: DayOfWeek[] = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+
+/* ------------------------------------------------------------------ */
+/*  Image upload (drag&drop → resized data URL)                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Reads an image file, downscales it to `maxDim` on the longest side and
+ * re-encodes it as a data URL so it can be stored directly in the CMS JSON
+ * (no separate upload backend required). Falls back to JPEG when the browser
+ * can't encode WebP.
+ */
+async function resizeImageToDataUrl(file: File, maxDim = 1280, quality = 0.82): Promise<string> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Можно загружать только изображения')
+  }
+  if (file.size > 6 * 1024 * 1024) {
+    throw new Error('Файл слишком большой (максимум 6 МБ)')
+  }
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'))
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('Не удалось загрузить изображение'))
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+        const w = Math.max(1, Math.round(img.width * scale))
+        const h = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('Canvas недоступен'))
+          return
+        }
+        ctx.drawImage(img, 0, 0, w, h)
+        const webp = canvas.toDataURL('image/webp', quality)
+        resolve(webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', quality))
+      }
+      img.src = reader.result as string
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+/** Friendly display name for a CRUD item — never the internal id. */
+function itemTitle(it: Record<string, unknown>): string {
+  for (const k of ['name', 'title', 'question', 'specialization'] as const) {
+    const v = it[k]
+    if (typeof v === 'string' && v.trim() !== '') return v.trim()
+  }
+  return ''
+}
 
 /* ------------------------------------------------------------------ */
 /*  Field config — drives the generic CRUD editors                    */
@@ -26,7 +90,8 @@ type FieldKind =
   | 'url'
   | 'select'
   | 'schedule'
-  | 'urllist'
+  | 'imagelist'
+  | 'image'
 
 interface FieldDef {
   key: string
@@ -37,8 +102,6 @@ interface FieldDef {
   optionLabels?: Record<string, string>
   required?: boolean
   placeholder?: string
-  /** Render a small image thumbnail under the URL input. */
-  preview?: boolean
 }
 
 type ArraySectionKey =
@@ -66,7 +129,7 @@ const SECTIONS: SectionDef[] = [
       { key: 'name', label: 'Имя', kind: 'text', required: true },
       { key: 'specialization', label: 'Роль / специализация', kind: 'text', required: true },
       { key: 'bio', label: 'Описание', kind: 'textarea' },
-      { key: 'photoUrl', label: 'Фото', kind: 'url', required: true, placeholder: 'Ссылка на изображение', preview: true },
+      { key: 'photoUrl', label: 'Фото', kind: 'image', required: true },
       { key: 'social', label: 'Ссылка на соцсеть', kind: 'url', placeholder: 'https://vk.com/...' },
     ],
   },
@@ -99,7 +162,7 @@ const SECTIONS: SectionDef[] = [
       { key: 'category', label: 'Категория', kind: 'select', options: ['adults', 'kids'], optionLabels: { adults: 'Взрослые', kids: 'Дети' }, required: true },
       { key: 'level', label: 'Уровень', kind: 'text', required: true },
       { key: 'description', label: 'Описание', kind: 'textarea', required: true },
-      { key: 'photoUrl', label: 'Фото', kind: 'url', required: true, placeholder: 'Ссылка на изображение', preview: true },
+      { key: 'photoUrl', label: 'Фото', kind: 'image', required: true },
       { key: 'schedule', label: 'Расписание', kind: 'schedule' },
     ],
   },
@@ -120,7 +183,7 @@ const SECTIONS: SectionDef[] = [
     fields: [
       { key: 'name', label: 'Имя', kind: 'text', required: true },
       { key: 'text', label: 'Текст отзыва', kind: 'textarea', required: true },
-      { key: 'photoUrl', label: 'Фото', kind: 'url', placeholder: 'Ссылка на изображение', preview: true },
+      { key: 'photoUrl', label: 'Фото', kind: 'image' },
     ],
   },
   {
@@ -138,8 +201,8 @@ const SECTIONS: SectionDef[] = [
       { key: 'title', label: 'Заголовок', kind: 'text', required: true },
       { key: 'text', label: 'Текст', kind: 'textarea', required: true },
       { key: 'date', label: 'Дата', kind: 'text', required: true, placeholder: 'ГГГГ-ММ-ДД, напр. 2026-07-04' },
-      { key: 'coverPhotoUrl', label: 'Обложка', kind: 'url', required: true, placeholder: 'Ссылка на изображение', preview: true },
-      { key: 'albumPhotoUrls', label: 'Фотографии альбома', kind: 'urllist' },
+      { key: 'coverPhotoUrl', label: 'Обложка', kind: 'image', required: true },
+      { key: 'albumPhotoUrls', label: 'Фотографии альбома', kind: 'imagelist' },
     ],
   },
   {
@@ -147,7 +210,7 @@ const SECTIONS: SectionDef[] = [
     title: 'Галерея',
     blank: () => ({ id: `new-${Date.now()}`, photoUrl: '', category: 'adults', sortOrder: 0 }),
     fields: [
-      { key: 'photoUrl', label: 'Фото', kind: 'url', required: true, placeholder: 'Ссылка на изображение', preview: true },
+      { key: 'photoUrl', label: 'Фото', kind: 'image', required: true },
       { key: 'category', label: 'Категория', kind: 'select', options: ['adults', 'kids', 'competitions'], optionLabels: { adults: 'Взрослые', kids: 'Дети', competitions: 'Соревнования' }, required: true },
       { key: 'sortOrder', label: 'Порядок показа', kind: 'number', required: true },
     ],
@@ -175,6 +238,7 @@ function validateItem(fields: FieldDef[], item: Record<string, unknown>): Record
         v === undefined ||
         v === null ||
         (typeof v === 'string' && v.trim() === '') ||
+        (Array.isArray(v) && v.length === 0) ||
         (f.kind === 'number' && (v === '' || isNaN(Number(v))))
       if (empty) errs[f.key] = 'Обязательно'
     }
@@ -186,6 +250,13 @@ function validateItem(fields: FieldDef[], item: Record<string, unknown>): Record
     ) {
       errs[f.key] = 'URL должен начинаться с http(s):// или /'
     }
+    if (
+      f.kind === 'imagelist' &&
+      Array.isArray(v) &&
+      v.some((x) => typeof x !== 'string' || (x as string).trim() === '')
+    ) {
+      errs[f.key] = 'Заполните все фотографии'
+    }
   }
   return errs
 }
@@ -193,20 +264,6 @@ function validateItem(fields: FieldDef[], item: Record<string, unknown>): Record
 /* ------------------------------------------------------------------ */
 /*  Field renderers                                                    */
 /* ------------------------------------------------------------------ */
-
-function ImagePreview({ url }: { url: string }) {
-  if (!url || !/^(https?:\/\/|\/)/.test(url.trim())) return null
-  return (
-    <img
-      src={url}
-      alt=""
-      className="mt-2 h-20 w-20 rounded-md border border-min-border object-cover"
-      onError={(e) => {
-        ;(e.currentTarget as HTMLImageElement).style.display = 'none'
-      }}
-    />
-  )
-}
 
 function ScheduleEditor({
   value,
@@ -263,41 +320,205 @@ function ScheduleEditor({
   )
 }
 
-function UrlListEditor({
+function ImageDropzone({
+  value,
+  onChange,
+  required,
+  label,
+  error,
+}: {
+  value: string
+  onChange: (v: string) => void
+  required?: boolean
+  label: string
+  error?: string
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragging, setDragging] = useState(false)
+  const [localError, setLocalError] = useState('')
+
+  const handleFiles = async (files: FileList | null) => {
+    const file = files?.[0]
+    if (!file) return
+    setLocalError('')
+    try {
+      onChange(await resizeImageToDataUrl(file, 1600))
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Не удалось загрузить файл')
+    }
+  }
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setDragging(false)
+    void handleFiles(e.dataTransfer.files)
+  }
+
+  const hasImage = typeof value === 'string' && value.trim() !== ''
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-min-muted">
+        {label}
+        {required && <span className="text-min-accent"> *</span>}
+      </label>
+
+      {hasImage ? (
+        <div className="mt-1 flex items-start gap-3">
+          <img
+            src={value}
+            alt={label}
+            className="h-28 w-28 rounded-md border border-min-border object-cover"
+          />
+          <div className="flex flex-col gap-2">
+            <Button variant="secondary" size="sm" onClick={() => inputRef.current?.click()}>
+              Заменить
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onChange('')}>
+              Удалить
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={`Загрузить изображение: ${label}`}
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              inputRef.current?.click()
+            }
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragging(true)
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className={`mt-1 flex h-32 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-3 text-center transition-colors ${
+            dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60'
+          }`}
+        >
+          <span className="text-sm text-min-muted">Перетащите фото сюда</span>
+          <span className="text-xs text-min-muted">или нажмите для выбора (до 6 МБ)</span>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          void handleFiles(e.target.files)
+          e.target.value = ''
+        }}
+      />
+      {localError && <p className="mt-1 text-xs text-min-error">{localError}</p>}
+      {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
+    </div>
+  )
+}
+
+function ImageListDropzone({
   value,
   onChange,
   label,
+  error,
 }: {
   value: string[]
   onChange: (v: string[]) => void
   label: string
+  error?: string
 }) {
-  const update = (i: number, v: string) => onChange(value.map((x, idx) => (idx === i ? v : x)))
-  const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i))
-  const add = () => onChange([...value, ''])
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragging, setDragging] = useState(false)
+  const [localError, setLocalError] = useState('')
+
+  const addFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setLocalError('')
+    try {
+      const added = await Promise.all(Array.from(files).map((f) => resizeImageToDataUrl(f, 1600)))
+      onChange([...value, ...added])
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Не удалось загрузить файл')
+    }
+  }
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setDragging(false)
+    void addFiles(e.dataTransfer.files)
+  }
+
+  const removeOne = (i: number) => onChange(value.filter((_, idx) => idx !== i))
 
   return (
     <div>
       <label className="block text-sm font-medium text-min-muted">{label}</label>
-      <div className="mt-1 space-y-2">
-        {value.map((u, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
-              type="url"
-              className="flex-1 rounded-md border border-min-border bg-min-surface p-2 text-min-text"
-              value={u}
-              placeholder="/media/..."
-              onChange={(e) => update(i, e.target.value)}
-            />
-            <Button variant="ghost" size="sm" onClick={() => remove(i)} aria-label="Удалить URL">
-              ✕
-            </Button>
-          </div>
-        ))}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={`Загрузить фотографии: ${label}`}
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            inputRef.current?.click()
+          }
+        }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragging(true)
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        className={`mt-1 flex h-24 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-3 text-center transition-colors ${
+          dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60'
+        }`}
+      >
+        <span className="text-sm text-min-muted">Перетащите фотографии сюда</span>
+        <span className="text-xs text-min-muted">или нажмите для выбора</span>
       </div>
-      <Button variant="secondary" size="sm" className="mt-2" onClick={add}>
-        + URL
-      </Button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          void addFiles(e.target.files)
+          e.target.value = ''
+        }}
+      />
+
+      {value.length > 0 && (
+        <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {value.map((src, i) => (
+            <div key={i} className="relative">
+              <img
+                src={src}
+                alt={`${label} ${i + 1}`}
+                className="h-20 w-full rounded-md border border-min-border object-cover"
+              />
+              <button
+                type="button"
+                aria-label="Удалить фото"
+                onClick={() => removeOne(i)}
+                className="absolute -right-1 -top-1 rounded-full bg-min-error px-1.5 text-xs text-white"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {localError && <p className="mt-1 text-xs text-min-error">{localError}</p>}
+      {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
     </div>
   )
 }
@@ -330,9 +551,26 @@ function FieldEditor({
     )
   }
 
-  if (field.kind === 'urllist') {
+  if (field.kind === 'image') {
     return (
-      <UrlListEditor value={(value as string[]) ?? []} onChange={onChange} label={field.label} />
+      <ImageDropzone
+        value={String(value ?? '')}
+        onChange={onChange}
+        required={field.required}
+        label={field.label}
+        error={error}
+      />
+    )
+  }
+
+  if (field.kind === 'imagelist') {
+    return (
+      <ImageListDropzone
+        value={(value as string[]) ?? []}
+        onChange={onChange}
+        label={field.label}
+        error={error}
+      />
     )
   }
 
@@ -387,7 +625,6 @@ function FieldEditor({
         placeholder={field.placeholder}
         onChange={(e) => onChange(field.kind === 'number' ? Number(e.target.value) : e.target.value)}
       />
-      {field.preview && <ImagePreview url={strValue} />}
       {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
     </div>
   )
@@ -412,7 +649,7 @@ function CrudList({
   const update = (idx: number, patch: Record<string, unknown>) =>
     onChange(items.map((it, i) => (i === idx ? { ...it, ...patch } : it)))
   const remove = (idx: number) => {
-    const label = String(items[idx].id ?? `#${idx + 1}`)
+    const label = itemTitle(items[idx]) || `#${idx + 1}`
     if (confirm(`Удалить запись «${label}»?`)) onChange(items.filter((_, i) => i !== idx))
   }
   const duplicate = (idx: number) => {
@@ -435,7 +672,9 @@ function CrudList({
       <div className="mb-4 flex items-center justify-between gap-2">
         <h2 className="text-xl font-semibold text-min-text">
           {def.title}
-          {hasErrors && <span className="ml-2 align-middle text-xs text-min-error">есть ошибки</span>}
+          {hasErrors && (
+            <span className="ml-2 align-middle text-xs text-min-error">есть незаполненные поля</span>
+          )}
         </h2>
         <Button variant="secondary" size="sm" onClick={add}>
           + Добавить
@@ -446,11 +685,14 @@ function CrudList({
         <p className="text-sm text-min-muted">Пока нет записей.</p>
       ) : (
         <div className="space-y-4">
-          {items.map((it, idx) => (
-            <div key={String(it.id ?? idx)} className="rounded-lg border border-min-border p-4">
+          {items.map((it, idx) => {
+            const invalid = Object.keys(errors[idx]).length > 0
+            const title = itemTitle(it)
+            return (
+            <div key={String(it.id ?? idx)} className={`rounded-lg border p-4 ${invalid ? 'border-min-error' : 'border-min-border'}`}>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm text-min-muted">
-                  #{idx + 1} · {String(it.id ?? 'без id')}
+                  #{idx + 1}{title ? ` · ${title}` : ''}
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
@@ -491,7 +733,7 @@ function CrudList({
                 ))}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
     </Card>
@@ -655,12 +897,12 @@ function SubmissionsViewer() {
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/submissions', {
-        headers: { 'x-admin-token': ADMIN_PASSWORD },
+        headers: adminHeaders(),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setItems((await res.json()) as SubmissionView[])
     } catch {
-      setError('Не удалось загрузить заявки (проверьте ADMIN_API_TOKEN на сервере)')
+      setError('Не удалось загрузить заявки. Войдите заново в админ-панель.')
     }
   }, [])
 
@@ -672,7 +914,7 @@ function SubmissionsViewer() {
     if (!confirm('Удалить заявку?')) return
     await fetch(`/api/submissions?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
-      headers: { 'x-admin-token': ADMIN_PASSWORD },
+        headers: adminHeaders(),
     })
     load()
   }
@@ -681,7 +923,7 @@ function SubmissionsViewer() {
     const next = current === 'new' ? 'processed' : 'new'
     await fetch(`/api/submissions?id=${encodeURIComponent(id)}`, {
       method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-admin-token': ADMIN_PASSWORD },
+      headers: adminHeaders(true),
       body: JSON.stringify({ status: next }),
     })
     load()
@@ -733,13 +975,13 @@ function SubmissionsViewer() {
 
 export function Admin() {
   const [authed, setAuthed] = useState(
-    () => typeof sessionStorage !== 'undefined' && sessionStorage.getItem('admin_authed') === '1',
+    () => typeof sessionStorage !== 'undefined' && Boolean(sessionStorage.getItem(ADMIN_CSRF_STORAGE_KEY)),
   )
   const [pwd, setPwd] = useState('')
   const [err, setErr] = useState('')
   const [data, setData] = useState<CmsData | null>(null)
   const [initial, setInitial] = useState<CmsData | null>(null)
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error' | 'validation'>('idle')
   const [active, setActive] = useState<NavKey>('settings')
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -754,18 +996,28 @@ export function Admin() {
     }
   }, [authed])
 
-  const login = (e: FormEvent) => {
+  const login = async (e: FormEvent) => {
     e.preventDefault()
-    if (ADMIN_PASSWORD && pwd === ADMIN_PASSWORD) {
-      sessionStorage.setItem('admin_authed', '1')
+    setErr('')
+    try {
+      const res = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ password: pwd }),
+      })
+      const body = await res.json().catch(() => ({})) as { csrfToken?: string }
+      if (!res.ok || !body.csrfToken) throw new Error('Unauthorized')
+      sessionStorage.setItem(ADMIN_CSRF_STORAGE_KEY, body.csrfToken)
       setAuthed(true)
-    } else {
+      setPwd('')
+    } catch {
       setErr('Неверный пароль')
     }
   }
 
   const logout = () => {
-    sessionStorage.removeItem('admin_authed')
+    void fetch('/api/admin/session', { method: 'DELETE' })
+    sessionStorage.removeItem(ADMIN_CSRF_STORAGE_KEY)
     setAuthed(false)
     setData(null)
     setInitial(null)
@@ -793,21 +1045,26 @@ export function Admin() {
   const save = async () => {
     if (!data) return
     if (globalErrors > 0) {
-      setStatus('error')
+      setStatus('validation')
       return
     }
     setStatus('saving')
     try {
       const res = await fetch('/api/content', {
         method: 'PUT',
-        headers: { 'content-type': 'application/json', 'x-admin-token': ADMIN_PASSWORD },
+        headers: adminHeaders(true),
         body: JSON.stringify(data),
       })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        console.error('Admin save failed: HTTP', res.status, body)
+        throw new Error(`HTTP ${res.status}`)
+      }
       setInitial(data)
       setStatus('saved')
       notifyContentChanged()
-    } catch {
+    } catch (err) {
+      console.error('Admin save failed:', err)
       setStatus('error')
     }
   }
@@ -859,9 +1116,9 @@ export function Admin() {
               className="rounded-md border border-min-border bg-min-surface p-2 text-min-text"
             />
             {err && <p className="text-sm text-min-error">{err}</p>}
-            {!ADMIN_PASSWORD && (
+            {import.meta.env.DEV && (
               <p className="text-xs text-min-muted">
-                Задайте VITE_ADMIN_PASSWORD (и ADMIN_API_TOKEN на сервере) в .env.
+                Задайте ADMIN_PASSWORD и ADMIN_SESSION_SECRET на сервере в .env.
               </p>
             )}
             <Button type="submit">Войти</Button>
@@ -876,7 +1133,7 @@ export function Admin() {
             <div className="flex flex-wrap items-center gap-2">
               {dirty && <span className="text-xs text-min-accent">● Несохранённые</span>}
               {globalErrors > 0 && (
-                <span className="text-xs text-min-error">Ошибки: {globalErrors}</span>
+                <span className="text-xs text-min-error">Незаполненных полей: {globalErrors}</span>
               )}
               <Button variant="ghost" onClick={exportJson}>
                 Экспорт
@@ -900,6 +1157,9 @@ export function Admin() {
               >
                 {status === 'saving' ? 'Сохранение…' : 'Сохранить'}
               </Button>
+              {globalErrors > 0 && (
+                <span className="text-xs text-min-error">Заполните обязательные поля</span>
+              )}
               <Button variant="ghost" onClick={logout}>
                 Выйти
               </Button>
@@ -909,9 +1169,14 @@ export function Admin() {
           {status === 'saved' && (
             <p className="mb-4 rounded bg-white/10 p-2 text-sm text-min-accent">Сохранено ✓</p>
           )}
+          {status === 'validation' && (
+            <p className="mb-4 rounded bg-min-error/10 p-2 text-sm text-min-error">
+              Нельзя сохранить: заполните обязательные поля (отмечены красным) и исправьте ошибки.
+            </p>
+          )}
           {status === 'error' && (
             <p className="mb-4 rounded bg-min-error/10 p-2 text-sm text-min-error">
-              Ошибка сохранения. Проверьте ADMIN_API_TOKEN на сервере и исправьте ошибки валидации.
+              Ошибка сохранения. Возможно, сессия истекла — войдите заново, или сервер недоступен (подробности — в консоли браузера).
             </p>
           )}
 
