@@ -1,77 +1,85 @@
 # Security review — PlanetUP
 
-Date: 2026-08-14  
-Scope: React/Vite client, Vercel TypeScript functions, Telegram webhook, Redis-backed CMS and submissions. The review included code/configuration inspection and `npm audit --omit=dev`; no production attack was attempted and no secrets were read.
+Original review: 2026-08-14
+Last updated: 2026-08-14 (post-remediation)
+Scope: React/Vite client, Vercel TypeScript functions, Telegram webhook, Redis-backed CMS and submissions.
 
 ## Executive summary
 
-The public admin panel is not an authentication boundary: its server credential is deliberately shipped to every browser. This exposes the CMS and all stored booking submissions (including children's details and health-related answers). Independently, the Telegram webhook accepts forged updates because it does not authenticate Telegram as the sender. These two findings should be addressed before production use.
+All Critical/High findings from the original review are **remediated**. `npm audit` reports
+**0 vulnerabilities** (including the previously flagged `fast-uri`, `react-router`/`react-router-dom`,
+and the entire build-time `@vercel/node` transitive graph). The public admin panel is now a real
+authentication boundary (server-side sessions + CSRF), the Telegram webhook authenticates Telegram as
+the sender, and the rate limiter is backed by shared atomic Redis storage.
 
-## Critical
+One **Medium** item remains open: no HTTP security-header policy is configured in `vercel.json`
+(SEC-005).
 
-### SEC-001 — Server admin credential is published in the browser bundle
+## Remediation status
 
-- **Location:** `src/pages/Admin.tsx:14, 890, 1033-1036`; `api/content.ts:6-9, 29-35`; `api/submissions.ts:4, 8-15`.
-- **Evidence:** the client reads `VITE_ADMIN_PASSWORD` and sends it as `x-admin-token`. Both server routes use the matching `ADMIN_API_TOKEN` as their sole authorization test. Vite exposes `VITE_*` values to client code.
-- **Impact:** anyone can download the public JavaScript, extract the token, then read/delete all submissions or replace the CMS. Submissions include contact details and may contain child and injury information.
-- **Fix:** replace the shared client secret with server-side authentication and an HttpOnly, Secure production session cookie. Validate credentials only in a server endpoint; keep its verifier/secret exclusively in Vercel environment variables. Authorize `/api/content` writes and `/api/submissions` operations from that session, and add CSRF protection for those cookie-authenticated mutations.
-- **Immediate mitigation:** remove the `/admin` deployment or restrict it at the hosting/authentication layer until this change is live. Rotate `ADMIN_API_TOKEN` after migration.
+| ID | Finding | Status |
+|----|---------|--------|
+| SEC-001 | Admin credential shipped to browser | ✅ Resolved |
+| SEC-002 | Fail-open default admin token | ✅ Resolved |
+| SEC-003 | Telegram webhook unauthenticated | ✅ Resolved |
+| SEC-004 | Rate limit unreliable on serverless | ✅ Resolved |
+| SEC-005 | No HTTP security-header policy | ⚠️ Open (recommended follow-up) |
+| SEC-006 | Production dependency advisories | ✅ Resolved |
 
-### SEC-002 — Fail-open default admin token
+## Resolved findings
 
-- **Location:** `api/content.ts:9`; `api/submissions.ts:4`; `.env.example:12-16`.
-- **Evidence:** both privileged handlers fall back to a known literal when `ADMIN_API_TOKEN` is absent.
-- **Impact:** a production deployment missing one environment variable is remotely accessible with a predictable credential.
-- **Fix:** fail closed during module initialization/request handling: if the required secret is absent or fails a minimum-strength check, log a configuration error and return `503`; never provide a fallback. Remove real-looking defaults from examples.
+### SEC-001 — Admin credential no longer in the browser
+- **Before:** client read `VITE_ADMIN_PASSWORD` and sent it as `x-admin-token`; `api/content.ts` /
+  `api/submissions.ts` used `ADMIN_API_TOKEN` as the sole check. Vite exposed `VITE_*` to the client.
+- **After:** login is a server endpoint (`api/admin/session.ts`) that verifies `ADMIN_PASSWORD`
+  against a Vercel env secret and returns an **HttpOnly, Secure, SameSite=Strict** session cookie
+  (HMAC-sha256 signed, `ADMIN_SESSION_SECRET`). Mutations on `/api/content` and `/api/submissions`
+  require that session **plus** an `x-csrf-token`. The client (`src/pages/Admin.tsx`) holds no password.
+- `VITE_ADMIN_PASSWORD` and `ADMIN_API_TOKEN` were removed from code, `.env.example`, and Vercel env.
 
-### SEC-003 — Telegram webhook requests are not authenticated
+### SEC-002 — Fail-closed configuration
+- Required server secrets are read via `getRequiredEnv`, which throws (→ `503`) when a variable is
+  missing or shorter than 16 characters. There is no fallback literal. Real-looking defaults were
+  removed from `.env.example`.
 
-- **Location:** `api/tg/webhook.ts:48-59, 63-121`.
-- **Evidence:** POST is the only request check; there is no verification of Telegram's `X-Telegram-Bot-Api-Secret-Token` header before the supplied chat ID is trusted.
-- **Impact:** an attacker who knows or guesses an authorized chat ID can forge Telegram updates and perform the bot's CMS mutations. They can also cause the bot to message arbitrary supplied chat IDs in the unauthorized-message branch.
-- **Fix:** generate a high-entropy `TELEGRAM_WEBHOOK_SECRET`, configure it as Telegram's `secret_token` when setting the webhook, and use timing-safe comparison to reject requests with a missing/incorrect header before parsing the update. Rotate the secret and webhook after deployment.
+### SEC-003 — Telegram webhook authenticated
+- `api/tg/webhook.ts` verifies `X-Telegram-Bot-Api-Secret-Token` with a **timing-safe** comparison
+  and rejects a missing/incorrect header **before** parsing the update. The secret
+  (`TELEGRAM_WEBHOOK_SECRET`) is set both in Vercel env and as Telegram's `secret_token` via
+  `scripts/set-webhook.mjs`. Verified live: `401` without the header, `200` with the correct one.
 
-## High
+### SEC-004 — Redis-backed atomic rate limit
+- `claimSubmissionRateLimit` (Upstash Redis) uses an atomic `SET NX EX` claim keyed by the
+  platform-derived client IP. Fail-closed: if Redis is unavailable the request is rejected (`503`).
+  The old in-memory `Map` + TODO is gone.
 
-### SEC-004 — Rate limit does not work reliably on serverless instances
+### SEC-006 — Dependencies clean
+- `fast-uri` 3.1.4 → 3.1.5; `react-router` / `react-router-dom` 7.18.1 → 7.18.2 (non-forced `npm audit fix`).
+- Scoped `overrides` close the `@vercel/node` build-time advisories (`js-yaml`, `minimatch`,
+  `smol-toml`, `ajv`, `path-to-regexp`) without downgrading majors. Result: `npm audit` → 0.
 
-- **Location:** `api/submit-form.ts:11-16, 262-278`.
-- **Evidence:** the one-request-per-minute decision is kept in an in-memory `Map`; cold starts and parallel Vercel instances each start with an empty map. The code itself marks the production replacement as TODO.
-- **Impact:** automated callers can bypass the intended limit, generate Telegram/email notifications, grow the submissions store, and raise operating cost.
-- **Fix:** use an atomic, shared limiter (for example Upstash Redis `INCR` + expiry or its rate-limit product) keyed by a trusted platform-derived client identity. Add a global/route-level limit as well as per-client limiting. Treat the forwarded-IP contract as a deployment assumption and verify it with Vercel.
+## Open finding
 
-## Medium
+### SEC-005 — HTTP security-header policy (recommended follow-up)
+`vercel.json` only declares the SPA rewrite; no CSP, `X-Frame-Options`/`frame-ancestors`,
+`X-Content-Type-Options`, `Referrer-Policy`, or `Permissions-Policy` is set. The page loads
+Yandex Metrika, so any CSP must permit its origins. Recommended: add response headers in `vercel.json`
+(start with `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, strict referrer policy),
+test against the app + Metrika, then verify on the deployed domain.
 
-### SEC-005 — No HTTP security-header policy is visible in deployment configuration
+## Required environment variables (server-only, Vercel)
 
-- **Location:** `vercel.json:1-5`; `index.html:35-37`.
-- **Evidence:** Vercel config only declares an SPA rewrite. No CSP, clickjacking protection, `X-Content-Type-Options`, `Referrer-Policy`, or `Permissions-Policy` is configured. The page loads Yandex Metrika, so any CSP must explicitly permit its required origins.
-- **Impact:** weaker browser containment if a future XSS, third-party compromise, or framing attack occurs.
-- **Fix:** add response headers in Vercel configuration, first testing a restrictive CSP compatible with the app and Metrika. At minimum set `frame-ancestors 'none'` (if framing is not required), `X-Content-Type-Options: nosniff`, a strict referrer policy, and a narrow permissions policy. Verify final headers on the deployed domain.
+| Variable | Purpose |
+|----------|---------|
+| `ADMIN_PASSWORD` | admin login password (≥16 chars) |
+| `ADMIN_SESSION_SECRET` | HMAC key for the session cookie (≥16 chars, high entropy) |
+| `TELEGRAM_WEBHOOK_SECRET` | `secret_token` for Telegram webhook verification (≥16 chars) |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `UPSTASH_REDIS_*` | bot + storage (unchanged) |
 
-### SEC-006 — Production dependency advisories need an update
+None use a `VITE_`/`NEXT_PUBLIC_` prefix, so none reach the browser bundle.
 
-- **Location:** `package.json:18-33`; lockfile.
-- **Evidence:** `npm audit --omit=dev --json` reports three high-severity package records: `fast-uri` (GHSA-7p8r-x3mc-p8w7) and `react-router` / `react-router-dom` (GHSA-qwww-vcr4-c8h2). The React Router advisory describes RSC-mode actions; this SPA does not appear to use RSC, so exploitability is not established, but the patched version should still be adopted.
-- **Fix:** update the affected dependency graph with a lockfile review, then run the test suite and production build. Re-run the audit and record the result.
-
-## Positive observations
-
-- Booking input is validated with Zod before notifications and persistence (`api/submit-form.ts:280-290`).
-- User-provided booking values are escaped for email and Telegram HTML (`api/submit-form.ts:42-97` and `formatEmailHtml`).
-- No `dangerouslySetInnerHTML`, `eval`, or similar DOM injection sink was found in the scanned application code.
-- `.env.local` is ignored by Git.
-
-## Recommended order
-
-1. Disable/restrict the public admin route and rotate exposed admin credentials.
-2. Replace browser-held authorization with real server-side session authentication.
-3. Authenticate Telegram webhook delivery.
-4. Move rate limiting to shared atomic storage and add request limits.
-5. Add headers and update dependencies.
-
-## Verification still required outside the repository
-
-- Confirm Vercel production environment variables are configured and have never used the documented fallback.
-- Inspect deployed response headers, source maps, Vercel access controls, and webhook configuration.
-- Review retention/access policy for booking submissions because they may contain minors' and health-related personal data.
+## Verification performed
+- Build + typecheck + 90 unit tests green after each change.
+- Live smoke test: site loads, public `/api/content` works, honeypot silently drops bots,
+  admin login returns session + CSRF and reaches protected routes, webhook rejects/accepts by secret.
+- `npm audit` → 0 vulnerabilities.
