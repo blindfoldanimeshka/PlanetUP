@@ -48,16 +48,16 @@ function CompactCard({
           className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-        {/* Name + specialization — absolute bottom inside photo wrapper */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-left text-white sm:p-6">
-          <h3 className="font-display text-xl font-bold sm:text-2xl">
+        {/* Name + specialization — black plaques at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
+          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg">
             {trainer.name}
-          </h3>
-          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-min-accent sm:text-sm">
+          </span>
+          <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
             {trainer.specialization}
-          </p>
+          </span>
         </div>
       </div>
     </motion.div>
@@ -91,7 +91,7 @@ function ExpandedCard({
           alt={trainer.name}
           className="h-full w-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
         {/* Close button */}
         <button
@@ -116,14 +116,14 @@ function ExpandedCard({
           </svg>
         </button>
 
-        {/* Name + specialization — absolute at bottom of photo */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-left text-white sm:p-6 lg:p-8">
-          <h3 className="font-display text-2xl font-bold sm:text-3xl lg:text-4xl">
+        {/* Name + specialization — black plaques at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
+          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg lg:text-xl">
             {trainer.name}
-          </h3>
-          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-min-accent sm:mt-2 sm:text-sm">
+          </span>
+          <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
             {trainer.specialization}
-          </p>
+          </span>
         </div>
       </div>
 
