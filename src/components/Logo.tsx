@@ -15,8 +15,8 @@ export function Logo({ className, showWordmark = true, size = 48, src }: LogoPro
         <img
           src={src}
           alt="Планета UP — студия акробатики"
-          className="h-auto w-auto max-h-24 select-none"
-          style={{ height: size * 1.6 }}
+          className="w-auto select-none object-contain"
+          style={{ height: size }}
         />
         {showWordmark && (
           <span className="font-display text-xl font-bold tracking-tight text-min-text md:text-2xl">

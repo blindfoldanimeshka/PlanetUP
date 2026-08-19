@@ -73,7 +73,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, ease: 'easeOut' }}
         >
-          <Logo size={96} showWordmark={false} />
+          <Logo size={96} showWordmark={false} src="/media/logo/logo-white.png" />
         </motion.div>
 
         {/* Eyebrow */}
@@ -83,7 +83,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, delay: 0.15, ease: 'easeOut' }}
         >
-          Студия акробатики
+          Эстрадно-акробатическая студия
         </motion.p>
 
         {/* Massive headline */}
