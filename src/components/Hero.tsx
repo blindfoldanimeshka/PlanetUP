@@ -64,7 +64,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 -mt-[72px] pt-[72px]"
       aria-label="Главный экран — студия акробатики Планета UP"
     >
       <Starfield />
