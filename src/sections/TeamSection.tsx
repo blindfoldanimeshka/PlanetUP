@@ -132,7 +132,7 @@ function ExpandedCard({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.35 }}
-        className="flex flex-1 flex-col justify-center p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
+        className="flex flex-1 flex-col justify-center p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-lg lg:p-8 lg:text-xl"
       >
         <p>{trainer.bio}</p>
         {trainer.social && (
