@@ -69,7 +69,7 @@ function ExpandedCard({
       className="relative w-full overflow-hidden rounded-sm"
     >
       {/* Photo with gradient overlay */}
-      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden">
+      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative h-[50vh] min-h-[380px] max-h-[560px] w-full overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
