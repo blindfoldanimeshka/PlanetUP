@@ -13,7 +13,7 @@ export function ReviewsSection({ cms, variant }: { cms: CmsData; variant?: Secti
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cms.testimonials.map((t) => (
           <div key={t.id} data-stagger-card className="h-full">
-            <Card className="flex flex-col gap-4 bg-white/15 border-white/30 shadow-lg shadow-black/20">
+            <Card className="flex flex-col gap-4 bg-white/15 border-white/30 shadow-lg shadow-black/20 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_8px_32px_rgba(168,85,247,0.1)]">
               {t.photoUrl && (
                 <img
                   src={t.photoUrl}

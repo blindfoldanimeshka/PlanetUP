@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CmsData } from '@/types/cms'
-import { scrollToHero } from '@/lib/scroll'
 import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { MapPinIcon } from 'lucide-animated'
+
+function openBookingModal() {
+  document.dispatchEvent(new CustomEvent('open-booking'))
+}
 
 function LazyYandexMap() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -101,8 +104,8 @@ export function ContactsSection({ cms, variant }: { cms: CmsData; variant?: Sect
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-sm border border-min-border px-3 py-1.5 text-sm
-                      font-medium text-min-muted transition-colors
-                      hover:border-min-accent hover:text-min-accent
+                      font-medium text-min-muted transition-all duration-200
+                      hover:border-min-accent hover:text-min-accent hover:bg-white/5
                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
                   >
                     {SOCIAL_LABELS[key] || key}
@@ -113,7 +116,7 @@ export function ContactsSection({ cms, variant }: { cms: CmsData; variant?: Sect
               variant="primary"
               size="md"
               className="mt-4 self-stretch"
-              onClick={scrollToHero}
+              onClick={openBookingModal}
             >
               Записаться на пробное занятие
             </Button>

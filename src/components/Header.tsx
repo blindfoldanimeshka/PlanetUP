@@ -53,6 +53,8 @@ export function Header() {
         className={cn(
           'mx-auto max-w-6xl rounded-2xl transition-shadow duration-300',
           'glass-surface',
+          'bg-min-surface/80 md:bg-transparent md:[background-color:rgba(255,255,255,0.08)]',
+          'backdrop-blur-xl md:backdrop-blur',
           scrolled && 'shadow-[0_4px_30px_rgba(0,0,0,0.3)]'
         )}
       >

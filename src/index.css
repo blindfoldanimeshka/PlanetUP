@@ -232,6 +232,50 @@ a {
   }
 }
 
+/* Pulse CTA — subtle glow expansion to draw the eye */
+@keyframes cta-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
+  }
+}
+
+@utility animate-cta-pulse {
+  animation: cta-pulse 2.5s ease-in-out infinite;
+}
+
+/* Lightbox — translucent glass backdrop instead of solid black */
+.yarl__backdrop {
+  background-color: rgba(10, 10, 10, 0.88) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Lightbox navigation arrows — inset from edges, over the image */
+.yarl__button {
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: color 0.2s, transform 0.2s !important;
+}
+.yarl__button:hover {
+  color: var(--min-accent) !important;
+  transform: scale(1.12) !important;
+}
+.yarl__navigation_previous,
+.yarl__navigation_next {
+  inset-inline: 16px !important;
+}
+.yarl__navigation_previous svg,
+.yarl__navigation_next svg {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+@media (min-width: 768px) {
+  .yarl__navigation_previous { inset-inline: 24px !important; }
+  .yarl__navigation_next { inset-inline: 24px !important; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

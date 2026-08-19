@@ -11,7 +11,7 @@ function TrainerCard({ trainer }: { trainer: Trainer }) {
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
-          className="h-full w-full object-cover object-top transition-all duration-500 group-hover:scale-[1.02]"
+          className="h-full w-full object-cover object-top transition-all duration-500 group-hover:scale-[1.04]"
           loading="lazy"
         />
       </div>
@@ -41,7 +41,10 @@ function TrainerCard({ trainer }: { trainer: Trainer }) {
 }
 
 export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
-  if (cms.trainers.length === 0) return null
+  const visibleTrainers = cms.trainers.filter(
+    (t) => !t.name.toLowerCase().includes('ташкова')
+  )
+  if (visibleTrainers.length === 0) return null
   return (
     <Section id="team" variant={variant}>
       <SectionHeading id="team" icon={UserCheckIcon}>
@@ -54,7 +57,7 @@ export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionV
         ученику раскрыть потенциал и полюбить движение.
       </p>
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2 md:gap-12">
-        {cms.trainers.map((trainer) => (
+        {visibleTrainers.map((trainer) => (
           <TrainerCard key={trainer.id} trainer={trainer} />
         ))}
       </div>

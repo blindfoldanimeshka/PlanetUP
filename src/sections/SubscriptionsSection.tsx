@@ -1,4 +1,3 @@
-import { scrollToHero } from '@/lib/scroll'
 import type { CmsData, Subscription } from '@/types/cms'
 import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
@@ -7,6 +6,10 @@ import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { CheckIcon } from '@/components/icons/check'
 import { CreditCardIcon } from 'lucide-animated'
+
+function openBookingModal() {
+  document.dispatchEvent(new CustomEvent('open-booking'))
+}
 
 function SubscriptionCard({ subscription }: { subscription: Subscription }) {
   return (
@@ -27,7 +30,7 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
           variant="primary"
           size="md"
           className="self-stretch mt-4"
-          onClick={scrollToHero}
+          onClick={openBookingModal}
         >
           Записаться
         </Button>

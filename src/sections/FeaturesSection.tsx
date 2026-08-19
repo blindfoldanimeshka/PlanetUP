@@ -33,7 +33,7 @@ export function FeaturesSection({ variant }: { variant?: SectionVariant } = {}) 
           <div
             key={f.title}
             data-stagger-card
-            className="flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/8 p-6 backdrop-blur-md"
+            className="flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/8 p-6 backdrop-blur-md transition-all duration-300 hover:border-white/25 hover:bg-white/12 hover:shadow-[0_8px_32px_rgba(168,85,247,0.08)]"
           >
             <h3 className="font-display text-lg font-bold text-min-text">
               {f.title}

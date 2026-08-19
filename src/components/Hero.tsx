@@ -38,6 +38,13 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
   const reduced = useReducedMotion()
   const [showForm, setShowForm] = useState(false)
 
+  /* Listen for custom event from any "Записаться" button on the page */
+  useEffect(() => {
+    const open = () => setShowForm(true)
+    document.addEventListener('open-booking', open)
+    return () => document.removeEventListener('open-booking', open)
+  }, [])
+
   const { scrollY } = useScroll()
   const heroY = useTransform(scrollY, [0, 400], [0, -30])
 
@@ -145,7 +152,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
               <Button
                 variant="primary"
                 size="lg"
-                className="rounded-full border-min-accent bg-min-accent px-8 py-4 text-base font-semibold text-min-bg hover:bg-min-accent/90 hover:shadow-[0_0_30px_var(--min-accent-glow)]"
+                className="rounded-full border-min-accent bg-min-accent px-8 py-4 text-base font-semibold text-min-bg hover:bg-min-accent/90 hover:shadow-[0_0_30px_var(--min-accent-glow)] animate-cta-pulse"
               >
                 Записаться на пробное занятие
               </Button>

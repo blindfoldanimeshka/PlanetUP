@@ -33,22 +33,22 @@ function MainSections({ cms }: { cms: CmsData | null }) {
       <SectionDivider />
 
       {/* ── Programs & Pricing ── */}
-      <AdultsSection cms={cms} variant="compact" />
-      <KidsSection cms={cms} variant="compact" />
-      <SubscriptionsSection cms={cms} variant="compact" />
+      <AdultsSection cms={cms} variant="surface" />
+      <KidsSection cms={cms} variant="surface" />
+      <SubscriptionsSection cms={cms} variant="surface" />
 
       <SectionDivider />
 
       {/* ── Team & Media ── */}
-      <TeamSection cms={cms} variant="compact" />
+      <TeamSection cms={cms} variant="surface" />
       <GallerySection cms={cms} variant="compact" />
-      <LifeSection cms={cms} variant="compact" />
+      <LifeSection cms={cms} variant="surface" />
 
       <SectionDivider />
 
       {/* ── Social proof & Contact ── */}
-      <ReviewsSection cms={cms} variant="compact" />
-      <FaqSection cms={cms} variant="compact" />
+      <ReviewsSection cms={cms} variant="surface" />
+      <FaqSection cms={cms} variant="surface" />
       <ContactsSection cms={cms} />
     </>
   )
