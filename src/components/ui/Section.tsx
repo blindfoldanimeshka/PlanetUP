@@ -9,10 +9,10 @@ export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const VARIANT_CLASSES: Record<SectionVariant, string> = {
-  default: 'py-16 md:py-24',
-  compact: 'py-10 md:py-16',
-  spacious: 'py-20 md:py-32',
-  surface: 'py-16 md:py-24 bg-white/[0.02]',
+  default: 'py-12 md:py-20',
+  compact: 'py-8 md:py-12',
+  spacious: 'py-16 md:py-24',
+  surface: 'py-12 md:py-20 bg-white/[0.02]',
 }
 
 export function Section({ children, id, className, variant = 'default', ...props }: SectionProps) {
