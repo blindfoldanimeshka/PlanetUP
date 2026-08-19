@@ -32,13 +32,21 @@ public/cms.json
 # Locked empty remnant of client dump (content moved to raw-assets/)
 public/Для сайта-20260809T142710Z-1-001/
 
-# Agent / QA artifacts
+# Agent / AI tool directories (local-only, never commit)
+.agents/
+.claude/
 .omo/
+.opencode/
 .playwright-mcp/
+.remember/
+.scratch/
+.sisyphus/
+
+# Agent / QA artifacts
 tmp/
 qa-*.png
 *.traineddata
-.scratch/
+
 .opencode/skills/**/__pycache__/
 
 .vercel
