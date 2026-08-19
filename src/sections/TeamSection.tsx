@@ -8,10 +8,26 @@ import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { UserCheckIcon } from 'lucide-animated'
 
 /* ------------------------------------------------------------------ */
-/*  Grid card (compact view)                                          */
+/*  Animation variants                                                */
 /* ------------------------------------------------------------------ */
 
-function GridCard({
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } },
+}
+
+const cardEnter = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+}
+
+const cardExit = { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+
+/* ------------------------------------------------------------------ */
+/*  Compact card (grid view) — matches reference pattern               */
+/* ------------------------------------------------------------------ */
+
+function CompactCard({
   trainer,
   onClick,
 }: {
@@ -21,38 +37,33 @@ function GridCard({
   return (
     <motion.div
       layout
-      layoutId={`card-${trainer.id}`}
       onClick={onClick}
-      className="group cursor-pointer overflow-hidden rounded-sm border border-min-border bg-min-surface transition-colors duration-300 hover:border-min-accent/50"
+      className="group cursor-pointer overflow-hidden rounded-lg bg-min-surface shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
-      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative aspect-[3/4] overflow-hidden">
+      {/* Photo with fixed height + gradient overlay */}
+      <div className="relative h-120 overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
           className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
           loading="lazy"
         />
-      </motion.div>
-      <div className="p-5 text-center">
-        <motion.h3
-          layoutId={`name-${trainer.id}`}
-          className="font-display text-2xl font-bold text-min-text md:text-3xl"
-        >
-          {trainer.name}
-        </motion.h3>
-        <motion.p
-          layoutId={`spec-${trainer.id}`}
-          className="mt-1 text-xs font-medium uppercase tracking-widest text-min-accent"
-        >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+      </div>
+
+      {/* Name + specialization — absolute at bottom of card */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 text-left text-white">
+        <h3 className="font-display text-2xl font-bold">{trainer.name}</h3>
+        <p className="mt-1 text-sm font-medium uppercase tracking-widest text-min-accent">
           {trainer.specialization}
-        </motion.p>
+        </p>
       </div>
     </motion.div>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/*  Expanded card (full detail view)                                  */
+/*  Expanded card — photo + gradient + name over photo + bio below     */
 /* ------------------------------------------------------------------ */
 
 function ExpandedCard({
@@ -65,17 +76,20 @@ function ExpandedCard({
   return (
     <motion.div
       layout
-      layoutId={`card-${trainer.id}`}
-      className="relative w-full overflow-hidden rounded-sm border border-min-border bg-min-surface"
+      className="relative overflow-hidden rounded-lg bg-min-surface shadow-lg"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      {/* Photo with gradient overlay — name/specialization overlaid at bottom */}
-      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative aspect-[4/3] w-full overflow-hidden">
+      {/* Photo — same height as compact for shared-layout feel */}
+      <div className="relative h-120 overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
           className="h-full w-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-min-surface via-min-surface/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
         {/* Close button */}
         <button
@@ -86,47 +100,51 @@ function ExpandedCard({
           className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
           aria-label="Закрыть"
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
 
-        {/* Name + specialization — absolute over photo */}
-        <h3 className="absolute bottom-0 left-0 w-full p-6 font-display text-3xl font-bold text-min-text-light transition duration-300 sm:p-8 lg:p-12">
-          <motion.span layoutId={`name-${trainer.id}`} className="block">
+        {/* Name + specialization — absolute at bottom of photo */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-left text-white sm:p-8 lg:p-12">
+          <h3 className="font-display text-3xl font-bold sm:text-4xl">
             {trainer.name}
-          </motion.span>
-          <motion.span
-            layoutId={`spec-${trainer.id}`}
-            className="mt-2 block font-sans text-sm font-medium uppercase tracking-widest text-min-accent"
-          >
+          </h3>
+          <p className="mt-2 text-sm font-medium uppercase tracking-widest text-min-accent">
             {trainer.specialization}
-          </motion.span>
-        </h3>
-      </motion.div>
+          </p>
+        </div>
+      </div>
 
-      {/* Bio + social — below photo in normal flow */}
-      <div className="p-6 font-sans text-base leading-relaxed text-min-text-light/80 sm:p-8 lg:p-12">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-        >
-          {trainer.bio}
-        </motion.p>
+      {/* Bio + social — below photo in normal flow, staggered entrance */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.35 }}
+        className="p-6 font-sans text-base leading-relaxed text-white/80 sm:p-8 lg:p-12"
+      >
+        <p>{trainer.bio}</p>
         {trainer.social && (
-          <motion.a
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.4 }}
+          <a
             href={trainer.social}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 inline-block text-sm font-medium text-min-accent transition duration-200 hover:text-min-text-light"
+            className="mt-4 inline-block text-sm font-medium text-min-accent transition duration-200 hover:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             Профиль тренера →
-          </motion.a>
+          </a>
         )}
-      </div>
+      </motion.div>
     </motion.div>
   )
 }
@@ -164,34 +182,35 @@ export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionV
       </p>
 
       <div className="mx-auto max-w-5xl">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
           {expandedTrainer ? (
-            <ExpandedCard
-              key="expanded"
-              trainer={expandedTrainer}
-              onClose={handleClose}
-            />
+            /* ── Expanded: single card, full width ──────────────────── */
+            <motion.div
+              key={`expanded-${expandedTrainer.id}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <ExpandedCard trainer={expandedTrainer} onClose={handleClose} />
+            </motion.div>
           ) : (
+            /* ── Grid: compact cards with stagger ───────────────────── */
             <motion.div
               key="grid"
-              className="grid gap-8 md:grid-cols-2 md:gap-10"
+              className="grid grid-cols-1 gap-8 md:grid-cols-2"
+              variants={stagger}
               initial="hidden"
               animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.12 } },
-              }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
             >
               {visibleTrainers.map((trainer) => (
                 <motion.div
                   key={trainer.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-                  }}
-                  exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.25 } }}
+                  variants={cardEnter}
+                  exit={cardExit}
                 >
-                  <GridCard
+                  <CompactCard
                     trainer={trainer}
                     onClick={() => handleExpand(trainer.id)}
                   />
