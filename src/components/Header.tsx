@@ -59,8 +59,15 @@ export function Header() {
         )}
       >
         <div className="flex items-center justify-between px-6 py-3">
-          <a href="#hero" className="text-lg font-bold tracking-wide text-min-text">
-            Планета UP
+          <a href="#hero" className="flex items-center gap-2.5">
+            <img
+              src="/media/logo/logo-white.png"
+              alt="Планета UP"
+              className="h-8 w-auto"
+            />
+            <span className="text-lg font-bold tracking-wide text-min-text">
+              Планета UP
+            </span>
           </a>
           <div className="flex items-center gap-2">
             <CardNav />
