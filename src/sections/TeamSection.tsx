@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import type { CmsData, Trainer } from '@/types/cms'
 import type { SectionVariant } from '@/components/ui/Section'
@@ -21,132 +21,106 @@ const cardEnter = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 }
 
-const cardExit = { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
-
 /* ------------------------------------------------------------------ */
-/*  Compact card (grid view) — matches reference pattern               */
+/*  Single card — renders compact or expanded based on isExpanded      */
+/*  Uses `layout` for seamless morphing between states.               */
 /* ------------------------------------------------------------------ */
 
-function CompactCard({
+function TrainerCard({
   trainer,
-  onClick,
-}: {
-  trainer: Trainer
-  onClick: () => void
-}) {
-  return (
-    <motion.div
-      layout
-      onClick={onClick}
-      className="group cursor-pointer overflow-hidden rounded-lg bg-min-surface shadow-sm transition-shadow duration-300 hover:shadow-md"
-    >
-      {/* Photo — 3:4 portrait aspect ratio */}
-      <div className="relative aspect-[3/4] overflow-hidden">
-        <img
-          src={trainer.photoUrl}
-          alt={trainer.name}
-          className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-
-        {/* Name + specialization — black plaques at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
-          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg">
-            {trainer.name}
-          </span>
-          <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
-            {trainer.specialization}
-          </span>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Expanded card — photo + gradient + name over photo + bio below     */
-/* ------------------------------------------------------------------ */
-
-function ExpandedCard({
-  trainer,
+  isExpanded,
   onClose,
+  onExpand,
 }: {
   trainer: Trainer
+  isExpanded: boolean
   onClose: () => void
+  onExpand: () => void
 }) {
   return (
     <motion.div
       layout
-      className="relative flex flex-col overflow-hidden rounded-lg bg-min-surface shadow-lg sm:flex-row"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      onClick={!isExpanded ? onExpand : undefined}
+      className={
+        isExpanded
+          ? 'col-span-full overflow-hidden rounded-lg bg-min-surface shadow-lg'
+          : 'cursor-pointer overflow-hidden rounded-lg bg-min-surface shadow-sm transition-shadow duration-300 hover:shadow-md'
+      }
+      style={{ zIndex: isExpanded ? 10 : 1 }}
     >
-      {/* Photo — 3:4 portrait, left side on desktop */}
-      <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden sm:w-2/5">
-        <img
-          src={trainer.photoUrl}
-          alt={trainer.name}
-          className="h-full w-full object-cover object-top"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-
-        {/* Close button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onClose()
+      <div className="flex flex-col sm:flex-row">
+        {/* ── Photo ──────────────────────────────────────────────── */}
+        <motion.div
+          layout
+          className="relative shrink-0 overflow-hidden"
+          style={{
+            /* compact: full-width 3:4 portrait; expanded: fixed 40% width */
+            aspectRatio: isExpanded ? undefined : '3 / 4',
+            width: isExpanded ? '40%' : '100%',
           }}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
-          aria-label="Закрыть"
         >
-          <svg
-            className="h-4 w-4 sm:h-5 sm:w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          <img
+            src={trainer.photoUrl}
+            alt={trainer.name}
+            className="h-full w-full object-cover object-top"
+            loading={isExpanded ? undefined : 'lazy'}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-        {/* Name + specialization — black plaques at bottom of photo */}
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
-          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg">
-            {trainer.name}
-          </span>
-          <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
-            {trainer.specialization}
-          </span>
-        </div>
+          {/* Close button — expanded only */}
+          {isExpanded && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onClose()
+              }}
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+              aria-label="Закрыть"
+            >
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+
+          {/* Name + specialization — black plaques at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
+            <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg">
+              {trainer.name}
+            </span>
+            <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
+              {trainer.specialization}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* ── Info panel — expanded only ─────────────────────────── */}
+        <motion.div
+          layout
+          className="flex flex-1 flex-col justify-center overflow-hidden p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
+          initial={false}
+          animate={{
+            opacity: isExpanded ? 1 : 0,
+            width: isExpanded ? 'auto' : 0,
+            padding: isExpanded ? undefined : 0,
+          }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+          <p>{trainer.bio}</p>
+          {trainer.social && (
+            <a
+              href={trainer.social}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-block text-sm font-medium text-min-accent transition duration-200 hover:text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Профиль тренера →
+            </a>
+          )}
+        </motion.div>
       </div>
-
-      {/* Info — right side on desktop, below photo on mobile */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.35 }}
-        className="flex flex-1 flex-col justify-center p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
-      >
-        <p>{trainer.bio}</p>
-        {trainer.social && (
-          <a
-            href={trainer.social}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-block text-sm font-medium text-min-accent transition duration-200 hover:text-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Профиль тренера →
-          </a>
-        )}
-      </motion.div>
     </motion.div>
   )
 }
@@ -169,8 +143,6 @@ export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionV
 
   if (visibleTrainers.length === 0) return null
 
-  const expandedTrainer = visibleTrainers.find((t) => t.id === expandedId)
-
   return (
     <Section id="team" variant={variant}>
       <SectionHeading id="team" icon={UserCheckIcon}>
@@ -184,43 +156,24 @@ export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionV
       </p>
 
       <div className="mx-auto max-w-5xl">
-        <AnimatePresence mode="wait">
-          {expandedTrainer ? (
-            /* ── Expanded: single card, full width ──────────────────── */
-            <motion.div
-              key={`expanded-${expandedTrainer.id}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
-              <ExpandedCard trainer={expandedTrainer} onClose={handleClose} />
+        {/* Always render ALL cards — layout prop handles morphing */}
+        <motion.div
+          className="grid grid-cols-1 gap-8 md:grid-cols-2"
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+        >
+          {visibleTrainers.map((trainer) => (
+            <motion.div key={trainer.id} variants={cardEnter}>
+              <TrainerCard
+                trainer={trainer}
+                isExpanded={expandedId === trainer.id}
+                onClose={handleClose}
+                onExpand={() => handleExpand(trainer.id)}
+              />
             </motion.div>
-          ) : (
-            /* ── Grid: compact cards with stagger ───────────────────── */
-            <motion.div
-              key="grid"
-              className="grid grid-cols-1 gap-8 md:grid-cols-2"
-              variants={stagger}
-              initial="hidden"
-              animate="visible"
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            >
-              {visibleTrainers.map((trainer) => (
-                <motion.div
-                  key={trainer.id}
-                  variants={cardEnter}
-                  exit={cardExit}
-                >
-                  <CompactCard
-                    trainer={trainer}
-                    onClick={() => handleExpand(trainer.id)}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          ))}
+        </motion.div>
       </div>
     </Section>
   )
