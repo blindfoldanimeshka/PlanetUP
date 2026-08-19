@@ -245,6 +245,13 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  // Defense-in-depth: only accept JSON bodies. A non-JSON body could be
+  // parsed into an unexpected shape by the JSON parser.
+  const contentType = req.headers['content-type']
+  if (typeof contentType !== 'string' || !contentType.includes('application/json')) {
+    return res.status(415).json({ error: 'Unsupported Media Type' })
+  }
+
   res.setHeader('Cache-Control', 'private, no-store, max-age=0')
 
   const contentLength = Number(req.headers['content-length'] ?? 0)

@@ -191,4 +191,35 @@ describe('tg webhook', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ ok: true })
   })
+
+  it('returns 200 for empty body without any dispatching', async () => {
+    const res = mockRes()
+    await handler({
+      method: 'POST',
+      headers: { 'x-telegram-bot-api-secret-token': WEBHOOK_SECRET },
+      body: {},
+    } as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({ ok: true })
+    expect(storageMocks.isAdmin).not.toHaveBeenCalled()
+    expect(botMocks.handleCommand).not.toHaveBeenCalled()
+    expect(botMocks.handleCallback).not.toHaveBeenCalled()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  it('handles callback_query without message (inline message) without error', async () => {
+    const res = mockRes()
+    await handler({
+      method: 'POST',
+      headers: { 'x-telegram-bot-api-secret-token': WEBHOOK_SECRET },
+      body: { callback_query: { id: 'x', from: { id: 1 } } },
+    } as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(console.error).not.toHaveBeenCalled()
+    expect(storageMocks.isAdmin).not.toHaveBeenCalled()
+    expect(botMocks.handleCallback).not.toHaveBeenCalled()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
 })

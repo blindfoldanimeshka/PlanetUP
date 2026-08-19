@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest'
 import type { CmsData } from '../src/types/cms'
 
 /* ------------------------------------------------------------------ */
@@ -94,8 +94,18 @@ import {
   getSubmissions,
   deleteSubmission,
   updateSubmissionStatus,
+  getRedisConfig,
 } from '../src/lib/storage'
 /* eslint-enable import/first */
+
+/* The real client construction now requires UPSTASH_REDIS_REST_URL/TOKEN to be
+ * set. The existing tests run against the mocked Redis and don't set those vars,
+ * so we provide dummy values here to keep the production check satisfied while
+ * the dedicated "missing env" test below temporarily removes them. */
+beforeAll(() => {
+  process.env.UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL ?? 'http://localhost:6379'
+  process.env.UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN ?? 'test-token'
+})
 
 const fake = new FakeRedis()
 
@@ -344,5 +354,37 @@ describe('submissions', () => {
     const byId = Object.fromEntries(subs.map((s) => [s.id, s]))
     expect(byId[sub1.id].status).toBe('processed')
     expect(byId[sub2.id].status).toBe('new')
+  })
+})
+
+describe('redis configuration', () => {
+  it('getRedisConfig throws when UPSTASH_REDIS_REST_URL/TOKEN are missing', () => {
+    const savedUrl = process.env.UPSTASH_REDIS_REST_URL
+    const savedToken = process.env.UPSTASH_REDIS_REST_TOKEN
+    try {
+      delete process.env.UPSTASH_REDIS_REST_URL
+      delete process.env.UPSTASH_REDIS_REST_TOKEN
+      expect(() => getRedisConfig()).toThrow(/UPSTASH_REDIS_REST_URL/)
+    } finally {
+      if (savedUrl === undefined) delete process.env.UPSTASH_REDIS_REST_URL
+      else process.env.UPSTASH_REDIS_REST_URL = savedUrl
+      if (savedToken === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN
+      else process.env.UPSTASH_REDIS_REST_TOKEN = savedToken
+    }
+  })
+
+  it('getRedisConfig throws when only the token is missing', () => {
+    const savedUrl = process.env.UPSTASH_REDIS_REST_URL
+    const savedToken = process.env.UPSTASH_REDIS_REST_TOKEN
+    try {
+      process.env.UPSTASH_REDIS_REST_URL = 'http://localhost:6379'
+      delete process.env.UPSTASH_REDIS_REST_TOKEN
+      expect(() => getRedisConfig()).toThrow(/UPSTASH_REDIS_REST_TOKEN/)
+    } finally {
+      if (savedUrl === undefined) delete process.env.UPSTASH_REDIS_REST_URL
+      else process.env.UPSTASH_REDIS_REST_URL = savedUrl
+      if (savedToken === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN
+      else process.env.UPSTASH_REDIS_REST_TOKEN = savedToken
+    }
   })
 })

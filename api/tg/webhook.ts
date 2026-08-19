@@ -76,7 +76,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // --- Message ---
     if (update.message) {
       const msg = update.message
-      const chatId = msg.chat.id
+      const chatId = msg.chat?.id
+      if (chatId == null) {
+        return res.status(200).json({ ok: true })
+      }
       const text = msg.text?.trim()
       const photo = msg.photo
 
@@ -120,7 +123,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // --- Callback query (inline button press) ---
     if (update.callback_query) {
       const cq = update.callback_query
-      const chatId = cq.message.chat.id
+      const chatId = cq.message?.chat?.id
+      if (chatId == null) {
+        return res.status(200).json({ ok: true })
+      }
       const data = cq.data
 
       if (!(await isAdmin(chatId))) {

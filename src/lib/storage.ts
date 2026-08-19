@@ -9,12 +9,34 @@ import type { CmsData, GalleryItem, Group, Subscription, Trainer, LifePost, Test
 
 let _redis: Redis | null = null
 
+/**
+ * Reads and validates the Upstash Redis connection configuration from the
+ * environment.
+ *
+ * Throws a clear Error if either `UPSTASH_REDIS_REST_URL` or
+ * `UPSTASH_REDIS_REST_TOKEN` is missing/empty, so a misconfigured deployment
+ * fails fast at startup with an actionable message instead of producing
+ * cryptic auth errors deep inside the first Redis request.
+ */
+export function getRedisConfig(): { url: string; token: string } {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) {
+    const missing: string[] = []
+    if (!url) missing.push('UPSTASH_REDIS_REST_URL')
+    if (!token) missing.push('UPSTASH_REDIS_REST_TOKEN')
+    throw new Error(
+      `Redis is not configured: ${missing.join(' and ')} ${missing.length > 1 ? 'are' : 'is'} not set. ` +
+        'Set the Upstash Redis environment variables before starting the app.'
+    )
+  }
+  return { url, token }
+}
+
 function getRedis(): Redis {
   if (!_redis) {
-    _redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL ?? '',
-      token: process.env.UPSTASH_REDIS_REST_TOKEN ?? '',
-    })
+    const { url, token } = getRedisConfig()
+    _redis = new Redis({ url, token })
   }
   return _redis
 }
@@ -52,6 +74,21 @@ export async function setContent(data: CmsData): Promise<void> {
 /*  Section helpers — read section, mutate, write back                 */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Read-modify-write for a single CMS section.
+ *
+ * NOTE — TOCTOU race condition: this reads the whole `CmsData` blob, applies
+ * `fn` in memory, then writes it back. Between the read and the write another
+ * writer could mutate the same (or a different) section, and this write would
+ * clobber their change (lost update / time-of-check-to-time-of-use).
+ *
+ * This is acceptable for the current usage: edits are performed exclusively by
+ * a single Telegram bot / admin flow at low concurrency, where simultaneous
+ * conflicting writes are effectively impossible. A full fix would use a Redis
+ * transaction / optimistic locking (WATCH + MULTI/EXEC) on the content key, but
+ * that is unnecessary complexity for this access pattern. Revisit if concurrent
+ * writers are ever introduced.
+ */
 async function mutate<T extends keyof CmsData>(
   section: T,
   fn: (current: CmsData[T]) => CmsData[T]

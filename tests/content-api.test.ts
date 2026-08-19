@@ -141,4 +141,39 @@ describe('content API', () => {
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal error' })
   })
+
+  it('PUT with missing required field (groups) returns 400', async () => {
+    mocks.setContent.mockResolvedValue(undefined)
+    const headers = await adminHeaders()
+    const { groups: _removed, ...bodyWithoutGroups } = fixture as any
+    const res = mockRes()
+    await handler({ method: 'PUT', body: bodyWithoutGroups, headers } as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith({ error: 'Invalid content data' })
+    expect(mocks.setContent).not.toHaveBeenCalled()
+  })
+
+  it('PUT with wrong-typed field (groups is a string) returns 400', async () => {
+    mocks.setContent.mockResolvedValue(undefined)
+    const headers = await adminHeaders()
+    const res = mockRes()
+    await handler({ method: 'PUT', body: { ...fixture, groups: 'not-an-array' }, headers } as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith({ error: 'Invalid content data' })
+    expect(mocks.setContent).not.toHaveBeenCalled()
+  })
+
+  it('PUT with content-length exceeding max returns 413', async () => {
+    mocks.setContent.mockResolvedValue(undefined)
+    const headers = await adminHeaders()
+    headers['content-length'] = '2000000'
+    const res = mockRes()
+    await handler({ method: 'PUT', body: fixture, headers } as any, res as any)
+
+    expect(res.status).toHaveBeenCalledWith(413)
+    expect(res.json).toHaveBeenCalledWith({ error: 'Request too large' })
+    expect(mocks.setContent).not.toHaveBeenCalled()
+  })
 })

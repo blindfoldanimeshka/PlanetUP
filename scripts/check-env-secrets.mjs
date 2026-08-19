@@ -11,7 +11,7 @@
  *
  * Usage: node scripts/check-env-secrets.mjs
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve, join, basename } from 'node:path'
 
 const ROOT = process.cwd()

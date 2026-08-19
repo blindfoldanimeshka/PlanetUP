@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { getContent, setContent } from '../src/lib/storage.js'
-import type { CmsData } from '../src/types/cms.js'
 import { hasValidAdminSession } from '../src/lib/adminAuth.js'
+import { cmsDataSchema, MAX_BODY_SIZE } from '../src/lib/cmsSchema.js'
 
 /**
  * Public API — returns the full CMS content from Redis.
@@ -26,8 +26,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!hasValidAdminSession(req.headers.cookie, req.headers['x-csrf-token'])) {
         return res.status(401).json({ error: 'Unauthorized' })
       }
-      const data = req.body as CmsData
-      await setContent(data)
+
+      const contentLength = req.headers['content-length']
+      if (contentLength && Number(contentLength) > MAX_BODY_SIZE) {
+        return res.status(413).json({ error: 'Request too large' })
+      }
+
+      const parsed = cmsDataSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid content data' })
+      }
+
+      await setContent(parsed.data)
       return res.status(200).json({ ok: true })
     }
 

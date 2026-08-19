@@ -24,6 +24,8 @@ import {
   type AdminState,
 } from '../../src/lib/storage.js'
 import type { Group, Subscription, Trainer, LifePost, Testimonial, GalleryItem } from '../../src/types/cms.js'
+import { escapeHtml } from '../../src/lib/escapeHtml.js'
+import { isAllowedEditField, sanitizeCmsText } from '../../src/lib/botCmsGuard.js'
 import { sendMessage } from './webhook.js'
 
 /* ------------------------------------------------------------------ */
@@ -79,10 +81,6 @@ function cancelKeyboard() {
 
 function uid(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}`
-}
-
-function escapeHtml(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 async function reply(token: string, chatId: number, text: string, keyboard?: any) {
@@ -512,12 +510,16 @@ export async function handleCallback(
     if (action === 'field') {
       const field = data.split(':')[3]
       if (!state) return
+      if (!isAllowedEditField(section, field)) {
+        await reply(token, chatId, '❌ Недопустимое поле для редактирования.')
+        return
+      }
       await setAdminState(chatId, {
         ...state,
         action: `awaiting:${field}`,
         updatedAt: Date.now(),
       })
-      await reply(token, chatId, `Введите значение для <b>${field}</b>:`, cancelKeyboard())
+      await reply(token, chatId, `Введите значение для <b>${escapeHtml(field)}</b>:`, cancelKeyboard())
       return
     }
     return
@@ -682,6 +684,8 @@ async function handleStatefulInput(token: string, chatId: number, state: AdminSt
     if (section === 'contacts') {
       const settings = await getSettings()
       if (!settings) return
+      if (!isAllowedEditField('contacts', field)) return
+      const sanitized = sanitizeCmsText(text)
       const keyMap: Record<string, any> = {
         phone: (v: string) => ({ ...settings, phone: v, phoneHref: `tel:${v.replace(/\D/g, '')}` }),
         address: (v: string) => ({ ...settings, address: v }),
@@ -691,15 +695,17 @@ async function handleStatefulInput(token: string, chatId: number, state: AdminSt
         whatsapp: (v: string) => ({ ...settings, social: { ...settings.social, whatsapp: v } }),
       }
       if (keyMap[field]) {
-        await updateSettings(keyMap[field](text))
+        await updateSettings(keyMap[field](sanitized))
         await clearAdminState(chatId)
-        await reply(token, chatId, `✅ Поле <b>${field}</b> обновлено!`)
+        await reply(token, chatId, `✅ Поле <b>${escapeHtml(field)}</b> обновлено!`)
         await showSection(token, chatId, 'contacts')
       }
       return
     }
 
     // Generic section edit
+    if (!isAllowedEditField(section, field)) return
+    const sanitizedText = sanitizeCmsText(text)
     const updaters: Record<string, (id: string, field: string, value: string) => Promise<void>> = {
       schedule: async (id, f, v) => {
         const groups = await getGroups()
@@ -744,9 +750,9 @@ async function handleStatefulInput(token: string, chatId: number, state: AdminSt
     }
 
     if (updaters[section] && state.targetId) {
-      await updaters[section](state.targetId, field, text)
+      await updaters[section](state.targetId, field, sanitizedText)
       await clearAdminState(chatId)
-      await reply(token, chatId, `✅ Поле <b>${field}</b> обновлено!`)
+      await reply(token, chatId, `✅ Поле <b>${escapeHtml(field)}</b> обновлено!`)
       await showSection(token, chatId, section)
     }
     return

@@ -43,10 +43,13 @@ function mockRes() {
   return { status, json, setHeader }
 }
 
-function mockReq(body: unknown, ip = '127.0.0.1') {
+function mockReq(body: unknown, ip = '127.0.0.1', contentType: string | null = 'application/json') {
   return {
     method: 'POST',
-    headers: { 'x-forwarded-for': ip },
+    headers: {
+      'x-forwarded-for': ip,
+      ...(contentType === null ? {} : { 'content-type': contentType }),
+    },
     socket: { remoteAddress: ip },
     body,
   }
@@ -76,6 +79,20 @@ describe('submit-form handler', () => {
     const res = mockRes()
     await handler({ method: 'GET' } as any, res as any)
     expect(res.status).toHaveBeenCalledWith(405)
+  })
+
+  it('rejects non-JSON content types with 415', async () => {
+    const res = mockRes()
+    await handler(mockReq(validChildPayload, '10.0.0.9', 'text/plain') as any, res as any)
+    expect(res.status).toHaveBeenCalledWith(415)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  it('rejects requests without a content-type header with 415', async () => {
+    const res = mockRes()
+    await handler(mockReq(validChildPayload, '10.0.0.10', null) as any, res as any)
+    expect(res.status).toHaveBeenCalledWith(415)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 
   it('sends child data to Telegram with HTML formatting', async () => {
