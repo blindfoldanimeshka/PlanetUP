@@ -40,8 +40,8 @@ function CompactCard({
       onClick={onClick}
       className="group cursor-pointer overflow-hidden rounded-lg bg-min-surface shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
-      {/* Photo with fixed height + gradient overlay */}
-      <div className="relative h-120 overflow-hidden">
+      {/* Photo — name lives INSIDE this relative wrapper so absolute works */}
+      <div className="relative h-72 sm:h-96 md:h-120 overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
@@ -49,14 +49,16 @@ function CompactCard({
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-      </div>
 
-      {/* Name + specialization — absolute at bottom of card */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-left text-white">
-        <h3 className="font-display text-2xl font-bold">{trainer.name}</h3>
-        <p className="mt-1 text-sm font-medium uppercase tracking-widest text-min-accent">
-          {trainer.specialization}
-        </p>
+        {/* Name + specialization — absolute bottom inside photo wrapper */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-left text-white sm:p-6">
+          <h3 className="font-display text-xl font-bold sm:text-2xl">
+            {trainer.name}
+          </h3>
+          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-min-accent sm:text-sm">
+            {trainer.specialization}
+          </p>
+        </div>
       </div>
     </motion.div>
   )
@@ -82,8 +84,8 @@ function ExpandedCard({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      {/* Photo — same height as compact for shared-layout feel */}
-      <div className="relative h-120 overflow-hidden">
+      {/* Photo — responsive height, name lives inside */}
+      <div className="relative h-72 sm:h-96 md:h-120 overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
@@ -97,11 +99,11 @@ function ExpandedCard({
             e.stopPropagation()
             onClose()
           }}
-          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
           aria-label="Закрыть"
         >
           <svg
-            className="h-5 w-5"
+            className="h-4 w-4 sm:h-5 sm:w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -115,11 +117,11 @@ function ExpandedCard({
         </button>
 
         {/* Name + specialization — absolute at bottom of photo */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-left text-white sm:p-8 lg:p-12">
-          <h3 className="font-display text-3xl font-bold sm:text-4xl">
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-left text-white sm:p-6 lg:p-8">
+          <h3 className="font-display text-2xl font-bold sm:text-3xl lg:text-4xl">
             {trainer.name}
           </h3>
-          <p className="mt-2 text-sm font-medium uppercase tracking-widest text-min-accent">
+          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-min-accent sm:mt-2 sm:text-sm">
             {trainer.specialization}
           </p>
         </div>
@@ -130,7 +132,7 @@ function ExpandedCard({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.35 }}
-        className="p-6 font-sans text-base leading-relaxed text-white/80 sm:p-8 lg:p-12"
+        className="p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
       >
         <p>{trainer.bio}</p>
         {trainer.social && (
