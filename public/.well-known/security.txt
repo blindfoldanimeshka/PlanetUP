@@ -1,0 +1,5 @@
+Contact: mailto:aleksandra.danichek@mail.ru
+Contact: https://t.me/planetup_acro
+Expires: 2027-08-19T00:00:00.000Z
+Preferred-Languages: ru, en
+Canonical: https://planetaup.ru/.well-known/security.txt

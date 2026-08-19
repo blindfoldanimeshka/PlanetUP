@@ -1,5 +1,40 @@
 import { z } from 'zod'
 
+/** Remove C0/C1 control characters and trim surrounding whitespace. */
+export function stripControlChars(value: string): string {
+  let out = ''
+  for (const ch of value) {
+    const code = ch.codePointAt(0) ?? 0
+    if (code <= 0x1f || (code >= 0x7f && code <= 0x9f)) continue
+    out += ch
+  }
+  return out.trim()
+}
+
+export const MAX_NAME_LENGTH = 120
+export const MAX_TEXT_LENGTH = 2000
+
+/** Recursively strip control characters from any string in an arbitrary value. */
+export function deepSanitize(input: unknown): unknown {
+  if (typeof input === 'string') return stripControlChars(input)
+  if (Array.isArray(input)) return input.map(deepSanitize)
+  if (input && typeof input === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(input)) out[k] = deepSanitize(v)
+    return out
+  }
+  return input
+}
+
+const cleanedString = (max: number) =>
+  z.string().transform((v) => stripControlChars(v).slice(0, max))
+
+function nameField(requiredMsg: string) {
+  return cleanedString(MAX_NAME_LENGTH).pipe(
+    z.string().min(2, requiredMsg).max(MAX_NAME_LENGTH, 'Имя слишком длинное')
+  )
+}
+
 export const BOOKING_SOURCES = [
   { value: 'vk', label: 'ВКонтакте' },
   { value: 'instagram', label: 'Instagram' },
@@ -22,13 +57,27 @@ export function formatPhone(digits: string): string {
   return result
 }
 
-const phoneSchema = z.string().refine(
-  (val) => {
-    const digits = val.replace(/\D/g, '')
-    return digits.length === 11 && digits.startsWith('7')
-  },
-  { message: 'Введите корректный номер телефона в формате +7 (XXX) XXX-XX-XX' }
-)
+const phoneSchema = z
+  .string()
+  .transform((v) => v.replace(/\D/g, '').slice(0, 11))
+  .pipe(
+    z.string().refine(
+      (digits) => digits.length === 11 && digits.startsWith('7'),
+      { message: 'Введите корректный номер телефона в формате +7 (XXX) XXX-XX-XX' }
+    )
+  )
+
+const ageSchema = z
+  .string()
+  .min(1, 'Укажите возраст')
+  .refine((v) => /^\d+$/.test(v.trim()), { message: 'Возраст должен быть числом' })
+  .refine(
+    (v) => {
+      const n = Number(v)
+      return n >= 3 && n <= 99
+    },
+    { message: 'Возраст должен быть от 3 до 99 лет' }
+  )
 
 const sourceSchema = z.enum(
   BOOKING_SOURCES.map((s) => s.value) as [BookingSource, ...BookingSource[]]
@@ -41,14 +90,14 @@ const consentSchema = z.boolean().refine(
 
 export const childBookingSchema = z.object({
   formType: z.literal('child'),
-  childName: z.string().min(1, 'Введите имя ребёнка').min(2, 'Имя слишком короткое'),
-  age: z.string().min(1, 'Укажите возраст'),
+  childName: nameField('Введите имя ребёнка'),
+  age: ageSchema,
   hasExperience: z.enum(['yes', 'no'], {
     message: 'Укажите, был ли опыт занятий',
   }),
-  experienceDetails: z.string().optional(),
+  experienceDetails: cleanedString(MAX_TEXT_LENGTH).optional(),
   phone: phoneSchema,
-  parentName: z.string().min(1, 'Введите имя родителя').min(2, 'Имя слишком короткое'),
+  parentName: nameField('Введите имя родителя'),
   source: sourceSchema,
   consent: consentSchema,
   honeypot: z.string().optional(),
@@ -56,11 +105,11 @@ export const childBookingSchema = z.object({
 
 export const adultBookingSchema = z.object({
   formType: z.literal('adult'),
-  name: z.string().min(1, 'Введите имя').min(2, 'Имя слишком короткое'),
-  age: z.string().min(1, 'Укажите возраст'),
-  previousSportExperience: z.string().optional(),
+  name: nameField('Введите имя'),
+  age: ageSchema,
+  previousSportExperience: cleanedString(MAX_TEXT_LENGTH).optional(),
   phone: phoneSchema,
-  injuries: z.string().optional(),
+  injuries: cleanedString(MAX_TEXT_LENGTH).optional(),
   source: sourceSchema,
   consent: consentSchema,
   honeypot: z.string().optional(),

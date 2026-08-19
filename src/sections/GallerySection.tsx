@@ -80,11 +80,11 @@ export function GallerySection({ cms }: { cms: CmsData }) {
             type="button"
             onClick={() => handleOpen(i)}
             className="group mb-3 block w-full break-inside-avoid overflow-hidden rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
-            aria-label="Открыть фото"
+            aria-label={`Открыть фото ${i + 1}: ${CATEGORY_LABELS[item.category] ?? item.category}`}
           >
             <img
               src={item.photoUrl}
-              alt=""
+              alt={`Фотография — ${CATEGORY_LABELS[item.category] ?? item.category}`}
               loading="lazy"
               className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
             />
@@ -106,6 +106,11 @@ export function GallerySection({ cms }: { cms: CmsData }) {
             close={handleClose}
             index={lightboxIndex}
             slides={slides}
+            labels={{
+              Close: 'Закрыть',
+              Previous: 'Предыдущее фото',
+              Next: 'Следующее фото',
+            }}
           />
         </Suspense>
       )}

@@ -38,8 +38,9 @@ const validAdultPayload = {
 
 function mockRes() {
   const json = vi.fn()
-  const status = vi.fn(() => ({ json }))
-  return { status, json }
+  const setHeader = vi.fn()
+  const status = vi.fn(() => ({ json, setHeader }))
+  return { status, json, setHeader }
 }
 
 function mockReq(body: unknown, ip = '127.0.0.1') {

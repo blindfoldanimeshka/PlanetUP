@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+vi.mock('../src/lib/storage.js', () => ({
+  checkAdminLoginRateLimit: vi.fn(async () => ({ allowed: true, retryAfter: 0 })),
+  resetAdminLoginRateLimit: vi.fn(async () => {}),
+}))
+
 type Handler = typeof import('../api/admin/session.js').default
 let handler: Handler
 
@@ -40,7 +45,9 @@ describe('admin session API', () => {
     await handler({ method: 'POST', body: { password: 'wrong password' } } as any, res as any)
 
     expect(res.status).toHaveBeenCalledWith(401)
-    expect(res.setHeader).not.toHaveBeenCalled()
+    expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'private, no-store, max-age=0')
+    const setCookieCalls = res.setHeader.mock.calls.filter((c) => c[0] === 'Set-Cookie')
+    expect(setCookieCalls).toHaveLength(0)
   })
 
   it('clears the session cookie on logout', async () => {

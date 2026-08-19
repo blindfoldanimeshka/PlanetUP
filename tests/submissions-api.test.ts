@@ -44,8 +44,9 @@ function mockReq(method: string, opts: { token?: string; id?: string; body?: unk
 async function adminHeaders() {
   const res = mockRes()
   await sessionHandler({ method: 'POST', body: { password: 'correct horse battery staple' } } as any, res as any)
+  const cookieCall = res.setHeader.mock.calls.find((c) => c[0] === 'Set-Cookie')
   return {
-    cookie: res.setHeader.mock.calls[0][1] as string,
+    cookie: (cookieCall ? cookieCall[1] : '') as string,
     'x-csrf-token': res.json.mock.calls[0][0].csrfToken as string,
   }
 }

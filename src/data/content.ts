@@ -22,7 +22,7 @@ export const siteContent: CmsData = {
     hero: {
       title: 'Планета UP — студия акробатики',
       subtitle:
-        'Занятия для взрослых и детей в Долгопрудном: акробатика, акро-гимнастика, растяжка и танцевальные постановки. Пробное занятие бесплатно.',
+        'Занятия для взрослых и детей в Долгопрудном: акробатика, акро-гимнастика, растяжка и танцевальные постановки. Запишитесь на пробное занятие.',
     },
     seo: {
       title: 'Планета UP — студия акробатики для взрослых и детей в Долгопрудном',
@@ -46,8 +46,8 @@ export const siteContent: CmsData = {
     {
       id: 'trial',
       name: 'Пробное занятие',
-      price: '0 ₽',
-      description: 'Первое пробное занятие бесплатно по предварительной записи.',
+      price: '900 ₽',
+      description: 'Первое пробное занятие по предварительной записи.',
       conditions: 'Доступно один раз для новых учеников.',
       sortOrder: 1,
     },
@@ -318,6 +318,12 @@ export const siteContent: CmsData = {
 
   gallery: [
     { id: 'g-ad-1', photoUrl: media('adults/img-6249.webp'), category: 'adults', sortOrder: 1 },
+
+    { id: 'g-kd-1', photoUrl: media('kids/img-1871.webp'), category: 'kids', sortOrder: 11 },
+    { id: 'g-kd-2', photoUrl: media('kids/img-2609.webp'), category: 'kids', sortOrder: 12 },
+    { id: 'g-kd-3', photoUrl: media('kids/img-3115.webp'), category: 'kids', sortOrder: 13 },
+    { id: 'g-kd-4', photoUrl: media('kids/img-3366.webp'), category: 'kids', sortOrder: 14 },
+    { id: 'g-kd-5', photoUrl: media('kids/img-4060.webp'), category: 'kids', sortOrder: 15 },
 
     { id: 'g-cm-1', photoUrl: media('gallery/img-8977.webp'), category: 'competitions', sortOrder: 21 },
     { id: 'g-cm-2', photoUrl: media('gallery/img-9030.webp'), category: 'competitions', sortOrder: 22 },

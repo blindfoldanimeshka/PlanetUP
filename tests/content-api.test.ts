@@ -12,6 +12,8 @@ const { mocks } = vi.hoisted(() => ({
 vi.mock('../src/lib/storage.js', () => ({
   getContent: mocks.getContent,
   setContent: mocks.setContent,
+  checkAdminLoginRateLimit: vi.fn(async () => ({ allowed: true, retryAfter: 0 })),
+  resetAdminLoginRateLimit: vi.fn(async () => {}),
 }))
 
 type Handler = typeof import('../api/content.js').default
@@ -55,7 +57,8 @@ async function adminHeaders() {
   const res = mockRes()
   await sessionHandler({ method: 'POST', body: { password: 'correct horse battery staple' } } as any, res as any)
   const csrfToken = res.json.mock.calls[0][0].csrfToken as string
-  const cookie = res.setHeader.mock.calls[0][1] as string
+  const cookieCall = res.setHeader.mock.calls.find((c) => c[0] === 'Set-Cookie')
+  const cookie = (cookieCall ? cookieCall[1] : '') as string
   return { cookie, 'x-csrf-token': csrfToken }
 }
 

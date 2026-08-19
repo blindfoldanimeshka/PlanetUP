@@ -15,7 +15,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'glass-surface text-min-accent border border-min-accent/40 hover:bg-white/15',
+        'bg-min-accent text-min-bg border border-min-accent hover:bg-min-accent/90',
       secondary:
         'glass-surface text-min-text border border-white/15 hover:bg-white/15',
       ghost:

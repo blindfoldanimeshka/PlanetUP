@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import {
   bookingSchema,
   formatPhone,
+  deepSanitize,
   type BookingFormData,
 } from '../src/lib/validation.js'
 import { escapeHtml } from '../src/lib/escapeHtml.js'
@@ -244,11 +245,18 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0')
+
+  const contentLength = Number(req.headers['content-length'] ?? 0)
+  if (contentLength > 64 * 1024) {
+    return res.status(413).json({ error: 'Тело запроса слишком большое' })
+  }
+
   const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown'
   const ipStr = Array.isArray(rawIp) ? rawIp[0].trim() : rawIp.trim()
 
   // Honeypot check — return 200 OK to avoid revealing detection
-  if (req.body.honeypot) {
+  if (req.body?.honeypot) {
     return res.status(200).json({ success: true })
   }
 
@@ -265,8 +273,8 @@ export default async function handler(
       error: 'Слишком много заявок. Подождите минуту.',
     })
   }
-  // Validate body
-  const parseResult = bookingSchema.safeParse(req.body)
+  // Validate body (defense-in-depth: strip control chars from all inputs first)
+  const parseResult = bookingSchema.safeParse(deepSanitize(req.body))
   if (!parseResult.success) {
     const isDev = process.env.NODE_ENV === 'development'
     return res.status(400).json({

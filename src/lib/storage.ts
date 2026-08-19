@@ -294,4 +294,26 @@ export async function updateSubmissionStatus(
   }
 }
 
+/* ---------- Admin login rate limiting (brute-force protection) ---------- */
+
+const ADMIN_LOGIN_WINDOW_SECONDS = 15 * 60
+const ADMIN_LOGIN_MAX_ATTEMPTS = 5
+
+export async function checkAdminLoginRateLimit(
+  clientIp: string
+): Promise<{ allowed: boolean; retryAfter: number }> {
+  const key = `ratelimit:admin:${createHash('sha256').update(clientIp).digest('hex')}`
+  const ttl = await redis.ttl(key)
+  const count = await redis.incr(key)
+  if (count === 1) await redis.expire(key, ADMIN_LOGIN_WINDOW_SECONDS)
+  if (count > ADMIN_LOGIN_MAX_ATTEMPTS) {
+    return { allowed: false, retryAfter: Math.max(ttl, 0) }
+  }
+  return { allowed: true, retryAfter: 0 }
+}
+
+export async function resetAdminLoginRateLimit(clientIp: string): Promise<void> {
+  await redis.del(`ratelimit:admin:${createHash('sha256').update(clientIp).digest('hex')}`)
+}
+
 export { redis }

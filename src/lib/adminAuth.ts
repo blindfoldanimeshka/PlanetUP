@@ -1,7 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
 const SESSION_COOKIE = 'planetup_admin_session'
-const SESSION_TTL_SECONDS = 8 * 60 * 60
+const SESSION_TTL_SECONDS = 2 * 60 * 60
 
 interface AdminSession {
   csrfToken: string

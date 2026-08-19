@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type {
   CmsData,
   SiteSettings,
@@ -984,6 +985,11 @@ function SubmissionsViewer() {
     load()
   }, [load])
 
+  useEffect(() => {
+    const id = setInterval(load, 15000)
+    return () => clearInterval(id)
+  }, [load])
+
   const remove = async (id: string) => {
     if (!confirm('Удалить заявку?')) return
     await fetch(`/api/submissions?id=${encodeURIComponent(id)}`, {
@@ -1056,7 +1062,19 @@ export function Admin() {
   const [data, setData] = useState<CmsData | null>(null)
   const [initial, setInitial] = useState<CmsData | null>(null)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error' | 'validation'>('idle')
-  const [active, setActive] = useState<NavKey>('settings')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialTabParam = searchParams.get('tab')
+  const [active, setActive] = useState<NavKey>(
+    NAV.some((n) => n.key === initialTabParam) ? (initialTabParam as NavKey) : 'settings'
+  )
+  const changeTab = (key: NavKey) => {
+    setActive(key)
+    if (key === 'settings') {
+      if (searchParams.has('tab')) setSearchParams({}, { replace: true })
+    } else {
+      setSearchParams({ tab: key }, { replace: true })
+    }
+  }
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -1176,6 +1194,7 @@ export function Admin() {
     <>
       <Helmet>
         <title>Админ — Планета UP</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {!authed ? (
@@ -1260,7 +1279,7 @@ export function Admin() {
                 <button
                   key={n.key}
                   type="button"
-                  onClick={() => setActive(n.key)}
+                  onClick={() => changeTab(n.key)}
                   className={`whitespace-nowrap rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                     active === n.key
                       ? 'bg-min-accent/20 text-min-accent'

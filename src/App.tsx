@@ -73,10 +73,10 @@ export default function App() {
           name="description"
           content={
             seo?.description ??
-            'Студия акробатики в Москве: группы для взрослых и детей, воздушная акробатика, акро-гимнастика.'
+            'Студия акробатики в Долгопрудном: группы для взрослых и детей, воздушная акробатика, акро-гимнастика.'
           }
         />
-        <link rel="canonical" href="https://planeta-up.ru/" />
+        <link rel="canonical" href="https://planetaup.ru/" />
       </Helmet>
       <a
         href="#main-content"

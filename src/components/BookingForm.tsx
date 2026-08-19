@@ -174,7 +174,7 @@ export function BookingForm({
       </Tabs.Root>
 
       {submitError && (
-        <p className="mt-2 text-sm text-min-error">{submitError}</p>
+        <p role="alert" aria-live="polite" className="mt-2 text-sm text-min-error">{submitError}</p>
       )}
     </>
   )
@@ -219,6 +219,7 @@ function ChildForm({
         id="booking-child-name"
         placeholder="ФИО ребёнка"
         autoComplete="name"
+        maxLength={120}
         error={errors.childName?.message}
         {...register('childName')}
       />
@@ -227,6 +228,7 @@ function ChildForm({
         id="booking-child-age"
         placeholder="Возраст"
         inputMode="numeric"
+        maxLength={3}
         error={errors.age?.message}
         {...register('age')}
       />
@@ -249,6 +251,7 @@ function ChildForm({
           id="booking-child-experience"
           placeholder="Расскажите о предыдущем опыте"
           className="sm:col-span-2"
+          maxLength={2000}
           error={errors.experienceDetails?.message}
           {...register('experienceDetails')}
         />
@@ -264,9 +267,12 @@ function ChildForm({
           render={({ field }) => (
             <input
               id="booking-phone"
+              name="phone"
               type="tel"
               placeholder="+7 (___) ___-__-__"
               inputMode="numeric"
+              aria-invalid={errors.phone ? true : undefined}
+              aria-describedby={errors.phone ? 'booking-phone-error' : undefined}
               className={cn(
                 inputBase,
                 errors.phone ? 'border-min-error' : 'border-min-border'
@@ -281,7 +287,9 @@ function ChildForm({
           )}
         />
         {errors.phone && (
-          <p className="mt-1 text-xs text-min-error">{errors.phone.message}</p>
+          <p id="booking-phone-error" role="alert" className="mt-1 text-xs text-min-error">
+            {errors.phone.message}
+          </p>
         )}
       </div>
 
@@ -342,6 +350,7 @@ function AdultForm({
         id="booking-adult-name"
         placeholder="Ваше ФИО"
         autoComplete="name"
+        maxLength={120}
         error={errors.name?.message}
         {...register('name')}
       />
@@ -350,6 +359,7 @@ function AdultForm({
         id="booking-adult-age"
         placeholder="Возраст"
         inputMode="numeric"
+        maxLength={3}
         error={errors.age?.message}
         {...register('age')}
       />
@@ -358,6 +368,7 @@ function AdultForm({
         id="booking-adult-experience"
         placeholder="Расскажите о спортивном опыте (необязательно)"
         className="sm:col-span-2"
+        maxLength={2000}
         error={errors.previousSportExperience?.message}
         {...register('previousSportExperience')}
       />
@@ -366,6 +377,7 @@ function AdultForm({
         id="booking-adult-injuries"
         placeholder="Есть ли травмы или ограничения? (необязательно)"
         className="sm:col-span-2"
+        maxLength={2000}
         error={errors.injuries?.message}
         {...register('injuries')}
       />
@@ -380,9 +392,12 @@ function AdultForm({
           render={({ field }) => (
             <input
               id="booking-adult-phone"
+              name="phone"
               type="tel"
               placeholder="+7 (___) ___-__-__"
               inputMode="numeric"
+              aria-invalid={errors.phone ? true : undefined}
+              aria-describedby={errors.phone ? 'booking-adult-phone-error' : undefined}
               className={cn(
                 inputBase,
                 errors.phone ? 'border-min-error' : 'border-min-border'
@@ -397,7 +412,9 @@ function AdultForm({
           )}
         />
         {errors.phone && (
-          <p className="mt-1 text-xs text-min-error">{errors.phone.message}</p>
+          <p id="booking-adult-phone-error" role="alert" className="mt-1 text-xs text-min-error">
+            {errors.phone.message}
+          </p>
         )}
       </div>
 
@@ -424,6 +441,7 @@ function TextField({
   error?: string
   className?: string
 }) {
+  const errorId = error ? `${id}-error` : undefined
   return (
     <div className={cn('sm:col-span-1', className)}>
       <label htmlFor={id} className="sr-only">
@@ -432,13 +450,19 @@ function TextField({
       <input
         id={id}
         placeholder={placeholder}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={errorId}
         className={cn(
           inputBase,
           error ? 'border-min-error' : 'border-min-border'
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className="mt-1 text-xs text-min-error">
+          {error}
+        </p>
+      )}
     </div>
   )
 }
@@ -453,6 +477,7 @@ function TextArea({
   error?: string
   className?: string
 }) {
+  const errorId = error ? `${id}-error` : undefined
   return (
     <div className={cn('sm:col-span-2', className)}>
       <label htmlFor={id} className="sr-only">
@@ -462,13 +487,19 @@ function TextArea({
         id={id}
         placeholder={placeholder}
         rows={3}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={errorId}
         className={cn(
           inputBase,
           error ? 'border-min-error' : 'border-min-border'
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className="mt-1 text-xs text-min-error">
+          {error}
+        </p>
+      )}
     </div>
   )
 }
@@ -485,6 +516,8 @@ function SourceField({
       </label>
       <select
         id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
         className={cn(
           selectBase,
           error ? 'border-min-error' : 'border-min-border'
@@ -501,7 +534,9 @@ function SourceField({
           </option>
         ))}
       </select>
-      {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-min-error">{error}</p>
+      )}
     </div>
   )
 }

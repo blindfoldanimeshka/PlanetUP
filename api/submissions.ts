@@ -4,6 +4,8 @@ import { hasValidAdminSession } from '../src/lib/adminAuth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    res.setHeader('Cache-Control', 'private, no-store, max-age=0')
+
     if (!hasValidAdminSession(req.headers.cookie, req.headers['x-csrf-token'])) {
       return res.status(401).json({ error: 'Unauthorized' })
     }

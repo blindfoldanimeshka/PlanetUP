@@ -32,9 +32,9 @@ function ScrollIndicator() {
 export function Hero({ cms }: { cms?: CmsData | null }) {
   const { title: staticTitle } = siteContent.settings.hero
   const title = cms?.settings.hero.title ?? staticTitle
-  const subtitle =
+    const subtitle =
     cms?.settings.hero.subtitle ??
-    'Занятия для взрослых и детей в Долгопрудном. Пробное занятие — бесплатно.'
+    'Занятия для взрослых и детей в Долгопрудном. Запишитесь на пробное занятие.'
   const reduced = useReducedMotion()
   const [showForm, setShowForm] = useState(false)
 
@@ -73,12 +73,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, ease: 'easeOut' }}
         >
-          <Logo
-            src="/media/logo/logo-white.png"
-            size={96}
-            showWordmark={false}
-            className="[&_img]:max-h-none"
-          />
+          <Logo size={96} showWordmark={false} />
         </motion.div>
 
         {/* Eyebrow */}
@@ -150,9 +145,9 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
               <Button
                 variant="primary"
                 size="lg"
-                className="rounded-full border-min-accent bg-transparent px-8 py-4 text-base text-min-accent hover:bg-min-accent hover:text-min-bg hover:shadow-[0_0_30px_var(--min-accent-glow)]"
+                className="rounded-full border-min-accent bg-min-accent px-8 py-4 text-base font-semibold text-min-bg hover:bg-min-accent/90 hover:shadow-[0_0_30px_var(--min-accent-glow)]"
               >
-                Записаться на бесплатную тренировку
+                Записаться на пробное занятие
               </Button>
             </Dialog.Trigger>
             <Dialog.Portal forceMount>
@@ -209,7 +204,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
                       </div>
                       <Dialog.Description asChild>
                         <p className="sr-only">
-                          Форма записи на бесплатное пробное занятие в студии акробатики «Планета UP»
+                          Форма записи на пробное занятие в студии акробатики «Планета UP»
                         </p>
                       </Dialog.Description>
                       <BookingForm onClose={handleCloseForm} />
@@ -233,7 +228,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
             </Dialog.Portal>
           </Dialog.Root>
           <p className="mt-4 text-xs text-min-muted">
-            Пробное занятие — бесплатно. Без обязательств.
+            Пробное занятие — платно. Записывайтесь заранее.
           </p>
         </motion.div>
       </motion.div>
