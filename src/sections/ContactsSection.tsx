@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CmsData } from '@/types/cms'
 import { scrollToHero } from '@/lib/scroll'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -54,11 +55,11 @@ const SOCIAL_LABELS: Record<string, string> = {
   whatsapp: 'WhatsApp',
 }
 
-export function ContactsSection({ cms }: { cms: CmsData }) {
+export function ContactsSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   const { settings } = cms
 
   return (
-    <Section id="contacts">
+    <Section id="contacts" variant={variant}>
       <SectionHeading id="contacts" icon={MapPinIcon}>Контакты</SectionHeading>
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Info */}

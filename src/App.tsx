@@ -9,6 +9,7 @@ import { Hero } from '@/components/Hero'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ScrollProgress } from '@/components/scrollytelling/ScrollProgress'
 import { PageBackground } from '@/components/PageBackground'
+import { SectionDivider } from '@/components/ui/SectionDivider'
 import {
   AdultsSection,
   KidsSection,
@@ -26,15 +27,28 @@ function MainSections({ cms }: { cms: CmsData | null }) {
   if (!cms) return null
   return (
     <>
-      <FeaturesSection />
-      <AdultsSection cms={cms} />
-      <KidsSection cms={cms} />
-      <SubscriptionsSection cms={cms} />
-      <TeamSection cms={cms} />
-      <GallerySection cms={cms} />
-      <LifeSection cms={cms} />
-      <ReviewsSection cms={cms} />
-      <FaqSection cms={cms} />
+      {/* ── Overview ── */}
+      <FeaturesSection variant="surface" />
+
+      <SectionDivider />
+
+      {/* ── Programs & Pricing ── */}
+      <AdultsSection cms={cms} variant="compact" />
+      <KidsSection cms={cms} variant="compact" />
+      <SubscriptionsSection cms={cms} variant="compact" />
+
+      <SectionDivider />
+
+      {/* ── Team & Media ── */}
+      <TeamSection cms={cms} variant="compact" />
+      <GallerySection cms={cms} variant="compact" />
+      <LifeSection cms={cms} variant="compact" />
+
+      <SectionDivider />
+
+      {/* ── Social proof & Contact ── */}
+      <ReviewsSection cms={cms} variant="compact" />
+      <FaqSection cms={cms} variant="compact" />
       <ContactsSection cms={cms} />
     </>
   )

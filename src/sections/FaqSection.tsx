@@ -1,17 +1,18 @@
 import * as Accordion from '@radix-ui/react-accordion'
 import type { CmsData } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { CircleHelpIcon } from 'lucide-animated'
 import { ChevronDownIcon } from '@/components/icons/chevron-down'
 
-export function FaqSection({ cms }: { cms: CmsData }) {
+export function FaqSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   const sorted = [...cms.faq].sort((a, b) => a.sortOrder - b.sortOrder)
   if (sorted.length === 0) return null
 
   return (
-    <Section id="faq">
+    <Section id="faq" variant={variant}>
       <SectionHeading id="faq" icon={CircleHelpIcon}>Часто задаваемые вопросы</SectionHeading>
       <div className="mx-auto max-w-3xl">
         <Accordion.Root type="single" collapsible className="flex flex-col gap-3">

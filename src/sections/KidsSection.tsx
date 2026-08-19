@@ -1,16 +1,17 @@
 import type { CmsData } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { GroupCard } from '@/components/groups/GroupCard'
 import { ScheduleTabs } from '@/components/groups/ScheduleTabs'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { HeartIcon } from 'lucide-animated'
 
-export function KidsSection({ cms }: { cms: CmsData }) {
+export function KidsSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   const kidsGroups = cms.groups.filter((g) => g.category === 'kids')
   if (kidsGroups.length === 0) return null
 
   return (
-    <Section id="kids">
+    <Section id="kids" variant={variant}>
       <SectionHeading id="kids" icon={HeartIcon}>Детям</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {kidsGroups.map((group) => (

@@ -1,3 +1,4 @@
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { SparklesIcon } from 'lucide-animated'
@@ -21,9 +22,9 @@ const FEATURES = [
   },
 ]
 
-export function FeaturesSection() {
+export function FeaturesSection({ variant }: { variant?: SectionVariant } = {}) {
   return (
-    <Section id="features">
+    <Section id="features" variant={variant}>
       <SectionHeading id="features" icon={SparklesIcon}>
         Наши особенности
       </SectionHeading>

@@ -1,5 +1,6 @@
 import { scrollToHero } from '@/lib/scroll'
 import type { CmsData, Subscription } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -35,12 +36,12 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
   )
 }
 
-export function SubscriptionsSection({ cms }: { cms: CmsData }) {
+export function SubscriptionsSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   const sorted = [...cms.subscriptions].sort((a, b) => a.sortOrder - b.sortOrder)
   if (sorted.length === 0) return null
 
   return (
-    <Section id="subscriptions">
+    <Section id="subscriptions" variant={variant}>
       <SectionHeading id="subscriptions" icon={CreditCardIcon}>Цены</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {sorted.map((sub) => (

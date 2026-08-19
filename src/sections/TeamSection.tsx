@@ -1,4 +1,5 @@
 import type { CmsData, Trainer } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { UserCheckIcon } from 'lucide-animated'
@@ -39,10 +40,10 @@ function TrainerCard({ trainer }: { trainer: Trainer }) {
   )
 }
 
-export function TeamSection({ cms }: { cms: CmsData }) {
+export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   if (cms.trainers.length === 0) return null
   return (
-    <Section id="team">
+    <Section id="team" variant={variant}>
       <SectionHeading id="team" icon={UserCheckIcon}>
         Наша команда
       </SectionHeading>

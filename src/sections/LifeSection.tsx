@@ -3,6 +3,7 @@ import 'yet-another-react-lightbox/styles.css'
 
 const Lightbox = lazy(() => import('yet-another-react-lightbox'))
 import type { CmsData, LifePost } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
@@ -120,10 +121,10 @@ function LifePostCard({ post }: { post: LifePost }) {
   )
 }
 
-export function LifeSection({ cms }: { cms: CmsData }) {
+export function LifeSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   if (cms.lifePosts.length === 0) return null
   return (
-    <Section id="life">
+    <Section id="life" variant={variant}>
       <SectionHeading id="life" icon={CalendarDaysIcon}>
         Жизнь коллектива
       </SectionHeading>

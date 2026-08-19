@@ -1,13 +1,14 @@
 import type { CmsData } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
 import { MessageSquareIcon } from 'lucide-animated'
 
-export function ReviewsSection({ cms }: { cms: CmsData }) {
+export function ReviewsSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   if (cms.testimonials.length === 0) return null
   return (
-    <Section id="reviews">
+    <Section id="reviews" variant={variant}>
       <SectionHeading id="reviews" icon={MessageSquareIcon}>Отзывы</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cms.testimonials.map((t) => (

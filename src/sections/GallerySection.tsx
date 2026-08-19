@@ -3,6 +3,7 @@ import 'yet-another-react-lightbox/styles.css'
 
 const Lightbox = lazy(() => import('yet-another-react-lightbox'))
 import type { CmsData, GalleryCategory } from '@/types/cms'
+import type { SectionVariant } from '@/components/ui/Section'
 import { Section } from '@/components/ui/Section'
 import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/scrollytelling/SectionHeading'
@@ -17,7 +18,7 @@ const CATEGORY_LABELS: Record<GalleryCategory | 'all', string> = {
 
 const FILTERS: (GalleryCategory | 'all')[] = ['all', 'kids', 'adults', 'competitions']
 
-export function GallerySection({ cms }: { cms: CmsData }) {
+export function GallerySection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
   const [filter, setFilter] = useState<GalleryCategory | 'all'>('all')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
@@ -48,7 +49,7 @@ export function GallerySection({ cms }: { cms: CmsData }) {
   if (cms.gallery.length === 0) return null
 
   return (
-    <Section id="gallery">
+    <Section id="gallery" variant={variant}>
       <SectionHeading id="gallery" icon={SparklesIcon}>
         Галерея
       </SectionHeading>
