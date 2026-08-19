@@ -66,16 +66,16 @@ function ExpandedCard({
     <motion.div
       layout
       layoutId={`card-${trainer.id}`}
-      className="relative w-full overflow-hidden rounded-sm"
+      className="relative w-full overflow-hidden rounded-sm border border-min-border bg-min-surface"
     >
-      {/* Photo with gradient overlay */}
-      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative h-[50vh] min-h-[380px] max-h-[560px] w-full overflow-hidden">
+      {/* Photo with gradient overlay — name/specialization overlaid at bottom */}
+      <motion.div layoutId={`photo-wrapper-${trainer.id}`} className="relative aspect-[4/3] w-full overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
           className="h-full w-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-min-surface via-min-surface/60 to-transparent" />
 
         {/* Close button */}
         <button
@@ -89,44 +89,44 @@ function ExpandedCard({
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
         </button>
 
-        {/* Content at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-          <motion.h3
-            layoutId={`name-${trainer.id}`}
-            className="font-display text-3xl font-bold text-white sm:text-4xl"
-          >
+        {/* Name + specialization — absolute over photo */}
+        <h3 className="absolute bottom-0 left-0 w-full p-6 font-display text-3xl font-bold text-min-text-light transition duration-300 sm:p-8 lg:p-12">
+          <motion.span layoutId={`name-${trainer.id}`} className="block">
             {trainer.name}
-          </motion.h3>
-          <motion.p
+          </motion.span>
+          <motion.span
             layoutId={`spec-${trainer.id}`}
-            className="mt-2 text-sm font-medium uppercase tracking-widest text-min-accent"
+            className="mt-2 block font-sans text-sm font-medium uppercase tracking-widest text-min-accent"
           >
             {trainer.specialization}
-          </motion.p>
-          <motion.p
+          </motion.span>
+        </h3>
+      </motion.div>
+
+      {/* Bio + social — below photo in normal flow */}
+      <div className="p-6 font-sans text-base leading-relaxed text-min-text-light/80 sm:p-8 lg:p-12">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          {trainer.bio}
+        </motion.p>
+        {trainer.social && (
+          <motion.a
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="mt-4 max-w-2xl text-base leading-relaxed text-white/80"
+            transition={{ delay: 0.35, duration: 0.4 }}
+            href={trainer.social}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-block text-sm font-medium text-min-accent transition duration-200 hover:text-min-text-light"
+            onClick={(e) => e.stopPropagation()}
           >
-            {trainer.bio}
-          </motion.p>
-          {trainer.social && (
-            <motion.a
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.4 }}
-              href={trainer.social}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-block text-sm font-medium text-min-accent transition-colors hover:text-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Профиль тренера →
-            </motion.a>
-          )}
-        </div>
-      </motion.div>
+            Профиль тренера →
+          </motion.a>
+        )}
+      </div>
     </motion.div>
   )
 }
