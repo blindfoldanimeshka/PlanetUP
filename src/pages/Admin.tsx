@@ -10,6 +10,7 @@ import { getCmsData } from '@/api/cms'
 import { notifyContentChanged } from '@/lib/cmsSync'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { Helmet } from 'react-helmet-async'
 
 const ADMIN_CSRF_STORAGE_KEY = 'planetup_admin_csrf'
@@ -1253,9 +1254,6 @@ export function Admin() {
               {globalErrors > 0 && (
                 <span className="text-xs text-min-error">Заполните обязательные поля</span>
               )}
-              <Button variant="ghost" onClick={logout}>
-                Выйти
-              </Button>
             </div>
           </div>
 
@@ -1273,24 +1271,12 @@ export function Admin() {
             </p>
           )}
 
-          <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-            <nav className="flex gap-2 overflow-x-auto md:flex-col md:overflow-visible">
-              {NAV.map((n) => (
-                <button
-                  key={n.key}
-                  type="button"
-                  onClick={() => changeTab(n.key)}
-                  className={`whitespace-nowrap rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                    active === n.key
-                      ? 'bg-min-accent/20 text-min-accent'
-                      : 'text-min-muted hover:bg-white/5'
-                  }`}
-                >
-                  {n.title}
-                </button>
-              ))}
-            </nav>
-
+          <AdminSidebar
+            activeSection={active}
+            onSelectSection={changeTab}
+            onLogout={logout}
+            user={{ name: 'Администратор', email: 'admin@planetaup.ru' }}
+          >
             <div>
               {active === 'settings' ? (
                 <SettingsEditor
@@ -1314,7 +1300,7 @@ export function Admin() {
                 })()
               )}
             </div>
-          </div>
+          </AdminSidebar>
         </main>
       )}
     </>
