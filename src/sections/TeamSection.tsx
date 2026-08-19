@@ -40,8 +40,8 @@ function CompactCard({
       onClick={onClick}
       className="group cursor-pointer overflow-hidden rounded-lg bg-min-surface shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
-      {/* Photo — name lives INSIDE this relative wrapper so absolute works */}
-      <div className="relative h-72 sm:h-96 md:h-120 overflow-hidden">
+      {/* Photo — 3:4 portrait aspect ratio */}
+      <div className="relative aspect-[3/4] overflow-hidden">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
@@ -78,14 +78,14 @@ function ExpandedCard({
   return (
     <motion.div
       layout
-      className="relative overflow-hidden rounded-lg bg-min-surface shadow-lg"
+      className="relative flex flex-col overflow-hidden rounded-lg bg-min-surface shadow-lg sm:flex-row"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      {/* Photo — responsive height, name lives inside */}
-      <div className="relative h-72 sm:h-96 md:h-120 overflow-hidden">
+      {/* Photo — 3:4 portrait, left side on desktop */}
+      <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden sm:w-2/5">
         <img
           src={trainer.photoUrl}
           alt={trainer.name}
@@ -116,9 +116,9 @@ function ExpandedCard({
           </svg>
         </button>
 
-        {/* Name + specialization — black plaques at bottom */}
+        {/* Name + specialization — black plaques at bottom of photo */}
         <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start gap-1.5 p-3 sm:p-4">
-          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg lg:text-xl">
+          <span className="inline-block rounded bg-black/70 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm sm:text-lg">
             {trainer.name}
           </span>
           <span className="inline-block rounded bg-min-accent/80 px-3 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white backdrop-blur-sm sm:text-xs">
@@ -127,12 +127,12 @@ function ExpandedCard({
         </div>
       </div>
 
-      {/* Bio + social — below photo in normal flow, staggered entrance */}
+      {/* Info — right side on desktop, below photo on mobile */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.35 }}
-        className="p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
+        className="flex flex-1 flex-col justify-center p-4 font-sans text-sm leading-relaxed text-white/80 sm:p-6 sm:text-base lg:p-8"
       >
         <p>{trainer.bio}</p>
         {trainer.social && (
