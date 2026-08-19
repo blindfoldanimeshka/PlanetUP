@@ -34,7 +34,7 @@ function LazyYandexMap() {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-sm">
+    <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-2xl border border-white/15">
       {loaded ? (
           <iframe
           src="https://yandex.ru/map-widget/v1/?ll=37.520518%2C55.963214&z=17&mode=search&text=%D0%9D%D0%B0%D0%B1%D0%B5%D1%80%D0%B5%D0%B6%D0%BD%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2025%2C%20%D0%94%D0%BE%D0%BB%D0%B3%D0%BE%D0%BF%D1%80%D1%83%D0%B4%D0%BD%D1%8B%D0%B9"
@@ -44,7 +44,7 @@ function LazyYandexMap() {
           allowFullScreen
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-min-surface text-min-muted">
+        <div className="flex h-full w-full items-center justify-center bg-white/8 text-min-muted">
           <p className="text-sm">Загрузка карты…</p>
         </div>
       )}
