@@ -235,7 +235,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
             </Dialog.Portal>
           </Dialog.Root>
           <p className="mt-4 text-xs text-min-muted">
-            Пробное занятие — платно. Записывайтесь заранее.
+            При покупке абонемента первое занятие бесплатное
           </p>
         </motion.div>
       </motion.div>
