@@ -31,6 +31,7 @@ const validAdultPayload = {
   age: '28',
   previousSportExperience: 'Йога 2 года',
   injuries: 'Нет',
+  injuriesConsent: true,
   phone: '79123456789',
   source: 'search',
   consent: true,

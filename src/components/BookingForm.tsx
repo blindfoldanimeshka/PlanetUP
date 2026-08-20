@@ -8,6 +8,7 @@ import {
   adultBookingSchema,
   formatPhone,
   BOOKING_SOURCES,
+  hasHealthData,
   type ChildBookingFormData,
   type AdultBookingFormData,
 } from '@/lib/validation'
@@ -42,6 +43,7 @@ const emptyAdultValues: AdultBookingFormData = {
   age: '',
   previousSportExperience: '',
   injuries: '',
+  injuriesConsent: false,
   phone: '',
   source: 'vk',
   consent: false,
@@ -328,8 +330,11 @@ function AdultForm({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = form
+
+  const injuries = watch('injuries')
 
   return (
     <form
@@ -381,6 +386,18 @@ function AdultForm({
         error={errors.injuries?.message}
         {...register('injuries')}
       />
+
+      {hasHealthData(injuries) && (
+        <ConsentField
+          id="booking-injuries-consent"
+          error={errors.injuriesConsent?.message}
+          {...register('injuriesConsent')}
+        >
+          Согласен на обработку специальной категории персональных данных — сведений о
+          состоянии здоровья (травмах/ограничениях) в соответствии со ст. 10 и ч. 4 ст. 9
+          Федерального закона № 152-ФЗ
+        </ConsentField>
+      )}
 
       <div className="sm:col-span-1">
         <label htmlFor="booking-adult-phone" className="sr-only">
@@ -558,27 +575,36 @@ function Radio(
 }
 
 function ConsentField({
+  id = 'booking-consent',
   error,
+  children,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { error?: string }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & {
+  error?: string
+  children?: React.ReactNode
+}) {
   return (
     <>
       <div className="flex items-start gap-2 sm:col-span-2">
         <input
-          id="booking-consent"
+          id={id}
           type="checkbox"
           className="mt-1 h-4 w-4 accent-min-accent"
           {...props}
         />
-        <label htmlFor="booking-consent" className="text-xs text-min-muted">
-          Согласен на обработку{' '}
-          <a
-            href="/privacy"
-            target="_blank"
-            className="underline hover:text-min-accent"
-          >
-            персональных данных
-          </a>
+        <label htmlFor={id} className="text-xs text-min-muted">
+          {children ?? (
+            <>
+              Согласен на обработку{' '}
+              <a
+                href="/privacy"
+                target="_blank"
+                className="underline hover:text-min-accent"
+              >
+                персональных данных
+              </a>
+            </>
+          )}
         </label>
       </div>
       {error && (

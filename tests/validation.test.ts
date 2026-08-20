@@ -24,6 +24,7 @@ describe('bookingSchema', () => {
     injuries: 'Была растяжение год назад',
     source: 'instagram',
     consent: true,
+    injuriesConsent: true,
     honeypot: '',
   }
 
@@ -87,6 +88,27 @@ describe('bookingSchema', () => {
   it('rejects unknown formType', () => {
     const result = bookingSchema.safeParse({ ...childPayload, formType: 'teen' })
     expect(result.success).toBe(false)
+  })
+
+  it('rejects adult form with injuries but missing injuriesConsent (ст. 10, ч. 4 ст. 9 ФЗ-152)', () => {
+    const result = bookingSchema.safeParse({
+      ...adultPayload,
+      injuries: 'Была травма колена',
+      injuriesConsent: false,
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('injuriesConsent'))).toBe(true)
+    }
+  })
+
+  it('allows adult form with empty injuries and no injuriesConsent', () => {
+    const result = bookingSchema.safeParse({
+      ...adultPayload,
+      injuries: '',
+      injuriesConsent: false,
+    })
+    expect(result.success).toBe(true)
   })
 })
 

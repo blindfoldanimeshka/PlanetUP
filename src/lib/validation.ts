@@ -88,6 +88,10 @@ const consentSchema = z.boolean().refine(
   { message: 'Необходимо согласие на обработку персональных данных' }
 )
 
+/** True when injuries contains actual health/trauma data (non-empty after trim). */
+export const hasHealthData = (injuries?: unknown): boolean =>
+  typeof injuries === 'string' && injuries.trim().length > 0
+
 export const childBookingSchema = z.object({
   formType: z.literal('child'),
   childName: nameField('Введите имя ребёнка'),
@@ -110,15 +114,22 @@ export const adultBookingSchema = z.object({
   previousSportExperience: cleanedString(MAX_TEXT_LENGTH).optional(),
   phone: phoneSchema,
   injuries: cleanedString(MAX_TEXT_LENGTH).optional(),
+  injuriesConsent: z.boolean(),
   source: sourceSchema,
   consent: consentSchema,
   honeypot: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (hasHealthData(data.injuries) && !data.injuriesConsent) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['injuriesConsent'],
+      message:
+        'Необходимо отдельное согласие на обработку сведений о состоянии здоровья (травмах/ограничениях) в соответствии со ст. 10 и ч. 4 ст. 9 Федерального закона № 152-ФЗ',
+    })
+  }
 })
 
-export const bookingSchema = z.discriminatedUnion('formType', [
-  childBookingSchema,
-  adultBookingSchema,
-])
+export const bookingSchema = z.union([childBookingSchema, adultBookingSchema])
 
 export type ChildBookingFormData = z.infer<typeof childBookingSchema>
 export type AdultBookingFormData = z.infer<typeof adultBookingSchema>
