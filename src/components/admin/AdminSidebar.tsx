@@ -23,7 +23,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { Card } from "@/components/ui/Card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -104,9 +103,9 @@ export function AdminSidebar({
     <SidebarProvider>
       <Sidebar
         collapsible="icon"
-        className="[&_[data-slot=sidebar-inner]]:bg-transparent"
+        className="[&_[data-slot=sidebar-inner]]:bg-transparent [&_[data-slot=sidebar-container]]:border-r-0"
       >
-        <Card className="flex w-full flex-col p-0">
+          <div className="flex h-full w-full flex-col rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 p-0">
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -186,7 +185,7 @@ export function AdminSidebar({
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarFooter>
-        </Card>
+          </div>
 
         <SidebarRail />
       </Sidebar>
