@@ -1204,6 +1204,7 @@ export function Admin() {
           <form onSubmit={login} className="flex flex-col gap-3">
             <input
               type="password"
+              autoComplete="current-password"
               value={pwd}
               onChange={(e) => setPwd(e.target.value)}
               placeholder="Пароль"
