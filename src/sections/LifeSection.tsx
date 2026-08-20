@@ -85,7 +85,7 @@ function LifePostCard({ post }: { post: LifePost }) {
                     openLightbox(i)
                   }}
                   className="overflow-hidden rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-min-accent"
-                  aria-label="Открыть фото"
+                  aria-label={`Открыть фото ${i + 1}: ${post.title}`}
                 >
                   <img
                     src={url}
@@ -114,6 +114,11 @@ function LifePostCard({ post }: { post: LifePost }) {
             close={closeLightbox}
             index={lightboxIndex}
             slides={slides}
+            labels={{
+              Close: 'Закрыть',
+              Previous: 'Предыдущее фото',
+              Next: 'Следующее фото',
+            }}
           />
         </Suspense>
       )}
