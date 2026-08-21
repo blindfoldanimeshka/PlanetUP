@@ -12,6 +12,7 @@ import { notifyContentChanged } from '@/lib/cmsSync'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { uploadAdminImage } from '@/lib/imageUpload'
 import { Helmet } from 'react-helmet-async'
 
 const ADMIN_CSRF_STORAGE_KEY = 'planetup_admin_csrf'
@@ -27,51 +28,6 @@ function adminHeaders(contentType = false): HeadersInit {
 }
 
 const DAYS: DayOfWeek[] = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-/* ------------------------------------------------------------------ */
-/*  Image upload (drag&drop → resized data URL)                        */
-/* ------------------------------------------------------------------ */
-
-/**
- * Reads an image file, downscales it to `maxDim` on the longest side and
- * re-encodes it as a data URL so it can be stored directly in the CMS JSON
- * (no separate upload backend required). Falls back to JPEG when the browser
- * can't encode WebP.
- */
-async function resizeImageToDataUrl(file: File, maxDim = 1280, quality = 0.82): Promise<string> {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Можно загружать только изображения')
-  }
-  if (file.size > 6 * 1024 * 1024) {
-    throw new Error('Файл слишком большой (максимум 6 МБ)')
-  }
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(new Error('Не удалось прочитать файл'))
-    reader.onload = () => {
-      const img = new Image()
-      img.onerror = () => reject(new Error('Не удалось загрузить изображение'))
-      img.onload = () => {
-        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
-        const w = Math.max(1, Math.round(img.width * scale))
-        const h = Math.max(1, Math.round(img.height * scale))
-        const canvas = document.createElement('canvas')
-        canvas.width = w
-        canvas.height = h
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          reject(new Error('Canvas недоступен'))
-          return
-        }
-        ctx.drawImage(img, 0, 0, w, h)
-        const webp = canvas.toDataURL('image/webp', quality)
-        resolve(webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', quality))
-      }
-      img.src = reader.result as string
-    }
-    reader.readAsDataURL(file)
-  })
-}
 
 /** Friendly display name for a CRUD item — never the internal id. */
 function itemTitle(it: Record<string, unknown>): string {
@@ -351,16 +307,20 @@ function ImageDropzone({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [localError, setLocalError] = useState('')
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0]
-    if (!file) return
+    if (!file || busy) return
     setLocalError('')
+    setBusy(true)
     try {
-      onChange(await resizeImageToDataUrl(file, 1600))
+      onChange(await uploadAdminImage(file))
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : 'Не удалось загрузить файл')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -411,15 +371,19 @@ function ImageDropzone({
           onDrop={onDrop}
           className={`mt-1 flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
             dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60 hover:bg-white/[0.02]'
-          }`}
+          } ${busy ? 'pointer-events-none opacity-60' : ''}`}
         >
           <svg className="h-8 w-8 text-min-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 16V4" />
             <path d="m7 9 5-5 5 5" />
             <path d="M5 16v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1" />
           </svg>
-          <span className="text-sm font-medium text-min-text">Перетащите изображение сюда</span>
-          <span className="text-xs text-min-muted">или нажмите для выбора · JPG/PNG, до 6 МБ</span>
+          <span className="text-sm font-medium text-min-text">
+            {busy ? 'Загрузка…' : 'Перетащите изображение сюда'}
+          </span>
+          <span className="text-xs text-min-muted">
+            {busy ? 'сжимаем и загружаем' : 'или нажмите · JPG/PNG/WebP, сожмём автоматически'}
+          </span>
         </div>
       )}
 
@@ -452,16 +416,20 @@ function ImageListDropzone({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [localError, setLocalError] = useState('')
 
   const addFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
+    if (!files || files.length === 0 || busy) return
     setLocalError('')
+    setBusy(true)
     try {
-      const added = await Promise.all(Array.from(files).map((f) => resizeImageToDataUrl(f, 1600)))
+      const added = await Promise.all(Array.from(files).map((f) => uploadAdminImage(f)))
       onChange([...value, ...added])
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : 'Не удалось загрузить файл')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -495,15 +463,19 @@ function ImageListDropzone({
         onDrop={onDrop}
         className={`mt-1 flex h-28 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
           dragging ? 'border-min-accent bg-min-accent/10' : 'border-min-border hover:border-min-accent/60 hover:bg-white/[0.02]'
-        }`}
+        } ${busy ? 'pointer-events-none opacity-60' : ''}`}
       >
         <svg className="h-7 w-7 text-min-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <circle cx="9" cy="9" r="2" />
           <path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L4 21" />
         </svg>
-        <span className="text-sm font-medium text-min-text">Добавить фотографии</span>
-        <span className="text-xs text-min-muted">перетащите сюда или нажмите · можно несколько</span>
+        <span className="text-sm font-medium text-min-text">
+          {busy ? 'Загрузка…' : 'Добавить фотографии'}
+        </span>
+        <span className="text-xs text-min-muted">
+          {busy ? 'сжимаем и загружаем' : 'перетащите сюда или нажмите · можно несколько'}
+        </span>
       </div>
       <input
         ref={inputRef}
