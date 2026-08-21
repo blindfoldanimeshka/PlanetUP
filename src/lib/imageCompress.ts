@@ -54,18 +54,19 @@ export async function compressImageToWebp(
     throw new Error('Файл слишком большой (максимум 25 МБ)')
   }
 
+  // FileReader -> data: URL instead of URL.createObjectURL: production CSP
+  // allows img-src 'self' data: https: but not blob:, so object URLs break
+  // image decoding in the admin panel.
   const bitmap = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Не удалось прочитать изображение'))
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'))
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('Не удалось прочитать изображение'))
+      img.onload = () => resolve(img)
+      img.src = reader.result as string
     }
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      resolve(img)
-    }
-    img.src = url
+    reader.readAsDataURL(file)
   })
 
   const { width, height } = computeTargetSize(bitmap.naturalWidth, bitmap.naturalHeight, maxEdge)
