@@ -11,7 +11,7 @@ function openBookingModal() {
   document.dispatchEvent(new CustomEvent('open-booking'))
 }
 
-function LazyYandexMap() {
+function LazyYandexMap({ mapUrl }: { mapUrl: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
 
@@ -37,9 +37,9 @@ function LazyYandexMap() {
     <div ref={containerRef} className="relative h-72 w-full overflow-hidden rounded-2xl border border-white/15">
       {loaded ? (
           <iframe
-          src="https://yandex.ru/map-widget/v1/?ll=37.520518%2C55.963214&z=17&mode=search&text=%D0%9D%D0%B0%D0%B1%D0%B5%D1%80%D0%B5%D0%B6%D0%BD%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2025%2C%20%D0%94%D0%BE%D0%BB%D0%B3%D0%BE%D0%BF%D1%80%D1%83%D0%B4%D0%BD%D1%8B%D0%B9"
+          src={mapUrl}
           className="absolute inset-0 h-full w-full border-0"
-          title="Студия Планета UP на карте Яндекс (Набережная улица, 25, Долгопрудный)"
+          title="Студия Планета UP на карте"
           loading="lazy"
           allowFullScreen
         />
@@ -59,16 +59,16 @@ const SOCIAL_LABELS: Record<string, string> = {
 }
 
 export function ContactsSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
-  const { settings } = cms
+  const { settings, texts } = cms
 
   return (
     <Section id="contacts" variant={variant}>
-      <SectionHeading id="contacts" icon={MapPinIcon}>Контакты</SectionHeading>
+      <SectionHeading id="contacts" icon={MapPinIcon}>{texts.headings.contacts}</SectionHeading>
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Info */}
         <div className="flex flex-col gap-6 h-full" data-stagger-card>
           <Card className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold text-min-text">Как нас найти</h3>
+            <h3 className="text-lg font-semibold text-min-text">{texts.headings.contactsHowToFind}</h3>
               <address className="not-italic text-sm leading-relaxed text-min-muted">
                 {settings.address && (
                   <p className="font-medium">{settings.address}</p>
@@ -118,14 +118,14 @@ export function ContactsSection({ cms, variant }: { cms: CmsData; variant?: Sect
               className="mt-4 self-stretch"
               onClick={openBookingModal}
             >
-              Записаться на пробное занятие
+              {texts.booking.ctaButton}
             </Button>
           </Card>
         </div>
 
         {/* Map */}
         <div data-stagger-card>
-          <LazyYandexMap />
+          <LazyYandexMap mapUrl={settings.mapUrl} />
         </div>
       </div>
     </Section>

@@ -13,7 +13,7 @@ export function FaqSection({ cms, variant }: { cms: CmsData; variant?: SectionVa
 
   return (
     <Section id="faq" variant={variant}>
-      <SectionHeading id="faq" icon={CircleHelpIcon}>Часто задаваемые вопросы</SectionHeading>
+      <SectionHeading id="faq" icon={CircleHelpIcon}>{cms.texts.headings.faq}</SectionHeading>
       <div className="mx-auto max-w-3xl">
         <Accordion.Root type="single" collapsible className="flex flex-col gap-3">
           {sorted.map((item) => (

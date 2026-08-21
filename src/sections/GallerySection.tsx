@@ -51,7 +51,7 @@ export function GallerySection({ cms, variant }: { cms: CmsData; variant?: Secti
   return (
     <Section id="gallery" variant={variant}>
       <SectionHeading id="gallery" icon={SparklesIcon}>
-        Галерея
+        {cms.texts.headings.gallery}
       </SectionHeading>
 
       {/* Category filter */}

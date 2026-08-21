@@ -9,7 +9,7 @@ export function ReviewsSection({ cms, variant }: { cms: CmsData; variant?: Secti
   if (cms.testimonials.length === 0) return null
   return (
     <Section id="reviews" variant={variant}>
-      <SectionHeading id="reviews" icon={MessageSquareIcon}>Отзывы</SectionHeading>
+      <SectionHeading id="reviews" icon={MessageSquareIcon}>{cms.texts.headings.reviews}</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cms.testimonials.map((t) => (
           <div key={t.id} data-stagger-card className="h-full">

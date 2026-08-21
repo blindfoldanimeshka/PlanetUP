@@ -11,7 +11,7 @@ function openBookingModal() {
   document.dispatchEvent(new CustomEvent('open-booking'))
 }
 
-function SubscriptionCard({ subscription }: { subscription: Subscription }) {
+function SubscriptionCard({ subscription, ctaLabel }: { subscription: Subscription; ctaLabel: string }) {
   return (
     <div data-stagger-card className="h-full">
       <Card className="flex flex-col gap-4">
@@ -32,7 +32,7 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
           className="self-stretch mt-4"
           onClick={openBookingModal}
         >
-          Записаться
+          {ctaLabel}
         </Button>
       </Card>
     </div>
@@ -45,10 +45,10 @@ export function SubscriptionsSection({ cms, variant }: { cms: CmsData; variant?:
 
   return (
     <Section id="subscriptions" variant={variant}>
-      <SectionHeading id="subscriptions" icon={CreditCardIcon}>Цены</SectionHeading>
+      <SectionHeading id="subscriptions" icon={CreditCardIcon}>{cms.texts.headings.subscriptions}</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {sorted.map((sub) => (
-          <SubscriptionCard key={sub.id} subscription={sub} />
+          <SubscriptionCard key={sub.id} subscription={sub} ctaLabel={cms.texts.booking.submitButton} />
         ))}
       </div>
     </Section>

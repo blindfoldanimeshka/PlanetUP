@@ -12,16 +12,16 @@ export function KidsSection({ cms, variant }: { cms: CmsData; variant?: SectionV
 
   return (
     <Section id="kids" variant={variant}>
-      <SectionHeading id="kids" icon={HeartIcon}>Детям</SectionHeading>
+      <SectionHeading id="kids" icon={HeartIcon}>{cms.texts.headings.kids}</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {kidsGroups.map((group) => (
           <div key={group.id} data-stagger-card className="h-full">
-            <GroupCard group={group} />
+            <GroupCard group={group} ctaLabel={cms.texts.booking.submitButton} />
           </div>
         ))}
       </div>
       <div className="mt-12" data-stagger-card>
-        <ScheduleTabs groups={kidsGroups} />
+        <ScheduleTabs groups={kidsGroups} emptyText={cms.texts.scheduleEmptyDay} />
       </div>
     </Section>
   )

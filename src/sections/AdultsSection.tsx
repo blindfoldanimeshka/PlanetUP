@@ -12,16 +12,16 @@ export function AdultsSection({ cms, variant }: { cms: CmsData; variant?: Sectio
 
   return (
     <Section id="adults" variant={variant}>
-      <SectionHeading id="adults" icon={UsersIcon}>Взрослым</SectionHeading>
+      <SectionHeading id="adults" icon={UsersIcon}>{cms.texts.headings.adults}</SectionHeading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {adultsGroups.map((group) => (
           <div key={group.id} data-stagger-card className="h-full">
-            <GroupCard group={group} />
+            <GroupCard group={group} ctaLabel={cms.texts.booking.submitButton} />
           </div>
         ))}
       </div>
       <div className="mt-12" data-stagger-card>
-        <ScheduleTabs groups={adultsGroups} />
+        <ScheduleTabs groups={adultsGroups} emptyText={cms.texts.scheduleEmptyDay} />
       </div>
     </Section>
   )

@@ -156,9 +156,7 @@ function ExpandedCard({
 /* ------------------------------------------------------------------ */
 
 export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionVariant }) {
-  const visibleTrainers = cms.trainers.filter(
-    (t) => !t.name.toLowerCase().includes('ташкова'),
-  )
+  const visibleTrainers = cms.trainers.filter((t) => !t.hidden)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const handleExpand = useCallback((id: string) => {
@@ -174,14 +172,13 @@ export function TeamSection({ cms, variant }: { cms: CmsData; variant?: SectionV
   return (
     <Section id="team" variant={variant}>
       <SectionHeading id="team" icon={UserCheckIcon}>
-        Наша команда
+        {cms.texts.headings.team}
       </SectionHeading>
-      <p className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-min-muted">
-        Наши педагоги — профессиональные тренеры с большим опытом. Они работают
-        и с детьми, и со взрослыми: от первых шагов в акробатике до сложных
-        парных постановок и выступлений. Каждый тренер «Планеты UP» помогает
-        ученику раскрыть потенциал и полюбить движение.
-      </p>
+      {cms.texts.teamIntro.trim() !== '' && (
+        <p className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-min-muted">
+          {cms.texts.teamIntro}
+        </p>
+      )}
 
       <div className="mx-auto max-w-5xl">
         <AnimatePresence mode="wait">

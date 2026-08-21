@@ -131,7 +131,7 @@ export function LifeSection({ cms, variant }: { cms: CmsData; variant?: SectionV
   return (
     <Section id="life" variant={variant}>
       <SectionHeading id="life" icon={CalendarDaysIcon}>
-        Жизнь коллектива
+        {cms.texts.headings.life}
       </SectionHeading>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {cms.lifePosts.map((post) => (
