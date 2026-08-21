@@ -1,50 +1,30 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
-import { hasValidAdminSessionCookie } from '../src/lib/adminAuth.js'
+import { randomBytes } from 'node:crypto'
+import { put } from '@vercel/blob'
+import { hasValidAdminSession } from '../src/lib/adminAuth.js'
 
 /**
- * Client-upload broker for Vercel Blob.
+ * Direct photo upload for the admin panel.
  *
- * Two kinds of POSTs land here (see HandleUploadBody):
- *  - "generate client token" from the admin browser -> gated by the admin
- *    session (cookie + CSRF header), because without it anyone could mint
- *    upload tokens into our store;
- *  - "upload completed" webhook from Vercel Blob servers -> NOT session-gated
- *    (they carry no admin cookie); the SDK validates its own payload signature.
- *
- * The file bytes themselves never pass through this function: the browser
- * PUTs them directly to Blob storage with a short-lived token, which sidesteps
- * the 4.5 MB serverless body limit.
+ * The compressed image bytes are POSTed here (same-origin fetch with the
+ * admin session cookie + CSRF header), and the function stores them in
+ * Vercel Blob server-side. We deliberately do NOT use @vercel/blob/client:
+ * its gateway round-trip through vercel.com breaks under our strict CSP and
+ * is not CORS-open to arbitrary deployment domains. Client-side compression
+ * keeps bodies far below the 4.5 MB serverless limit.
  */
 
-const IMAGE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-/** Client-side compression targets < 1 MB; this is a hard abuse ceiling. */
-const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
-
-class UnauthorizedError extends Error {
-  constructor() {
-    super('Unauthorized')
-  }
+const IMAGE_CONTENT_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const EXT_BY_TYPE: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
 }
+/** Compressed photos are well under this; it is an abuse ceiling. */
+const MAX_BODY_BYTES = 4 * 1024 * 1024
 
 function firstHeader(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value
-}
-
-/**
- * CSRF defense for the blob token route. The @vercel/blob client cannot send
- * custom headers, so instead of the x-csrf-token pair we require that the
- * request carries an Origin (browsers attach it to every fetch POST) or
- * Referer whose host matches ours — a cross-site attacker cannot forge either.
- */
-function isSameOrigin(req: VercelRequest): boolean {
-  const source = firstHeader(req.headers.origin) ?? firstHeader(req.headers.referer)
-  if (!source || !req.headers.host) return false
-  try {
-    return new URL(source).host === req.headers.host
-  } catch {
-    return false
-  }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -54,35 +34,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  try {
-    const jsonResponse = await handleUpload({
-      body: req.body as HandleUploadBody,
-      request: req,
-      onBeforeGenerateToken: async () => {
-        if (
-          !isSameOrigin(req) ||
-          !hasValidAdminSessionCookie(firstHeader(req.headers.cookie))
-        ) {
-          throw new UnauthorizedError()
-        }
-        return {
-          allowedContentTypes: IMAGE_CONTENT_TYPES,
-          maximumSizeInBytes: MAX_UPLOAD_BYTES,
-          addRandomSuffix: true,
-        }
-      },
-      onUploadCompleted: async ({ blob }) => {
-        // URL persistence happens when the admin saves content; this is audit log only.
-        console.log(`[upload] completed: ${blob.pathname} (${blob.contentType})`)
-      },
-    })
+  const contentType = firstHeader(req.headers['content-type']) ?? ''
+  if (!IMAGE_CONTENT_TYPES.has(contentType)) {
+    return res.status(415).json({ error: 'Поддерживаются только JPG, PNG и WebP' })
+  }
 
-    return res.status(200).json(jsonResponse)
+  const cookie = firstHeader(req.headers.cookie)
+  const csrfToken = firstHeader(req.headers['x-csrf-token'])
+  if (!hasValidAdminSession(cookie, csrfToken)) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const raw = req.body
+  const body = Buffer.isBuffer(raw)
+    ? raw
+    : typeof raw === 'string'
+      ? Buffer.from(raw)
+      : null
+  if (!body || body.length === 0) {
+    return res.status(400).json({ error: 'Некорректное тело запроса' })
+  }
+  if (body.length > MAX_BODY_BYTES) {
+    return res.status(413).json({ error: 'Файл слишком большой' })
+  }
+
+  try {
+    const ext = EXT_BY_TYPE[contentType]
+    const pathname = `cms/${Date.now().toString(36)}${randomBytes(4).toString('hex')}.${ext}`
+    const blob = await put(pathname, body as Buffer, {
+      access: 'public',
+      addRandomSuffix: true,
+      contentType,
+    })
+    return res.status(200).json({ url: blob.url, pathname: blob.pathname })
   } catch (err) {
-    if (err instanceof UnauthorizedError) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
     console.error('[upload] failed:', err instanceof Error ? err.message : err)
-    return res.status(400).json({ error: err instanceof Error ? err.message : 'Upload failed' })
+    return res.status(502).json({ error: 'Не удалось сохранить файл' })
   }
 }

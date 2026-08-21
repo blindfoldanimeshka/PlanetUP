@@ -12,10 +12,8 @@ import { notifyContentChanged } from '@/lib/cmsSync'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { uploadAdminImage } from '@/lib/imageUpload'
+import { uploadAdminImage, ADMIN_CSRF_STORAGE_KEY } from '@/lib/imageUpload'
 import { Helmet } from 'react-helmet-async'
-
-const ADMIN_CSRF_STORAGE_KEY = 'planetup_admin_csrf'
 
 function adminHeaders(contentType = false): HeadersInit {
   const csrfToken = typeof sessionStorage === 'undefined'

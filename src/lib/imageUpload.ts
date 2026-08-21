@@ -1,29 +1,47 @@
-import { upload } from '@vercel/blob/client'
 import { compressImageToWebp } from './imageCompress.js'
 
+/** Shared with src/pages/Admin.tsx — keep in sync if renamed. */
+export const ADMIN_CSRF_STORAGE_KEY = 'planetup_admin_csrf'
+
 /**
- * Compress + upload one admin photo to Vercel Blob.
+ * Compress + upload one admin photo.
  *
- * The browser receives a short-lived client token from /api/upload (which
- * enforces the admin session) and PUTs the bytes straight to Blob storage,
- * so files never pass through a 4.5 MB-limited serverless body.
- *
- * Returns the public URL to store in the CMS JSON.
+ * The image is downscaled/re-encoded in the browser first, then POSTed as raw
+ * bytes to /api/upload (same-origin, session cookie + CSRF header), which
+ * stores it in Vercel Blob server-side and returns the public URL.
  */
 export async function uploadAdminImage(file: File): Promise<string> {
   const compressed = await compressImageToWebp(file)
-  const pathname = `cms/${compressed.name}`
+  const csrfToken =
+    typeof sessionStorage === 'undefined'
+      ? ''
+      : sessionStorage.getItem(ADMIN_CSRF_STORAGE_KEY) ?? ''
+
+  let res: Response
   try {
-    const blob = await upload(pathname, compressed, {
-      access: 'public',
-      handleUploadUrl: '/api/upload',
+    res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'content-type': compressed.type || 'application/octet-stream',
+        'x-csrf-token': csrfToken,
+      },
+      body: compressed,
     })
-    return blob.url
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    if (/401|Unauthorized/i.test(message)) {
+  } catch {
+    throw new Error('Сеть недоступна — не удалось загрузить фото')
+  }
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    if (res.status === 401) {
       throw new Error('Сессия истекла — войдите в админку заново')
     }
-    throw new Error(`Не удалось загрузить фото: ${message}`)
+    throw new Error(body.error ?? `Не удалось загрузить фото (${res.status})`)
   }
+
+  const data = (await res.json()) as { url?: string }
+  if (!data.url) {
+    throw new Error('Сервер не вернул адрес фотографии')
+  }
+  return data.url
 }
