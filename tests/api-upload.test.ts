@@ -76,8 +76,8 @@ describe('upload API', () => {
     await handler(
       {
         method: 'POST',
-        headers: { host: PROD_HOST, 'content-type': 'image/webp' },
-        body: Buffer.from('x'),
+        headers: { host: PROD_HOST, 'content-type': 'application/json' },
+        body: { data: 'eA==', type: 'image/webp' },
       } as any,
       res as any,
     )
@@ -92,10 +92,14 @@ describe('upload API', () => {
       url: 'https://store.public.blob.vercel-storage.com/cms/photo-abc.webp',
       pathname: 'cms/photo-abc.webp',
     })
-    const headers = await adminHeaders({ 'content-type': 'image/webp' })
+    const headers = await adminHeaders({ 'content-type': 'application/json' })
     const res = mockRes()
     await handler(
-      { method: 'POST', headers, body: Buffer.from('webp-bytes') } as any,
+      {
+        method: 'POST',
+        headers,
+        body: { data: Buffer.from('webp-bytes').toString('base64'), type: 'image/webp' },
+      } as any,
       res as any,
     )
 
@@ -112,23 +116,30 @@ describe('upload API', () => {
   })
 
   it('rejects unsupported content types with 415', async () => {
-    const headers = await adminHeaders({ 'content-type': 'application/pdf' })
+    const headers = await adminHeaders({ 'content-type': 'application/json' })
     const res = mockRes()
-    await handler({ method: 'POST', headers, body: Buffer.from('%PDF') } as any, res as any)
+    await handler(
+      {
+        method: 'POST',
+        headers,
+        body: { data: Buffer.from('%PDF').toString('base64'), type: 'application/pdf' },
+      } as any,
+      res as any,
+    )
 
     expect(res.status).toHaveBeenCalledWith(415)
     expect(mocks.put).not.toHaveBeenCalled()
   })
 
   it('rejects bodies above the 4 MB cap with 413', async () => {
-    const headers = await adminHeaders({ 'content-type': 'image/jpeg' })
-    const bigBody = Buffer.alloc(5 * 1024 * 1024)
+    const headers = await adminHeaders({ 'content-type': 'application/json' })
+    const bigBase64 = 'A'.repeat(6 * 1024 * 1024) // ~4.5 MB once decoded
     const res = mockRes()
     await handler(
       {
         method: 'POST',
-        headers: { ...headers, 'content-length': String(bigBody.length) },
-        body: bigBody,
+        headers,
+        body: { data: bigBase64, type: 'image/jpeg' },
       } as any,
       res as any,
     )
@@ -139,9 +150,16 @@ describe('upload API', () => {
 
   it('maps Blob failures to 502 without leaking internals', async () => {
     mocks.put.mockRejectedValue(new Error('blob unavailable'))
-    const headers = await adminHeaders({ 'content-type': 'image/png' })
+    const headers = await adminHeaders({ 'content-type': 'application/json' })
     const res = mockRes()
-    await handler({ method: 'POST', headers, body: Buffer.from('png') } as any, res as any)
+    await handler(
+      {
+        method: 'POST',
+        headers,
+        body: { data: Buffer.from('png').toString('base64'), type: 'image/png' },
+      } as any,
+      res as any,
+    )
 
     expect(res.status).toHaveBeenCalledWith(502)
     expect(res.json).toHaveBeenCalledWith({ error: 'Не удалось сохранить файл' })

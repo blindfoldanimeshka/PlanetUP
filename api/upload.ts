@@ -23,6 +23,11 @@ const EXT_BY_TYPE: Record<string, string> = {
 /** Compressed photos are well under this; it is an abuse ceiling. */
 const MAX_BODY_BYTES = 4 * 1024 * 1024
 
+interface UploadPayload {
+  data?: unknown
+  type?: unknown
+}
+
 function firstHeader(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value
 }
@@ -34,9 +39,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const contentType = firstHeader(req.headers['content-type']) ?? ''
-  if (!IMAGE_CONTENT_TYPES.has(contentType)) {
+  const payload = (req.body ?? {}) as UploadPayload
+  if (typeof payload.type !== 'string' || !IMAGE_CONTENT_TYPES.has(payload.type)) {
     return res.status(415).json({ error: 'Поддерживаются только JPG, PNG и WebP' })
+  }
+  if (typeof payload.data !== 'string' || payload.data.length === 0) {
+    return res.status(400).json({ error: 'Некорректное тело запроса' })
   }
 
   const cookie = firstHeader(req.headers.cookie)
@@ -45,13 +53,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const raw = req.body
-  const body = Buffer.isBuffer(raw)
-    ? raw
-    : typeof raw === 'string'
-      ? Buffer.from(raw)
-      : null
-  if (!body || body.length === 0) {
+  // Base64 inflates by ~4/3; decoding gives the true byte size for the cap.
+  const body = Buffer.from(payload.data, 'base64')
+  if (body.length === 0) {
     return res.status(400).json({ error: 'Некорректное тело запроса' })
   }
   if (body.length > MAX_BODY_BYTES) {
@@ -59,12 +63,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const ext = EXT_BY_TYPE[contentType]
+    const ext = EXT_BY_TYPE[payload.type]
     const pathname = `cms/${Date.now().toString(36)}${randomBytes(4).toString('hex')}.${ext}`
-    const blob = await put(pathname, body as Buffer, {
+    const blob = await put(pathname, body, {
       access: 'public',
       addRandomSuffix: true,
-      contentType,
+      contentType: payload.type,
     })
     return res.status(200).json({ url: blob.url, pathname: blob.pathname })
   } catch (err) {
