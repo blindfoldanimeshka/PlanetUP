@@ -19,6 +19,8 @@ vi.mock('../src/lib/storage.js', () => ({
 type Handler = typeof import('../api/upload.js').default
 let handler: Handler
 
+const PROD_HOST = 'planetaup.vercel.app'
+
 function mockRes() {
   const json = vi.fn()
   const status = vi.fn(() => ({ json }))
@@ -26,7 +28,7 @@ function mockRes() {
   return { status, json, setHeader }
 }
 
-async function adminHeaders() {
+async function adminHeaders(origin?: string) {
   const res = mockRes()
   await sessionHandler(
     { method: 'POST', body: { password: 'correct horse battery staple' } } as any,
@@ -35,7 +37,13 @@ async function adminHeaders() {
   const csrfToken = res.json.mock.calls[0][0].csrfToken as string
   const cookieCall = res.setHeader.mock.calls.find((c) => c[0] === 'Set-Cookie')
   const cookie = (cookieCall ? cookieCall[1] : '') as string
-  return { cookie, 'x-csrf-token': csrfToken }
+  // The blob client cannot send custom CSRF headers, so the route authenticates
+  // with the session cookie plus an Origin/Referer same-host check instead.
+  return {
+    cookie,
+    ...(origin !== undefined ? { origin } : {}),
+    host: PROD_HOST,
+  }
 }
 
 beforeEach(async () => {
@@ -63,42 +71,81 @@ describe('upload API', () => {
     expect(mocks.handleUpload).not.toHaveBeenCalled()
   })
 
-  it('POST without admin session: token generation is rejected with Unauthorized', async () => {
-    mocks.handleUpload.mockImplementation(async ({ onBeforeGenerateToken }: any) => {
-      // Simulate the SDK invoking the auth callback for a token request.
-      return await onBeforeGenerateToken('uploads/photo.jpg')
-    })
-    const res = mockRes()
-    await handler({ method: 'POST', headers: {}, body: {} } as any, res as any)
-
-    expect(mocks.handleUpload).toHaveBeenCalledTimes(1)
-    expect(res.status).toHaveBeenCalledWith(401)
-    expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' })
-  })
-
-  it('valid admin session: token request succeeds with image-only content types', async () => {
+  it('POST without admin cookie: token generation rejected with Unauthorized', async () => {
     let capturedConfig: any
     mocks.handleUpload.mockImplementation(async (config: any) => {
       capturedConfig = config
       return await config.onBeforeGenerateToken('uploads/photo.jpg')
     })
-    const headers = await adminHeaders()
+    const res = mockRes()
+    await handler({ method: 'POST', headers: { host: PROD_HOST }, body: {} } as any, res as any)
+
+    expect(mocks.handleUpload).toHaveBeenCalledTimes(1)
+    await expect(capturedConfig.onBeforeGenerateToken('uploads/photo.jpg')).rejects.toThrow(
+      'Unauthorized',
+    )
+    expect(res.status).toHaveBeenCalledWith(401)
+    expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' })
+  })
+
+  it('valid session cookie + same-origin POST: token request succeeds with image-only types', async () => {
+    let capturedConfig: any
+    mocks.handleUpload.mockImplementation(async (config: any) => {
+      capturedConfig = config
+      return await config.onBeforeGenerateToken('cms/photo.webp')
+    })
+    const headers = await adminHeaders(`https://${PROD_HOST}`)
     const res = mockRes()
     await handler({ method: 'POST', headers, body: {} } as any, res as any)
 
     expect(capturedConfig).toBeTruthy()
-    await expect(capturedConfig.onBeforeGenerateToken('uploads/photo.jpg')).resolves.toEqual(
+    await expect(capturedConfig.onBeforeGenerateToken('cms/photo.webp')).resolves.toEqual(
       expect.objectContaining({
         allowedContentTypes: expect.arrayContaining(['image/jpeg', 'image/png', 'image/webp']),
+        maximumSizeInBytes: 20 * 1024 * 1024,
         addRandomSuffix: true,
       }),
     )
     expect(res.status).toHaveBeenCalledWith(200)
   })
 
+  it('valid session cookie but cross-origin POST: rejected with Unauthorized', async () => {
+    let capturedConfig: any
+    mocks.handleUpload.mockImplementation(async (config: any) => {
+      capturedConfig = config
+      return await config.onBeforeGenerateToken('cms/photo.jpg')
+    })
+    const headers = await adminHeaders('https://evil.example')
+    const res = mockRes()
+    await handler({ method: 'POST', headers, body: {} } as any, res as any)
+
+    await expect(capturedConfig.onBeforeGenerateToken('cms/photo.jpg')).rejects.toThrow(
+      'Unauthorized',
+    )
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('no Origin and no Referer: rejected with Unauthorized (cannot prove same-origin)', async () => {
+    let capturedConfig: any
+    mocks.handleUpload.mockImplementation(async (config: any) => {
+      capturedConfig = config
+      return await config.onBeforeGenerateToken('cms/photo.jpg')
+    })
+    const res = mockRes()
+    await handler(
+      { method: 'POST', headers: await adminHeaders(undefined), body: {} } as any,
+      res as any,
+    )
+
+    await expect(capturedConfig.onBeforeGenerateToken('cms/photo.jpg')).rejects.toThrow(
+      'Unauthorized',
+    )
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
   it('handleUpload generic failure maps to 400 with the error message', async () => {
     mocks.handleUpload.mockRejectedValue(new Error('boom'))
-    const headers = await adminHeaders()
+    const headers = await adminHeaders(`https://${PROD_HOST}`)
     const res = mockRes()
     await handler({ method: 'POST', headers, body: {} } as any, res as any)
 

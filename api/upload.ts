@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
-import { hasValidAdminSession } from '../src/lib/adminAuth.js'
+import { hasValidAdminSessionCookie } from '../src/lib/adminAuth.js'
 
 /**
  * Client-upload broker for Vercel Blob.
@@ -31,6 +31,22 @@ function firstHeader(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value
 }
 
+/**
+ * CSRF defense for the blob token route. The @vercel/blob client cannot send
+ * custom headers, so instead of the x-csrf-token pair we require that the
+ * request carries an Origin (browsers attach it to every fetch POST) or
+ * Referer whose host matches ours — a cross-site attacker cannot forge either.
+ */
+function isSameOrigin(req: VercelRequest): boolean {
+  const source = firstHeader(req.headers.origin) ?? firstHeader(req.headers.referer)
+  if (!source || !req.headers.host) return false
+  try {
+    return new URL(source).host === req.headers.host
+  } catch {
+    return false
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0')
 
@@ -43,9 +59,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: req.body as HandleUploadBody,
       request: req,
       onBeforeGenerateToken: async () => {
-        const cookie = firstHeader(req.headers.cookie)
-        const csrfToken = firstHeader(req.headers['x-csrf-token'])
-        if (!hasValidAdminSession(cookie, csrfToken)) {
+        if (
+          !isSameOrigin(req) ||
+          !hasValidAdminSessionCookie(firstHeader(req.headers.cookie))
+        ) {
           throw new UnauthorizedError()
         }
         return {

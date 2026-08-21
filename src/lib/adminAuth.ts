@@ -66,18 +66,34 @@ export function clearSessionCookie(isProduction: boolean): string {
   ].join('; ')
 }
 
-export function hasValidAdminSession(cookieHeader: string | undefined, csrfToken: unknown): boolean {
+function verifySessionToken(token: string | null): AdminSession | null {
   const secret = getRequiredEnv('ADMIN_SESSION_SECRET')
-  const token = parseCookie(cookieHeader, SESSION_COOKIE)
-  if (!secret || !token || typeof csrfToken !== 'string') return false
+  if (!secret || !token) return null
 
   const [payload, signature] = token.split('.')
-  if (!payload || !signature || !equalSecrets(signature, sign(payload, secret))) return false
+  if (!payload || !signature || !equalSecrets(signature, sign(payload, secret))) return null
 
   try {
     const session = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as AdminSession
-    return session.expiresAt > Date.now() && equalSecrets(csrfToken, session.csrfToken)
+    return session.expiresAt > Date.now() ? session : null
   } catch {
-    return false
+    return null
   }
+}
+
+export function hasValidAdminSession(cookieHeader: string | undefined, csrfToken: unknown): boolean {
+  const token = parseCookie(cookieHeader, SESSION_COOKIE)
+  if (!token || typeof csrfToken !== 'string') return false
+  const session = verifySessionToken(token)
+  return session !== null && equalSecrets(csrfToken, session.csrfToken)
+}
+
+/**
+ * Cookie-only session validation for endpoints that cannot receive custom
+ * headers from their client (e.g. @vercel/blob client uploads, whose internal
+ * token request never carries our x-csrf-token header). Must be paired with a
+ * same-origin Origin/Referer check to retain CSRF defense.
+ */
+export function hasValidAdminSessionCookie(cookieHeader: string | undefined): boolean {
+  return verifySessionToken(parseCookie(cookieHeader, SESSION_COOKIE)) !== null
 }
