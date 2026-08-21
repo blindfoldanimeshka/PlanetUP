@@ -39,16 +39,19 @@ import {
   FileText,
   HelpCircle,
   Images,
+  ListChecks,
   LogOut,
   Settings2,
   Sparkles,
   Star,
+  Type,
   Users,
   UsersRound,
 } from "lucide-react";
 
 type SectionKey =
   | "settings"
+  | "texts"
   | "trainers"
   | "subscriptions"
   | "groups"
@@ -56,6 +59,7 @@ type SectionKey =
   | "testimonials"
   | "lifePosts"
   | "gallery"
+  | "features"
   | "submissions";
 
 const SECTIONS: {
@@ -64,6 +68,8 @@ const SECTIONS: {
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
   { key: "settings", title: "Контакты и SEO", icon: Settings2 },
+  { key: "texts", title: "Тексты сайта", icon: Type },
+  { key: "features", title: "Преимущества", icon: ListChecks },
   { key: "trainers", title: "Тренеры", icon: Users },
   { key: "subscriptions", title: "Абонементы", icon: CreditCard },
   { key: "groups", title: "Группы", icon: UsersRound },

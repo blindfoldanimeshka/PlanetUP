@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import type {
   CmsData,
   SiteSettings,
+  SiteTexts,
   ScheduleItem,
   DayOfWeek,
 } from '@/types/cms'
@@ -94,6 +95,7 @@ type FieldKind =
   | 'schedule'
   | 'imagelist'
   | 'image'
+  | 'boolean'
 
 interface FieldDef {
   key: string
@@ -114,6 +116,7 @@ type ArraySectionKey =
   | 'testimonials'
   | 'lifePosts'
   | 'gallery'
+  | 'features'
 
 interface SectionDef {
   key: ArraySectionKey
@@ -124,15 +127,25 @@ interface SectionDef {
 
 const SECTIONS: SectionDef[] = [
   {
+    key: 'features',
+    title: 'Преимущества',
+    blank: () => ({ id: `new-${Date.now()}`, title: '', text: '' }),
+    fields: [
+      { key: 'title', label: 'Заголовок', kind: 'text', required: true },
+      { key: 'text', label: 'Описание', kind: 'textarea', required: true },
+    ],
+  },
+  {
     key: 'trainers',
     title: 'Тренеры',
-    blank: () => ({ id: `new-${Date.now()}`, name: '', specialization: '', bio: '', photoUrl: '', social: '' }),
+    blank: () => ({ id: `new-${Date.now()}`, name: '', specialization: '', bio: '', photoUrl: '', social: '', hidden: false }),
     fields: [
       { key: 'name', label: 'Имя', kind: 'text', required: true },
       { key: 'specialization', label: 'Роль / специализация', kind: 'text', required: true },
       { key: 'bio', label: 'Описание', kind: 'textarea' },
       { key: 'photoUrl', label: 'Фото', kind: 'image', required: true },
       { key: 'social', label: 'Ссылка на соцсеть', kind: 'url', placeholder: 'https://vk.com/...' },
+      { key: 'hidden', label: 'Скрыть тренера с сайта', kind: 'boolean' },
     ],
   },
   {
@@ -219,10 +232,11 @@ const SECTIONS: SectionDef[] = [
   },
 ]
 
-type NavKey = 'settings' | ArraySectionKey | 'submissions'
+type NavKey = 'settings' | ArraySectionKey | 'submissions' | 'texts'
 
 const NAV: { key: NavKey; title: string }[] = [
   { key: 'settings', title: 'Контакты и SEO' },
+  { key: 'texts', title: 'Тексты сайта' },
   ...SECTIONS.map((s) => ({ key: s.key as NavKey, title: s.title })),
   { key: 'submissions', title: 'Заявки' },
 ]
@@ -618,6 +632,23 @@ function FieldEditor({
     )
   }
 
+  if (field.kind === 'boolean') {
+    return (
+      <div className="self-end pb-1">
+        <label className="flex items-center gap-2 text-sm text-min-muted">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-min-accent"
+            checked={value === true}
+            onChange={(e) => onChange(e.target.checked)}
+          />
+          {field.label}
+        </label>
+        {error && <p className="mt-1 text-xs text-min-error">{error}</p>}
+      </div>
+    )
+  }
+
   const inputType = field.kind === 'url' ? 'url' : field.kind === 'number' ? 'number' : 'text'
   const strValue = field.kind === 'number' ? String(Number(value ?? 0)) : String(value ?? '')
   return (
@@ -856,6 +887,7 @@ function SettingsEditor({
         {input('Телефон (href)', settings.phoneHref, (v) => set('phoneHref', v), 'tel:+7...')}
         {input('Адрес', settings.address, (v) => set('address', v))}
         {input('Email', settings.email, (v) => set('email', v), 'name@mail.ru')}
+        {input('Карта: URL виджета Яндекса', settings.mapUrl, (v) => set('mapUrl', v), 'https://yandex.ru/map-widget/v1/?ll=...')}
         {input('VK', settings.social.vk, (v) => setSocial('vk', v), 'https://vk.com/...')}
         {input('Telegram', settings.social.telegram, (v) => setSocial('telegram', v))}
         {input('WhatsApp', settings.social.whatsapp, (v) => setSocial('whatsapp', v))}
@@ -865,6 +897,151 @@ function SettingsEditor({
         {input('SEO: описание', settings.seo.description, (v) => setSeo('description', v))}
       </div>
     </Card>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Site texts editor (nav / headings / booking copy)                  */
+/* ------------------------------------------------------------------ */
+
+type FlatTextKey = 'heroEyebrow' | 'heroNote' | 'teamIntro' | 'scheduleEmptyDay' | 'footerTagline'
+
+function TextsEditor({
+  texts,
+  onChange,
+}: {
+  texts: SiteTexts
+  onChange: (t: SiteTexts) => void
+}) {
+  const setNav = (k: keyof SiteTexts['nav'], v: string) =>
+    onChange({ ...texts, nav: { ...texts.nav, [k]: v } })
+  const setHeading = (k: keyof SiteTexts['headings'], v: string) =>
+    onChange({ ...texts, headings: { ...texts.headings, [k]: v } })
+  const setBooking = (k: keyof SiteTexts['booking'], v: string) =>
+    onChange({ ...texts, booking: { ...texts.booking, [k]: v } })
+  const setFlat = <K extends FlatTextKey>(k: K, v: SiteTexts[K]) =>
+    onChange({ ...texts, [k]: v })
+
+  const input = (
+    label: string,
+    value: string,
+    cb: (v: string) => void,
+    placeholder?: string,
+    multiline = false
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-min-muted">{label}</label>
+      {multiline ? (
+        <textarea
+          rows={3}
+          className="mt-1 w-full rounded-md border border-min-border bg-min-surface p-2 text-min-text"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => cb(e.target.value)}
+        />
+      ) : (
+        <input
+          className="mt-1 w-full rounded-md border border-min-border bg-min-surface p-2 text-min-text"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => cb(e.target.value)}
+        />
+      )}
+    </div>
+  )
+
+  const groupCard = (title: string, children: React.ReactNode) => (
+    <Card className="p-6">
+      <h2 className="mb-4 text-xl font-semibold text-min-text">{title}</h2>
+      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
+    </Card>
+  )
+
+  return (
+    <div className="space-y-4">
+      {groupCard(
+        'Навигация',
+        <>
+          {input('Главная', texts.nav.home, (v) => setNav('home', v))}
+          {input('Услуги (группа)', texts.nav.services, (v) => setNav('services', v))}
+          {input('→ Взрослым', texts.nav.adults, (v) => setNav('adults', v))}
+          {input('→ Детям', texts.nav.kids, (v) => setNav('kids', v))}
+          {input('→ Абонементы', texts.nav.subscriptions, (v) => setNav('subscriptions', v))}
+          {input('Студия (группа)', texts.nav.studio, (v) => setNav('studio', v))}
+          {input('→ Команда', texts.nav.team, (v) => setNav('team', v))}
+          {input('→ Галерея', texts.nav.gallery, (v) => setNav('gallery', v))}
+          {input('→ Жизнь', texts.nav.life, (v) => setNav('life', v))}
+          {input('Инфо (группа)', texts.nav.info, (v) => setNav('info', v))}
+          {input('→ Отзывы', texts.nav.reviews, (v) => setNav('reviews', v))}
+          {input('→ FAQ', texts.nav.faq, (v) => setNav('faq', v))}
+          {input('→ Контакты', texts.nav.contacts, (v) => setNav('contacts', v))}
+        </>
+      )}
+
+      {groupCard(
+        'Заголовки секций',
+        <>
+          {input('Наши особенности', texts.headings.features, (v) => setHeading('features', v))}
+          {input('Взрослым', texts.headings.adults, (v) => setHeading('adults', v))}
+          {input('Детям', texts.headings.kids, (v) => setHeading('kids', v))}
+          {input('Цены', texts.headings.subscriptions, (v) => setHeading('subscriptions', v))}
+          {input('Наша команда', texts.headings.team, (v) => setHeading('team', v))}
+          {input('Галерея', texts.headings.gallery, (v) => setHeading('gallery', v))}
+          {input('Жизнь коллектива', texts.headings.life, (v) => setHeading('life', v))}
+          {input('Отзывы', texts.headings.reviews, (v) => setHeading('reviews', v))}
+          {input('FAQ', texts.headings.faq, (v) => setHeading('faq', v))}
+          {input('Контакты', texts.headings.contacts, (v) => setHeading('contacts', v))}
+          {input('Контакты: «Как нас найти»', texts.headings.contactsHowToFind, (v) =>
+            setHeading('contactsHowToFind', v)
+          )}
+        </>
+      )}
+
+      {groupCard(
+        'Форма записи',
+        <>
+          {input('Кнопка CTA (hero и контакты)', texts.booking.ctaButton, (v) => setBooking('ctaButton', v), undefined, true)}
+          {input('Заголовок модалки формы', texts.booking.modalTitle, (v) => setBooking('modalTitle', v))}
+          {input('Таб «Ребёнку»', texts.booking.tabChild, (v) => setBooking('tabChild', v))}
+          {input('Таб «Взрослому»', texts.booking.tabAdult, (v) => setBooking('tabAdult', v))}
+          {input('Кнопка отправки', texts.booking.submitButton, (v) => setBooking('submitButton', v))}
+          {input('Кнопка отправки (при загрузке)', texts.booking.submitButtonLoading, (v) =>
+            setBooking('submitButtonLoading', v)
+          )}
+          {input('Экран успеха: заголовок', texts.booking.successTitle, (v) => setBooking('successTitle', v))}
+          {input('Экран успеха: текст', texts.booking.successText, (v) => setBooking('successText', v), undefined, true)}
+          {input('Вопрос про опыт занятий', texts.booking.experienceQuestion, (v) =>
+            setBooking('experienceQuestion', v)
+          )}
+          {input('«Как Вы о нас узнали?»', texts.booking.sourceLabel, (v) => setBooking('sourceLabel', v))}
+          {input(
+            'Согласие на обработку ПД (текст перед ссылкой)',
+            texts.booking.consentText,
+            (v) => setBooking('consentText', v),
+            undefined,
+            true
+          )}
+          {input(
+            'Согласие на обработку данных о здоровье',
+            texts.booking.injuriesConsentText,
+            (v) => setBooking('injuriesConsentText', v),
+            undefined,
+            true
+          )}
+        </>
+      )}
+
+      {groupCard(
+        'Прочее',
+        <>
+          {input('Hero: надзаголовок', texts.heroEyebrow, (v) => setFlat('heroEyebrow', v))}
+          {input('Hero: ремарка под кнопкой', texts.heroNote, (v) => setFlat('heroNote', v), undefined, true)}
+          {input('Команда: вводный абзац', texts.teamIntro, (v) => setFlat('teamIntro', v), undefined, true)}
+          {input('Расписание: пустой день', texts.scheduleEmptyDay, (v) => setFlat('scheduleEmptyDay', v))}
+          {input('Футер: название', texts.footerTagline, (v) => setFlat('footerTagline', v))}
+        </>
+      )}
+    </div>
   )
 }
 
@@ -1283,6 +1460,11 @@ export function Admin() {
                 <SettingsEditor
                   settings={data.settings}
                   onChange={(s) => setData((d) => (d ? { ...d, settings: s } : d))}
+                />
+              ) : active === 'texts' ? (
+                <TextsEditor
+                  texts={data.texts}
+                  onChange={(t) => setData((d) => (d ? { ...d, texts: t } : d))}
                 />
               ) : active === 'submissions' ? (
                 <SubmissionsViewer />
