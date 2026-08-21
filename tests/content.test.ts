@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { siteContent } from '../src/data/content'
+import { cmsDataSchema } from '../src/lib/cmsSchema'
+import { normalizeCmsData } from '../src/lib/cmsNormalize'
 
 const PHONE_REGEX = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
 const MEDIA_PATH_REGEX = /^\/media\/.+\.webp$/
@@ -85,5 +87,72 @@ describe('siteContent integrity', () => {
       expect(validCategories).toContain(item.category)
       expect(item.photoUrl).toMatch(MEDIA_PATH_REGEX)
     }
+  })
+
+  it('has non-empty texts for every client-facing string', () => {
+    const { texts } = siteContent
+    for (const value of Object.values(texts.nav)) expect(value.trim()).not.toBe('')
+    for (const value of Object.values(texts.headings)) expect(value.trim()).not.toBe('')
+    for (const value of Object.values(texts.booking)) expect(value.trim()).not.toBe('')
+    expect(texts.heroEyebrow.trim()).not.toBe('')
+    expect(texts.heroNote.trim()).not.toBe('')
+    expect(texts.teamIntro.length).toBeGreaterThan(20)
+    expect(texts.scheduleEmptyDay.trim()).not.toBe('')
+    expect(texts.footerTagline.trim()).not.toBe('')
+  })
+
+  it('has features with title and text', () => {
+    expect(siteContent.features.length).toBeGreaterThan(0)
+    for (const f of siteContent.features) {
+      expect(f.title.trim()).not.toBe('')
+      expect(f.text.trim()).not.toBe('')
+    }
+  })
+})
+
+describe('cmsDataSchema', () => {
+  it('accepts the full static content', () => {
+    expect(cmsDataSchema.safeParse(siteContent).success).toBe(true)
+  })
+
+  it('rejects blobs missing required keys (e.g. legacy data without texts)', () => {
+    const { texts: _t, features: _f, ...legacy } = siteContent
+    expect(cmsDataSchema.safeParse(legacy).success).toBe(false)
+  })
+
+  it('accepts the optional trainer hidden flag', () => {
+    const withHidden = {
+      ...siteContent,
+      trainers: [{ ...siteContent.trainers[0], hidden: true }],
+    }
+    expect(cmsDataSchema.safeParse(withHidden).success).toBe(true)
+  })
+})
+
+describe('normalizeCmsData', () => {
+  it('fills missing features/texts/mapUrl from defaults (legacy blob)', () => {
+    const { texts: _t, features: _f, settings, ...legacy } = siteContent
+    const legacySettings = { ...settings }
+    delete (legacySettings as { mapUrl?: string }).mapUrl
+    const normalized = normalizeCmsData({ ...legacy, settings: legacySettings })
+    expect(normalized.features).toEqual(siteContent.features)
+    expect(normalized.texts).toEqual(siteContent.texts)
+    expect(normalized.settings.mapUrl).toBe(siteContent.settings.mapUrl)
+  })
+
+  it('passes the normalized blob through the strict schema', () => {
+    const { texts: _t, ...partial } = siteContent
+    expect(cmsDataSchema.safeParse(normalizeCmsData(partial)).success).toBe(true)
+  })
+
+  it('preserves deliberately emptied arrays instead of resurrecting defaults', () => {
+    const stored = { ...siteContent, trainers: [] }
+    const normalized = normalizeCmsData(stored)
+    expect(normalized.trainers).toEqual([])
+  })
+
+  it('returns full defaults for null/undefined input', () => {
+    expect(normalizeCmsData(null)).toEqual(siteContent)
+    expect(normalizeCmsData(undefined)).toEqual(siteContent)
   })
 })

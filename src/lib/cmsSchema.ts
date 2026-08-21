@@ -28,6 +28,7 @@ const trainerSchema = z
     bio: z.string(),
     photoUrl: z.string(),
     social: z.string().optional(),
+    hidden: z.boolean().optional(),
   })
   .strict()
 
@@ -92,12 +93,85 @@ const galleryItemSchema = z
   })
   .strict()
 
+const featureItemSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    text: z.string(),
+  })
+  .strict()
+
+const navTextsSchema = z
+  .object({
+    home: z.string(),
+    services: z.string(),
+    adults: z.string(),
+    kids: z.string(),
+    subscriptions: z.string(),
+    studio: z.string(),
+    team: z.string(),
+    gallery: z.string(),
+    life: z.string(),
+    info: z.string(),
+    reviews: z.string(),
+    faq: z.string(),
+    contacts: z.string(),
+  })
+  .strict()
+
+const sectionHeadingsSchema = z
+  .object({
+    features: z.string(),
+    adults: z.string(),
+    kids: z.string(),
+    subscriptions: z.string(),
+    team: z.string(),
+    gallery: z.string(),
+    life: z.string(),
+    reviews: z.string(),
+    faq: z.string(),
+    contacts: z.string(),
+    contactsHowToFind: z.string(),
+  })
+  .strict()
+
+const bookingTextsSchema = z
+  .object({
+    ctaButton: z.string(),
+    modalTitle: z.string(),
+    tabChild: z.string(),
+    tabAdult: z.string(),
+    submitButton: z.string(),
+    submitButtonLoading: z.string(),
+    successTitle: z.string(),
+    successText: z.string(),
+    experienceQuestion: z.string(),
+    sourceLabel: z.string(),
+    consentText: z.string(),
+    injuriesConsentText: z.string(),
+  })
+  .strict()
+
+const siteTextsSchema = z
+  .object({
+    nav: navTextsSchema,
+    headings: sectionHeadingsSchema,
+    booking: bookingTextsSchema,
+    heroEyebrow: z.string(),
+    heroNote: z.string(),
+    teamIntro: z.string(),
+    scheduleEmptyDay: z.string(),
+    footerTagline: z.string(),
+  })
+  .strict()
+
 const siteSettingsSchema = z
   .object({
     phone: z.string(),
     phoneHref: z.string(),
     address: z.string(),
     email: z.string(),
+    mapUrl: z.string(),
     social: z
       .object({
         vk: z.string(),
@@ -130,6 +204,8 @@ export const cmsDataSchema = z
     testimonials: z.array(testimonialSchema),
     lifePosts: z.array(lifePostSchema),
     gallery: z.array(galleryItemSchema),
+    features: z.array(featureItemSchema),
     settings: siteSettingsSchema,
+    texts: siteTextsSchema,
   })
   .strict()

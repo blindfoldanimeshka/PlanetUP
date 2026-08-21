@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { CmsData } from '../src/types/cms'
+import { siteContent } from '../src/data/content'
 import sessionHandler from '../api/admin/session.js'
 
 const { mocks } = vi.hoisted(() => ({
@@ -19,7 +20,10 @@ vi.mock('../src/lib/storage.js', () => ({
 type Handler = typeof import('../api/content.js').default
 let handler: Handler
 
+// Spread the current static defaults so the fixture always satisfies
+// cmsDataSchema even when new CMS fields are introduced.
 const fixture: CmsData = {
+  ...siteContent,
   trainers: [],
   subscriptions: [],
   groups: [],
@@ -28,6 +32,7 @@ const fixture: CmsData = {
   lifePosts: [],
   gallery: [],
   settings: {
+    ...siteContent.settings,
     phone: '+7 (900) 000-00-00',
     phoneHref: 'tel:+79000000000',
     address: 'Долгопрудный',

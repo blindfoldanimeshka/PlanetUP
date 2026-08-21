@@ -17,6 +17,8 @@ export interface Trainer {
   bio: string
   photoUrl: string
   social?: string
+  /** When true the trainer is kept out of the public team section. */
+  hidden?: boolean
 }
 
 export interface Subscription {
@@ -68,11 +70,81 @@ export interface GalleryItem {
   sortOrder: number
 }
 
+/** «Наши особенности» — numbered feature card on the overview section. */
+export interface FeatureItem {
+  id: string
+  title: string
+  text: string
+}
+
+/** Labels for the header navigation (anchors stay fixed, labels are editable). */
+export interface NavTexts {
+  home: string
+  services: string
+  adults: string
+  kids: string
+  subscriptions: string
+  studio: string
+  team: string
+  gallery: string
+  life: string
+  info: string
+  reviews: string
+  faq: string
+  contacts: string
+}
+
+/** Visible headings of every public section (id anchors stay fixed). */
+export interface SectionHeadings {
+  features: string
+  adults: string
+  kids: string
+  subscriptions: string
+  team: string
+  gallery: string
+  life: string
+  reviews: string
+  faq: string
+  contacts: string
+  contactsHowToFind: string
+}
+
+/** All client-facing copy of the booking form and its CTA buttons. */
+export interface BookingTexts {
+  /** Hero CTA + contacts CTA — opens the booking dialog. */
+  ctaButton: string
+  modalTitle: string
+  tabChild: string
+  tabAdult: string
+  submitButton: string
+  submitButtonLoading: string
+  successTitle: string
+  successText: string
+  experienceQuestion: string
+  sourceLabel: string
+  consentText: string
+  injuriesConsentText: string
+}
+
+/** Free-form site copy that does not belong to a CRUD entity. */
+export interface SiteTexts {
+  nav: NavTexts
+  headings: SectionHeadings
+  booking: BookingTexts
+  heroEyebrow: string
+  heroNote: string
+  teamIntro: string
+  scheduleEmptyDay: string
+  footerTagline: string
+}
+
 export interface SiteSettings {
   phone: string
   phoneHref: string
   address: string
   email: string
+  /** Full Yandex Maps widget iframe URL (includes coordinates). */
+  mapUrl: string
   social: {
     vk: string
     telegram: string
@@ -96,5 +168,7 @@ export interface CmsData {
   testimonials: Testimonial[]
   lifePosts: LifePost[]
   gallery: GalleryItem[]
+  features: FeatureItem[]
   settings: SiteSettings
+  texts: SiteTexts
 }

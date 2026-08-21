@@ -7,6 +7,8 @@ const email = 'aleksandra.danichek@mail.ru'
 const vk = 'https://vk.com/planetaupacro'
 const telegram = 'https://t.me/planetup_acro'
 const whatsapp = 'https://wa.me/79629080554'
+const mapUrl =
+  'https://yandex.ru/map-widget/v1/?ll=37.520518%2C55.963214&z=17&mode=search&text=%D0%9D%D0%B0%D0%B1%D0%B5%D1%80%D0%B5%D0%B6%D0%BD%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2025%2C%20%D0%94%D0%BE%D0%BB%D0%B3%D0%BE%D0%BF%D1%80%D1%83%D0%B4%D0%BD%D1%8B%D0%B9'
 
 function media(path: string): string {
   return `/media/${path}`
@@ -18,6 +20,7 @@ export const siteContent: CmsData = {
     phoneHref,
     address,
     email,
+    mapUrl,
     social: { vk, telegram, whatsapp },
     hero: {
       title: 'Планета UP — студия акробатики',
@@ -334,4 +337,80 @@ export const siteContent: CmsData = {
     { id: 'g-cm-7', photoUrl: media('gallery/img-9221.webp'), category: 'competitions', sortOrder: 27 },
     { id: 'g-cm-8', photoUrl: media('gallery/img-9295.webp'), category: 'competitions', sortOrder: 28 },
   ],
+
+  features: [
+    {
+      id: 'feature-development',
+      title: 'Физическое развитие',
+      text: 'Комфортное и безопасное обучение для каждого.',
+    },
+    {
+      id: 'feature-trainers',
+      title: 'Тренеры-профи',
+      text: 'Практикующие спортсмены с опытом работы с детьми и взрослыми любого уровня.',
+    },
+    {
+      id: 'feature-groups',
+      title: 'Любительские и профессиональные группы',
+      text: 'Тренируйтесь для себя или готовьтесь к выступлениям — для каждого найдётся группа.',
+    },
+    {
+      id: 'feature-ages',
+      title: 'Группы от 3 до +18 лет',
+      text: 'Занимаемся с детьми от 3 лет и со взрослыми без верхней границы возраста.',
+    },
+  ],
+
+  texts: {
+    nav: {
+      home: 'Главная',
+      services: 'Услуги',
+      adults: 'Взрослым',
+      kids: 'Детям',
+      subscriptions: 'Абонементы',
+      studio: 'Студия',
+      team: 'Команда',
+      gallery: 'Галерея',
+      life: 'Жизнь',
+      info: 'Инфо',
+      reviews: 'Отзывы',
+      faq: 'FAQ',
+      contacts: 'Контакты',
+    },
+    headings: {
+      features: 'Наши особенности',
+      adults: 'Взрослым',
+      kids: 'Детям',
+      subscriptions: 'Цены',
+      team: 'Наша команда',
+      gallery: 'Галерея',
+      life: 'Жизнь коллектива',
+      reviews: 'Отзывы',
+      faq: 'Часто задаваемые вопросы',
+      contacts: 'Контакты',
+      contactsHowToFind: 'Как нас найти',
+    },
+    booking: {
+      ctaButton: 'Записаться на пробное занятие',
+      modalTitle: 'Запись на пробное занятие',
+      tabChild: 'Ребёнку',
+      tabAdult: 'Взрослому',
+      submitButton: 'Записаться',
+      submitButtonLoading: 'Отправка...',
+      successTitle: 'Заявка отправлена!',
+      successText: 'Мы свяжемся с вами в ближайшее время.',
+      experienceQuestion: 'Был ли опыт занятий?',
+      sourceLabel: 'Как Вы о нас узнали?',
+      // Rendered before the «персональных данных» link to /privacy.
+      consentText: 'Согласен на обработку',
+      injuriesConsentText:
+        'Согласен на обработку специальной категории персональных данных — сведений о состоянии здоровья (травмах/ограничениях) в соответствии со ст. 10 и ч. 4 ст. 9 Федерального закона № 152-ФЗ',
+    },
+    heroEyebrow: 'Эстрадно-акробатическая студия',
+    heroNote: 'При покупке абонемента первое занятие бесплатное',
+    teamIntro:
+      'Наши педагоги — профессиональные тренеры с большим опытом. Они работают и с детьми, и со взрослыми: от первых шагов в акробатике до сложных парных постановок и выступлений. Каждый тренер «Планеты UP» помогает ученику раскрыть потенциал и полюбить движение.',
+    scheduleEmptyDay: 'Нет занятий в этот день',
+    footerTagline: 'Планета UP',
+  },
 }

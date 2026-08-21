@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest'
 import type { CmsData } from '../src/types/cms'
+import { siteContent } from '../src/data/content'
 
 /* ------------------------------------------------------------------ */
 /*  In-memory fake for @upstash/redis                                  */
@@ -109,7 +110,10 @@ beforeAll(() => {
 
 const fake = new FakeRedis()
 
+// Spread the current static defaults so baseContent always satisfies CmsData
+// even when new CMS fields are introduced.
 const baseContent: CmsData = {
+  ...siteContent,
   trainers: [],
   subscriptions: [],
   groups: [],
@@ -118,6 +122,7 @@ const baseContent: CmsData = {
   lifePosts: [],
   gallery: [],
   settings: {
+    ...siteContent.settings,
     phone: '+7 (900) 000-00-00',
     phoneHref: 'tel:+79000000000',
     address: 'Долгопрудный',
