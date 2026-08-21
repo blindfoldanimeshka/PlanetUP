@@ -30,11 +30,9 @@ function ScrollIndicator() {
 /* ------------------------------------------------------------------ */
 
 export function Hero({ cms }: { cms?: CmsData | null }) {
-  const { title: staticTitle } = siteContent.settings.hero
-  const title = cms?.settings.hero.title ?? staticTitle
-    const subtitle =
-    cms?.settings.hero.subtitle ??
-    'Занятия для взрослых и детей в Долгопрудном. Запишитесь на пробное занятие.'
+  const title = cms?.settings.hero.title ?? siteContent.settings.hero.title
+  const subtitle = cms?.settings.hero.subtitle ?? siteContent.settings.hero.subtitle
+  const t = cms?.texts ?? siteContent.texts
   const reduced = useReducedMotion()
   const [showForm, setShowForm] = useState(false)
 
@@ -90,7 +88,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
           animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={reduced ? undefined : { duration: 0.6, delay: 0.15, ease: 'easeOut' }}
         >
-          Эстрадно-акробатическая студия
+          {t.heroEyebrow}
         </motion.p>
 
         {/* Massive headline */}
@@ -154,7 +152,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
                 size="lg"
                 className="rounded-full border-min-accent bg-min-accent px-8 py-4 text-base font-semibold text-min-bg hover:bg-min-accent/90 hover:shadow-[0_0_30px_var(--min-accent-glow)] animate-cta-pulse"
               >
-                Записаться на пробное занятие
+                {t.booking.ctaButton}
               </Button>
             </Dialog.Trigger>
             <Dialog.Portal forceMount>
@@ -196,7 +194,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
                       <div className="mb-6 flex items-start justify-between gap-4">
                         <Dialog.Title asChild>
                           <h2 className="font-display text-xl font-bold text-min-text md:text-2xl">
-                            Запись на пробное занятие
+                            {t.booking.modalTitle}
                           </h2>
                         </Dialog.Title>
                         <Dialog.Close asChild>
@@ -214,7 +212,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
                           Форма записи на пробное занятие в студии акробатики «Планета UP»
                         </p>
                       </Dialog.Description>
-                      <BookingForm onClose={handleCloseForm} />
+                      <BookingForm onClose={handleCloseForm} texts={t.booking} />
                       <div className="mt-4 flex justify-end gap-3">
                         <Dialog.Close asChild>
                           <button
@@ -235,7 +233,7 @@ export function Hero({ cms }: { cms?: CmsData | null }) {
             </Dialog.Portal>
           </Dialog.Root>
           <p className="mt-4 text-xs text-min-muted">
-            При покупке абонемента первое занятие бесплатное
+            {t.heroNote}
           </p>
         </motion.div>
       </motion.div>

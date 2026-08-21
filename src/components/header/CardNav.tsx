@@ -1,12 +1,15 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { NAV_ITEMS } from '@/components/header/navItems'
+import { buildNavItems, NAV_ITEMS, type NavItem } from '@/components/header/navItems'
+import type { NavTexts } from '@/types/cms'
 
 export { NAV_ITEMS }
 
-export function CardNav() {
+export function CardNav({ nav }: { nav?: NavTexts }) {
   const reduced = useReducedMotion()
+
+  const items: NavItem[] = nav ? buildNavItems(nav) : NAV_ITEMS
 
   const transition = reduced
     ? { duration: 0 }
@@ -14,7 +17,7 @@ export function CardNav() {
 
   return (
     <nav className="hidden gap-1 md:flex">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         // Simple link (no dropdown)
         if (!item.links) {
           return (

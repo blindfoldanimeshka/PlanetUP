@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/cn'
 import { useScrollDirection } from '@/hooks/useScrollDirection'
 import { CardNav } from '@/components/header/CardNav'
-import { NAV_ITEMS } from '@/components/header/navItems'
+import { buildNavItems, NAV_ITEMS } from '@/components/header/navItems'
+import type { NavTexts } from '@/types/cms'
 
-export function Header() {
+export function Header({ nav }: { nav?: NavTexts }) {
   const direction = useScrollDirection()
+  const items = nav ? buildNavItems(nav) : NAV_ITEMS
 
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -70,7 +72,7 @@ export function Header() {
             </span>
           </a>
           <div className="flex items-center gap-2">
-            <CardNav />
+            <CardNav nav={nav} />
             <button
               ref={toggleRef}
               type="button"
@@ -98,7 +100,7 @@ export function Header() {
               className="overflow-hidden md:hidden"
             >
               <div className="flex flex-col gap-1 px-3 pb-4">
-                {NAV_ITEMS.map((item) => (
+                {items.map((item) => (
                   <div key={item.label} className="flex flex-col">
                     {item.href ? (
                       <a

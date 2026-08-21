@@ -6,7 +6,7 @@ function openBookingModal() {
   document.dispatchEvent(new CustomEvent('open-booking'))
 }
 
-export function GroupCard({ group }: { group: Group }) {
+export function GroupCard({ group, ctaLabel = 'Записаться' }: { group: Group; ctaLabel?: string }) {
   return (
     <Card className="group flex flex-col overflow-hidden p-0">
       <div className="overflow-hidden">
@@ -31,7 +31,7 @@ export function GroupCard({ group }: { group: Group }) {
           className="mt-auto self-stretch"
           onClick={openBookingModal}
         >
-          Записаться
+          {ctaLabel}
         </Button>
       </div>
     </Card>

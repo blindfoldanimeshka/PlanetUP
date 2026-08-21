@@ -6,7 +6,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 const DAYS: DayOfWeek[] = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-export function ScheduleTabs({ groups }: { groups: Group[] }) {
+export function ScheduleTabs({ groups, emptyText = 'Нет занятий в этот день' }: { groups: Group[]; emptyText?: string }) {
   const reduced = useReducedMotion()
   const [activeDay, setActiveDay] = useState<string>('Пн')
 
@@ -58,7 +58,7 @@ export function ScheduleTabs({ groups }: { groups: Group[] }) {
             <div className="glass-surface rounded-2xl">
               <div className="p-4">
                 {items.length === 0 ? (
-                  <p className="text-sm text-min-muted">Нет занятий в этот день</p>
+                  <p className="text-sm text-min-muted">{emptyText}</p>
                 ) : (
                   <ul className="flex flex-col gap-3">
                     {items.map((item, i) => (

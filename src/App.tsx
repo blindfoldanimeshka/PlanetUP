@@ -28,7 +28,7 @@ function MainSections({ cms }: { cms: CmsData | null }) {
   return (
     <>
       {/* ── Overview ── */}
-      <FeaturesSection variant="surface" />
+      <FeaturesSection cms={cms} variant="surface" />
 
       <SectionDivider />
 
@@ -99,7 +99,7 @@ export default function App() {
         Перейти к содержимому
       </a>
       <ScrollProgress />
-      <Header />
+      <Header nav={cms?.texts.nav} />
       <main id="main-content" className="relative">
         <PageBackground />
         <ErrorBoundary>
@@ -107,7 +107,7 @@ export default function App() {
           <MainSections cms={cms} />
         </ErrorBoundary>
       </main>
-      {cms && <Footer settings={cms.settings} />}
+      {cms && <Footer settings={cms.settings} tagline={cms.texts.footerTagline} />}
     </>
   )
 }

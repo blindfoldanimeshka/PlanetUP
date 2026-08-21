@@ -1,13 +1,13 @@
 import type { SiteSettings } from '@/types/cms'
 
-export function Footer({ settings }: { settings: SiteSettings }) {
+export function Footer({ settings, tagline = 'Планета UP' }: { settings: SiteSettings; tagline?: string }) {
   return (
     <div className="glass-surface rounded-t-3xl">
       <footer className="px-4 py-12 text-min-muted">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-lg font-bold text-min-text">
-            Планета UP
+            {tagline}
           </p>
           {settings.address && (
             <p className="mt-1 text-sm">{settings.address}</p>

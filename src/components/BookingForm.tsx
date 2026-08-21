@@ -12,6 +12,8 @@ import {
   type ChildBookingFormData,
   type AdultBookingFormData,
 } from '@/lib/validation'
+import type { BookingTexts } from '@/types/cms'
+import { siteContent } from '@/data/content'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
 
@@ -65,9 +67,12 @@ async function submitBooking(data: ChildBookingFormData | AdultBookingFormData) 
 export function BookingForm({
   interest,
   onClose,
+  texts = siteContent.texts.booking,
 }: {
   interest?: string
   onClose?: () => void
+  /** Client-facing copy — comes from the CMS (`cms.texts.booking`). */
+  texts?: BookingTexts
 }) {
   const defaultTab = interest === 'adults' ? 'adult' : 'child'
   const [activeTab, setActiveTab] = useState(defaultTab)
@@ -133,9 +138,9 @@ export function BookingForm({
         className="glass-surface rounded-2xl"
       >
         <div className="p-6 text-center">
-          <p className="text-lg font-semibold text-min-text">Заявка отправлена!</p>
+          <p className="text-lg font-semibold text-min-text">{texts.successTitle}</p>
           <p className="mt-2 text-sm text-min-muted">
-            Мы свяжемся с вами в ближайшее время.
+            {texts.successText}
           </p>
         </div>
       </motion.div>
@@ -148,10 +153,10 @@ export function BookingForm({
         <div className="glass-surface mb-4 rounded-2xl">
           <Tabs.List className="grid grid-cols-2 gap-1 p-1">
           <Tabs.Trigger value="child" className={tabTrigger}>
-            Ребёнку
+            {texts.tabChild}
           </Tabs.Trigger>
           <Tabs.Trigger value="adult" className={tabTrigger}>
-            Взрослому
+            {texts.tabAdult}
           </Tabs.Trigger>
         </Tabs.List>
         </div>
@@ -162,6 +167,7 @@ export function BookingForm({
             onSubmit={onSubmitChild}
             loading={loading}
             onClose={onClose}
+            texts={texts}
           />
         </Tabs.Content>
 
@@ -171,6 +177,7 @@ export function BookingForm({
             onSubmit={onSubmitAdult}
             loading={loading}
             onClose={onClose}
+            texts={texts}
           />
         </Tabs.Content>
       </Tabs.Root>
@@ -187,11 +194,13 @@ function ChildForm({
   onSubmit,
   loading,
   onClose,
+  texts,
 }: {
   form: ReturnType<typeof useForm<ChildBookingFormData>>
   onSubmit: (data: ChildBookingFormData) => Promise<void>
   loading: boolean
   onClose?: () => void
+  texts: BookingTexts
 }) {
   const {
     register,
@@ -236,7 +245,7 @@ function ChildForm({
       />
 
       <div className="sm:col-span-2">
-        <p className="mb-2 text-sm text-min-muted">Был ли опыт занятий?</p>
+        <p className="mb-2 text-sm text-min-muted">{texts.experienceQuestion}</p>
         <div className="flex gap-4">
           <Radio label="Да" value="yes" {...register('hasExperience')} />
           <Radio label="Нет" value="no" {...register('hasExperience')} />
@@ -304,13 +313,14 @@ function ChildForm({
 
       <SourceField
         id="booking-child-source"
+        label={texts.sourceLabel}
         error={errors.source?.message}
         {...register('source')}
       />
 
-      <ConsentField error={errors.consent?.message} {...register('consent')} />
+      <ConsentField consentText={texts.consentText} error={errors.consent?.message} {...register('consent')} />
 
-      <SubmitButton loading={loading} onClose={onClose} />
+      <SubmitButton loading={loading} onClose={onClose} texts={texts} />
     </form>
   )
 }
@@ -320,11 +330,13 @@ function AdultForm({
   onSubmit,
   loading,
   onClose,
+  texts,
 }: {
   form: ReturnType<typeof useForm<AdultBookingFormData>>
   onSubmit: (data: AdultBookingFormData) => Promise<void>
   loading: boolean
   onClose?: () => void
+  texts: BookingTexts
 }) {
   const {
     register,
@@ -390,13 +402,11 @@ function AdultForm({
       {hasHealthData(injuries) && (
         <ConsentField
           id="booking-injuries-consent"
+          consentText={texts.injuriesConsentText}
+          hideLink
           error={errors.injuriesConsent?.message}
           {...register('injuriesConsent')}
-        >
-          Согласен на обработку специальной категории персональных данных — сведений о
-          состоянии здоровья (травмах/ограничениях) в соответствии со ст. 10 и ч. 4 ст. 9
-          Федерального закона № 152-ФЗ
-        </ConsentField>
+        />
       )}
 
       <div className="sm:col-span-1">
@@ -437,13 +447,14 @@ function AdultForm({
 
       <SourceField
         id="booking-adult-source"
+        label={texts.sourceLabel}
         error={errors.source?.message}
         {...register('source')}
       />
 
-      <ConsentField error={errors.consent?.message} {...register('consent')} />
+      <ConsentField consentText={texts.consentText} error={errors.consent?.message} {...register('consent')} />
 
-      <SubmitButton loading={loading} onClose={onClose} />
+      <SubmitButton loading={loading} onClose={onClose} texts={texts} />
     </form>
   )
 }
@@ -523,13 +534,14 @@ function TextArea({
 
 function SourceField({
   id,
+  label,
   error,
   ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & { error?: string; id: string }) {
+}: React.SelectHTMLAttributes<HTMLSelectElement> & { error?: string; id: string; label?: string }) {
   return (
     <div className="sm:col-span-1">
       <label htmlFor={id} className="mb-2 block text-sm text-min-muted">
-        Как Вы о нас узнали?
+        {label ?? 'Как Вы о нас узнали?'}
       </label>
       <select
         id={id}
@@ -576,11 +588,17 @@ function Radio(
 
 function ConsentField({
   id = 'booking-consent',
+  consentText,
+  hideLink = false,
   error,
   children,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & {
   error?: string
+  /** CMS-editable consent copy (`cms.texts.booking.consentText`). */
+  consentText?: string
+  /** Suppress the «персональных данных» /privacy link (legal long-form text). */
+  hideLink?: boolean
   children?: React.ReactNode
 }) {
   return (
@@ -595,14 +613,16 @@ function ConsentField({
         <label htmlFor={id} className="text-xs text-min-muted">
           {children ?? (
             <>
-              Согласен на обработку{' '}
-              <a
-                href="/privacy"
-                target="_blank"
-                className="underline hover:text-min-accent"
-              >
-                персональных данных
-              </a>
+              {consentText ?? 'Согласен на обработку'}{' '}
+              {!hideLink && (
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  className="underline hover:text-min-accent"
+                >
+                  персональных данных
+                </a>
+              )}
             </>
           )}
         </label>
@@ -617,9 +637,11 @@ function ConsentField({
 function SubmitButton({
   loading,
   onClose,
+  texts,
 }: {
   loading: boolean
   onClose?: () => void
+  texts?: BookingTexts
 }) {
   return (
     <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center">
@@ -630,7 +652,7 @@ function SubmitButton({
         className="w-full sm:w-auto"
         disabled={loading}
       >
-        {loading ? 'Отправка...' : 'Записаться'}
+        {loading ? (texts?.submitButtonLoading ?? 'Отправка...') : (texts?.submitButton ?? 'Записаться')}
       </Button>
       {onClose && (
         <Button
