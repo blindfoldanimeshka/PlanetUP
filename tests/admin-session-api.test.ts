@@ -57,4 +57,42 @@ describe('admin session API', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.setHeader).toHaveBeenCalledWith('Set-Cookie', expect.stringContaining('Max-Age=0'))
   })
+
+  /* Regression: production once had 13-char ADMIN_PASSWORD/ADMIN_SESSION_SECRET,
+   * which made getRequiredEnv() return null and login fail for EVERYONE while
+   * the panel still opened via stale sessionStorage. Locks the ≥16 contract. */
+  it('rejects login when ADMIN_PASSWORD is shorter than 16 chars even if it matches', async () => {
+    vi.stubEnv('ADMIN_PASSWORD', 'short13chars')
+    const res = mockRes()
+    await handler({ method: 'POST', body: { password: 'short13chars' } } as unknown as Parameters<typeof handler>[0], res as unknown as Parameters<typeof handler>[1])
+
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('rejects login when ADMIN_SESSION_SECRET is shorter than 16 chars', async () => {
+    vi.stubEnv('ADMIN_SESSION_SECRET', 'short13secret')
+    const res = mockRes()
+    await handler({ method: 'POST', body: { password: 'correct horse battery staple' } } as unknown as Parameters<typeof handler>[0], res as unknown as Parameters<typeof handler>[1])
+
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('GET reports a live session for a valid cookie and 401 without one', async () => {
+    const createRes = mockRes()
+    await handler({ method: 'POST', body: { password: 'correct horse battery staple' } } as unknown as Parameters<typeof handler>[0], createRes as unknown as Parameters<typeof handler>[1])
+    const setCookieCall = createRes.setHeader.mock.calls.find((c) => c[0] === 'Set-Cookie')
+    const raw = setCookieCall?.[1] as string | undefined
+    expect(raw).toBeTruthy()
+    const token = (raw ?? '').split(';')[0].split('=').slice(1).join('=')
+
+    const okRes = mockRes()
+    await handler({ method: 'GET', headers: { cookie: `planetup_admin_session=${token}` } } as unknown as Parameters<typeof handler>[0], okRes as unknown as Parameters<typeof handler>[1])
+    expect(okRes.status).toHaveBeenCalledWith(200)
+    expect(okRes.json).toHaveBeenCalledWith({ ok: true })
+
+    const badRes = mockRes()
+    await handler({ method: 'GET', headers: {} } as unknown as Parameters<typeof handler>[0], badRes as unknown as Parameters<typeof handler>[1])
+    expect(badRes.status).toHaveBeenCalledWith(401)
+    expect(badRes.json).toHaveBeenCalledWith({ ok: false })
+  })
 })

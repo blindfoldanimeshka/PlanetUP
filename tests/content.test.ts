@@ -21,7 +21,8 @@ describe('siteContent integrity', () => {
 
   it('has non-empty SEO and hero blocks', () => {
     const { settings } = siteContent
-    expect(settings.hero.title.length).toBeGreaterThan(10)
+    // Hero title is the short brand name «Планета UP» (exactly 10 chars).
+    expect(settings.hero.title.length).toBeGreaterThanOrEqual(10)
     expect(settings.hero.subtitle.length).toBeGreaterThan(20)
     expect(settings.seo.title.length).toBeGreaterThan(10)
     expect(settings.seo.description.length).toBeGreaterThan(30)

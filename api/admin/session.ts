@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { clearSessionCookie, createAdminSession, createSessionCookie } from '../../src/lib/adminAuth.js'
+import { clearSessionCookie, createAdminSession, createSessionCookie, hasValidAdminSessionCookie } from '../../src/lib/adminAuth.js'
 import { checkAdminLoginRateLimit, resetAdminLoginRateLimit } from '../../src/lib/storage.js'
 
 function getClientIp(req: VercelRequest): string {
@@ -10,6 +10,13 @@ function getClientIp(req: VercelRequest): string {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0')
+
+  if (req.method === 'GET') {
+    // Session validity probe for the admin UI: lets a restored tab detect a
+    // dead HttpOnly cookie BEFORE showing the editor (which cannot save).
+    const ok = hasValidAdminSessionCookie(req.headers.cookie)
+    return res.status(ok ? 200 : 401).json({ ok })
+  }
 
   if (req.method === 'DELETE') {
     res.setHeader('Set-Cookie', clearSessionCookie(process.env.NODE_ENV === 'production'))

@@ -1225,16 +1225,39 @@ export function Admin() {
   }
   const fileRef = useRef<HTMLInputElement>(null)
 
+  /** Clears local auth state without hitting the API (session already dead). */
+  const dropLocalSession = useCallback(() => {
+    sessionStorage.removeItem(ADMIN_CSRF_STORAGE_KEY)
+    setAuthed(false)
+    setData(null)
+    setInitial(null)
+    setStatus('idle')
+  }, [])
+
   useEffect(() => {
-    if (authed) {
-      getCmsData()
-        .then((d) => {
-          setData(d)
-          setInitial(d)
-        })
-        .catch(() => setData(null))
+    if (!authed) return
+    let cancelled = false
+    // A restored tab can carry a stale CSRF token in sessionStorage while the
+    // HttpOnly cookie is long gone — verify server-side before showing an
+    // editor whose every save would fail with 401.
+    fetch('/api/admin/session')
+      .then((r) => {
+        if (!cancelled && !r.ok) dropLocalSession()
+      })
+      .catch(() => {})
+    getCmsData()
+      .then((d) => {
+        if (cancelled) return
+        setData(d)
+        setInitial(d)
+      })
+      .catch(() => {
+        if (!cancelled) setData(null)
+      })
+    return () => {
+      cancelled = true
     }
-  }, [authed])
+  }, [authed, dropLocalSession])
 
   const login = async (e: FormEvent) => {
     e.preventDefault()
@@ -1298,6 +1321,13 @@ export function Admin() {
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         console.error('Admin save failed: HTTP', res.status, body)
+        if (res.status === 401) {
+          // Dead/expired session — return to the login form immediately
+          // instead of leaving the user in an editor that cannot save.
+          dropLocalSession()
+          setErr('Сессия истекла — войдите заново.')
+          return
+        }
         throw new Error(`HTTP ${res.status}`)
       }
       setInitial(data)
