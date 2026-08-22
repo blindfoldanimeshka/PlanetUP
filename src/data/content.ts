@@ -23,7 +23,7 @@ export const siteContent: CmsData = {
     mapUrl,
     social: { vk, telegram, whatsapp },
     hero: {
-      title: 'Планета UP — студия акробатики',
+      title: 'Планета UP',
       subtitle:
         'Занятия для взрослых и детей в Долгопрудном: акробатика, акро-гимнастика, растяжка и танцевальные постановки. Запишитесь на пробное занятие.',
     },
