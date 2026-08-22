@@ -48,7 +48,7 @@ export function createSessionCookie(token: string, isProduction: boolean): strin
   return [
     `${SESSION_COOKIE}=${token}`,
     'HttpOnly',
-    'SameSite=Strict',
+    'SameSite=Lax',
     'Path=/api',
     `Max-Age=${SESSION_TTL_SECONDS}`,
     ...(isProduction ? ['Secure'] : []),
@@ -59,7 +59,7 @@ export function clearSessionCookie(isProduction: boolean): string {
   return [
     `${SESSION_COOKIE}=`,
     'HttpOnly',
-    'SameSite=Strict',
+    'SameSite=Lax',
     'Path=/api',
     'Max-Age=0',
     ...(isProduction ? ['Secure'] : []),
